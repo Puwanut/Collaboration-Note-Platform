@@ -31,7 +31,6 @@ const Sidebar = () => {
             setSidebarWidth(0)
         } else {
             setOpen(true)
-            
         }
     }
 
@@ -114,8 +113,8 @@ const Sidebar = () => {
 
 
             {/* Slider */}
-            <div className={`top-0 w-1 -right-1 absolute h-screen
-            cursor-col-resize resize-x border-2 border-transparent
+            <div className={`top-0 w-1 -right-0 absolute h-screen
+            cursor-col-resize resize-x border-2 border-transparent bg-stone-100
             hover:border-stone-300 ${!open && "hidden"}`}
                 onMouseDown={startResizing}>
             </div>
