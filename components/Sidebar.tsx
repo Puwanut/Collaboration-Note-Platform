@@ -7,7 +7,7 @@ import { useAppContext } from "../context/AppContext"
 const Sidebar = () => {
     const {leftSidebarOpen, setLeftSidebarOpen} = useAppContext()
     const sidebarRef: MutableRefObject<HTMLDivElement> = useRef(null);
-    const [sidebarWidth, setSidebarWidth] = useState<number>(240)
+    const [sidebarWidth, setSidebarWidth] = useState<any>("100%")
     const [isResizing, setIsResizing] = useState<boolean>(false)
 
 
@@ -27,14 +27,13 @@ const Sidebar = () => {
 
 
     // Auto close menu when on mobile
-    const handleResize = () => {
+    const handleAutoResize = useCallback(() => {
         if (window.innerWidth < 768) {
             setLeftSidebarOpen(false)
-            setSidebarWidth(0)
         } else {
             setLeftSidebarOpen(true)
         }
-    }
+    }, [setLeftSidebarOpen])
 
     const startResizing = useCallback(() => {
         setIsResizing(true);
@@ -52,17 +51,17 @@ const Sidebar = () => {
     },[isResizing])
 
     useEffect(() => {
-        window.addEventListener("resize", handleResize)
+        window.addEventListener("resize", handleAutoResize)
         window.addEventListener("mousemove", resize)
         window.addEventListener("mouseup", stopResizing)
         !leftSidebarOpen && setSidebarWidth(0)
 
         return () => {
-            window.removeEventListener("resize", handleResize)
+            window.removeEventListener("resize", handleAutoResize)
             window.removeEventListener("mousemove", resize)
             window.removeEventListener("mouseup", stopResizing);
         };
-    }, [handleResize, leftSidebarOpen, resize, stopResizing])
+    }, [handleAutoResize, leftSidebarOpen, resize, stopResizing])
 
 
     return (

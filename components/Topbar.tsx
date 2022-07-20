@@ -6,9 +6,6 @@ const Topbar = () => {
 
     const { leftSidebarOpen, setLeftSidebarOpen } = useAppContext()
 
-
-
-
     return (
         <div className="w-full h-12 bg-slate-100 fixed items-center flex px-4">
             <FontAwesomeIcon icon={faBars}
