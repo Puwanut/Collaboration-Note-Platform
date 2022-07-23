@@ -1,5 +1,5 @@
 import { ScriptProps } from "next/script";
-import { createContext, FC, ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useRef, useState } from "react";
 
 const AppContext = createContext(undefined)
 
@@ -8,14 +8,33 @@ export interface IAppContextProviderProps {
   }
 
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
-    const [leftSidebarOpen, setLeftSidebarOpen] = useState(true)
+    const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
+    const [sidebarWidth, setSidebarWidth] = useState<any>("auto")
+    let sidebarWidthMemo = useRef(sidebarWidth)
+
+    const handleToggleSidebar = useCallback(
+      () => {
+        if (leftSidebarOpen) {
+          sidebarWidthMemo.current = sidebarWidth
+          setSidebarWidth(0)
+        } else {
+          setSidebarWidth(sidebarWidthMemo.current)
+        }
+        setLeftSidebarOpen(!leftSidebarOpen)
+
+      },
+      [leftSidebarOpen, sidebarWidth],
+    )
 
     const value = useMemo(
         () => ({
           leftSidebarOpen,
           setLeftSidebarOpen,
+          sidebarWidth,
+          setSidebarWidth,
+          handleToggleSidebar,
         }),
-        [leftSidebarOpen],
+        [leftSidebarOpen, sidebarWidth, handleToggleSidebar],
       )
 
     return (

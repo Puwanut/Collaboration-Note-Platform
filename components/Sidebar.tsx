@@ -5,9 +5,9 @@ import { useAppContext } from "../context/AppContext"
 
 
 const Sidebar = () => {
-    const {leftSidebarOpen, setLeftSidebarOpen} = useAppContext()
+    const {leftSidebarOpen, setLeftSidebarOpen, sidebarWidth, setSidebarWidth, handleToggleSidebar} = useAppContext()
     const sidebarRef: MutableRefObject<HTMLDivElement> = useRef(null);
-    const [sidebarWidth, setSidebarWidth] = useState<any>("100%")
+    // const [sidebarWidth, setSidebarWidth] = useState<any>("auto")
     const [isResizing, setIsResizing] = useState<boolean>(false)
 
 
@@ -28,12 +28,12 @@ const Sidebar = () => {
 
     // Auto close menu when on mobile
     const handleAutoResize = useCallback(() => {
-        if (window.innerWidth < 768) {
+        if (window.innerWidth < 768 && leftSidebarOpen) {
             setLeftSidebarOpen(false)
-        } else {
+        } else if (window.innerWidth >= 768) {
             setLeftSidebarOpen(true)
         }
-    }, [setLeftSidebarOpen])
+    }, [leftSidebarOpen, setLeftSidebarOpen])
 
     const startResizing = useCallback(() => {
         setIsResizing(true);
@@ -42,30 +42,31 @@ const Sidebar = () => {
       const stopResizing = useCallback(() => {
         setIsResizing(false);
         setSidebarWidth(sidebarRef.current.getBoundingClientRect().width)
-      }, []);
+      }, [setSidebarWidth]);
 
     const resize = useCallback((mouseMoveEvent: MouseEvent) => {
         if (isResizing) {
             setSidebarWidth(mouseMoveEvent.clientX - sidebarRef.current.getBoundingClientRect().x)
         }
-    },[isResizing])
+    },[isResizing, setSidebarWidth])
 
     useEffect(() => {
         window.addEventListener("resize", handleAutoResize)
         window.addEventListener("mousemove", resize)
         window.addEventListener("mouseup", stopResizing)
-        !leftSidebarOpen && setSidebarWidth(0)
+
 
         return () => {
             window.removeEventListener("resize", handleAutoResize)
             window.removeEventListener("mousemove", resize)
             window.removeEventListener("mouseup", stopResizing);
         };
-    }, [handleAutoResize, leftSidebarOpen, resize, stopResizing])
-
+    }, [handleAutoResize, leftSidebarOpen, resize, setSidebarWidth, stopResizing])
 
     return (
-        <div className={`h-screen bg-stone-100 relative ${leftSidebarOpen ? `min-w-[10rem] max-w-fit` : 'duration-300'}`}
+        <div className={`h-screen bg-stone-100 relative ${leftSidebarOpen ? `max-w-fit` : ''}
+            ${isResizing ? `duration-[0]` : `duration-300`}
+        `}
             ref={sidebarRef}
             onMouseDown={(e) => e.preventDefault()}
             style={{ width:  sidebarWidth }}
@@ -90,7 +91,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon icon={faAngleDoubleLeft}
                     className={`text-stone-400 cursor-pointer p-1 hover:bg-stone-300 duration-300
                     ${!leftSidebarOpen && "rotate-180"}`}
-                    onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+                    onClick={handleToggleSidebar}
                 />
             </div>
 
