@@ -5,7 +5,10 @@ import { useAppContext } from "../context/AppContext"
 
 
 const Sidebar = () => {
-    const {leftSidebarOpen, setLeftSidebarOpen, sidebarWidth, setSidebarWidth, handleToggleSidebar} = useAppContext()
+    const appcontext = useAppContext()
+    const {leftSidebarOpen, setLeftSidebarOpen} = appcontext
+    const {sidebarWidth, setSidebarWidth} = appcontext
+    const {handleToggleSidebar} = appcontext
     const sidebarRef: MutableRefObject<HTMLDivElement> = useRef(null);
     // const [sidebarWidth, setSidebarWidth] = useState<any>("auto")
     const [isResizing, setIsResizing] = useState<boolean>(false)
@@ -28,12 +31,11 @@ const Sidebar = () => {
 
     // Auto close menu when on mobile
     const handleAutoResize = useCallback(() => {
-        if (window.innerWidth < 768 && leftSidebarOpen) {
+        if (window.innerWidth < 768) {
             setLeftSidebarOpen(false)
-        } else if (window.innerWidth >= 768) {
-            setLeftSidebarOpen(true)
+            setSidebarWidth(0)
         }
-    }, [leftSidebarOpen, setLeftSidebarOpen])
+    }, [setLeftSidebarOpen, setSidebarWidth])
 
     const startResizing = useCallback(() => {
         setIsResizing(true);

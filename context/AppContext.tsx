@@ -11,6 +11,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
     const [sidebarWidth, setSidebarWidth] = useState<any>("auto")
     let sidebarWidthMemo = useRef(sidebarWidth)
+    let sidebarUserToggleOpen = useRef(true)
 
     const handleToggleSidebar = useCallback(
       () => {
@@ -20,6 +21,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
         } else {
           setSidebarWidth(sidebarWidthMemo.current)
         }
+        sidebarUserToggleOpen.current = !sidebarUserToggleOpen.current
         setLeftSidebarOpen(!leftSidebarOpen)
 
       },
@@ -32,7 +34,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           setLeftSidebarOpen,
           sidebarWidth,
           setSidebarWidth,
-          handleToggleSidebar,
+          handleToggleSidebar
         }),
         [leftSidebarOpen, sidebarWidth, handleToggleSidebar],
       )
