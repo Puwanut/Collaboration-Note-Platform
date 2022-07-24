@@ -18,27 +18,33 @@ const Sidebar = () => {
         { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
         { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
         { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
     ]
 
     // const [favNotes, setFavNotes] = useState<ItemType[]>([
@@ -98,7 +104,7 @@ const Sidebar = () => {
     }, [handleAutoResize, leftSidebarOpen, resize, setSidebarWidth, stopResizing])
 
     return (
-        <div className={`h-screen bg-stone-100 relative truncate ${leftSidebarOpen ? `max-w-fit` : ''}
+        <div className={`h-screen bg-stone-100 relative overflow-x-hidden whitespace-nowrap ${leftSidebarOpen ? `max-w-fit` : ''}
             ${isResizing ? `duration-[0]` : `duration-300`}
         `}
             ref={sidebarRef}
@@ -120,7 +126,7 @@ const Sidebar = () => {
                 <h1 className={`text-slate-700 origin-left font-medium duration-300
                     text-ellipsis overflow-hidden
                  ${!leftSidebarOpen && "scale-0"}`}>
-                    Sithiparp Hirunmuttapornnnnnnnnnn&apos;s Workspace {/* $apos; = ' (single quote) */}
+                    Puwanut Janmee&apos;s Workspace {/* $apos; = ' (single quote) */}
                 </h1>
 
                 <FontAwesomeIcon icon={faAngleDoubleLeft}
@@ -131,7 +137,7 @@ const Sidebar = () => {
             </div>
 
             {/* Menu */}
-            <ul>
+            <ul className="mb-5">
                 {menus.map((menu, index) => (
                     <li key={index}
                         className={`
