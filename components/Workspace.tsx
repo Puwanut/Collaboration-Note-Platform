@@ -28,10 +28,9 @@ const Workspace = () => {
             <Topbar />
 
             {/* <div className="pt-16"></div> */}
-            {/* <div className="mt-16 h-screen"> */}
+            <div className="mt-[6vh] h-[94vh] overflow-y-auto">
 
-
-                <div className="pt-16 pb-4 px-4 container overflow-auto h-screen
+                <div className="pt-4 pb-4 px-4 container
                 lg:max-w-screen-md
                 xl:max-w-screen-md
                 2xl:max-w-screen-md">
@@ -88,7 +87,7 @@ const Workspace = () => {
                     </p>
 
                 </div>
-            {/* </div> */}
+            </div>
 
         </div>
     )
