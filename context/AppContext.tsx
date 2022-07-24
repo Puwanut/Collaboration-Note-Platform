@@ -9,7 +9,7 @@ export interface IAppContextProviderProps {
 
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
-    const [sidebarWidth, setSidebarWidth] = useState<any>("auto")
+    const [sidebarWidth, setSidebarWidth] = useState<any>(0)
     let sidebarWidthMemo = useRef(sidebarWidth)
     let sidebarUserToggleOpen = useRef(true)
 
@@ -19,7 +19,13 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           sidebarWidthMemo.current = sidebarWidth
           setSidebarWidth(0)
         } else {
-          setSidebarWidth(sidebarWidthMemo.current)
+          if (sidebarWidthMemo.current == 0 || window.innerWidth < 420) {
+            setSidebarWidth("100%")
+          } else if (window.innerWidth < 768) {
+            setSidebarWidth("35vw")
+          } else {
+            setSidebarWidth(sidebarWidthMemo.current)
+          }
         }
         sidebarUserToggleOpen.current = !sidebarUserToggleOpen.current
         setLeftSidebarOpen(!leftSidebarOpen)

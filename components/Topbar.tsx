@@ -8,7 +8,7 @@ const Topbar = () => {
     const { leftSidebarOpen, handleToggleSidebar} = useAppContext()
 
     return (
-        <div className="w-full h-12 bg-slate-100 fixed items-center flex px-4">
+        <div className="w-full h-12 bg-slate-100 fixed z-50 items-center flex px-4">
             <FontAwesomeIcon icon={faBars}
                 className={`${!leftSidebarOpen && "hidden"} cursor-pointer`}
                 onClick={handleToggleSidebar}/>

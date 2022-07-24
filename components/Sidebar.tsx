@@ -17,7 +17,28 @@ const Sidebar = () => {
     const menus = [
         { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
         { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> }
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
+        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
     ]
 
     // const [favNotes, setFavNotes] = useState<ItemType[]>([
@@ -52,6 +73,17 @@ const Sidebar = () => {
         }
     },[isResizing, setSidebarWidth])
 
+    // Set Initial Sidebar  only once (depends on window size)
+    useEffect(() => {
+        console.log("run effect")
+        if (window.innerWidth < 420) {
+            setLeftSidebarOpen(false)
+            setSidebarWidth(0)
+        } else {
+            setSidebarWidth("15rem")
+        }
+    }, [])
+
     useEffect(() => {
         window.addEventListener("resize", handleAutoResize)
         window.addEventListener("mousemove", resize)
@@ -66,7 +98,7 @@ const Sidebar = () => {
     }, [handleAutoResize, leftSidebarOpen, resize, setSidebarWidth, stopResizing])
 
     return (
-        <div className={`h-screen bg-stone-100 relative ${leftSidebarOpen ? `max-w-fit` : ''}
+        <div className={`h-screen bg-stone-100 relative truncate ${leftSidebarOpen ? `max-w-fit` : ''}
             ${isResizing ? `duration-[0]` : `duration-300`}
         `}
             ref={sidebarRef}
@@ -75,7 +107,8 @@ const Sidebar = () => {
             >
 
             {/* Workspace Title */}
-            <div className={`flex gap-x-3 items-center px-3 py-3 hover:bg-stone-200 ${!leftSidebarOpen && `scale-0`} `}>
+            <div className={`flex gap-x-3 items-center px-3 py-3 hover:bg-stone-200
+                ${!leftSidebarOpen && `scale-0`} `}>
 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -85,9 +118,9 @@ const Sidebar = () => {
                 />
 
                 <h1 className={`text-slate-700 origin-left font-medium duration-300
-                overflow-hidden whitespace-nowrap overflow-ellipsis
+                    text-ellipsis overflow-hidden
                  ${!leftSidebarOpen && "scale-0"}`}>
-                    Puwanut&apos;s Workspace {/* $apos; = ' (single quote) */}
+                    Sithiparp Hirunmuttapornnnnnnnnnn&apos;s Workspace {/* $apos; = ' (single quote) */}
                 </h1>
 
                 <FontAwesomeIcon icon={faAngleDoubleLeft}
