@@ -27,8 +27,8 @@ const Workspace = () => {
         <div className={`flex-1`}>
             <Topbar />
 
-            {/* <div className="pt-16"></div> */}
-            <div className="mt-[6vh] h-[94vh] overflow-y-auto">
+            {/* <div className="pt-16"></div> mt-[6vh] h-[94vh]*/}
+            <div className="mt-12 h-[calc(100vh-4rem)] overflow-y-auto">
 
                 <div className="pt-4 pb-4 px-4 container
                 lg:max-w-screen-md
