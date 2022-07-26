@@ -4,27 +4,27 @@ import Topbar from "./Topbar";
 
 const Workspace = () => {
 
-    const {leftSidebarOpen} = useAppContext()
-    const [leftSidebarOpen_mobile, setLeftSidebarOpen_mobile] = useState(false)
+    // const {leftSidebarOpen} = useAppContext()
+    // const [leftSidebarOpen_mobile, setLeftSidebarOpen_mobile] = useState(false)
 
-    const handleHideWorkspace = useCallback(
-      () => {
-        if (window.innerWidth < 420 && leftSidebarOpen) {
-            setLeftSidebarOpen_mobile(true)
-        } else {
-            setLeftSidebarOpen_mobile(false)
-        }
-      },
-      [leftSidebarOpen],
-    )
+    // const handleHideWorkspace = useCallback(
+    //   () => {
+    //     if (window.innerWidth < 420 && leftSidebarOpen) {
+    //         setLeftSidebarOpen_mobile(true)
+    //     } else {
+    //         setLeftSidebarOpen_mobile(false)
+    //     }
+    //   },
+    //   [leftSidebarOpen],
+    // )
 
-    useEffect(() => {
-        handleHideWorkspace()
-    }, [handleHideWorkspace])
+    // useEffect(() => {
+    //     handleHideWorkspace()
+    // }, [handleHideWorkspace])
 
     return (
         // <div className="p-7 text-2xl font-semibold flex-1 h-screen container"></div>
-        <div className={`flex-1  ${leftSidebarOpen_mobile && "hidden duration-300 "}`}>
+        <div className={`flex-1`}>
             <Topbar />
 
             {/* <div className="pt-16"></div> */}

@@ -1,5 +1,5 @@
 import { ScriptProps } from "next/script";
-import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 const AppContext = createContext(undefined)
 
@@ -7,12 +7,15 @@ export interface IAppContextProviderProps {
     children: ReactNode
   }
 
+export const mobileViewWidth = 576
+
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
     const [sidebarWidth, setSidebarWidth] = useState<any>(0)
+    const [isMobileView, setIsMobileView] = useState<boolean>(false)
     let sidebarWidthMemo = useRef(sidebarWidth)
-    let sidebarUserToggleOpen = useRef(true)
 
+    // Memo previous sidebarWidth and setSidebarWidth when toggle on
     const handleToggleSidebar = useCallback(
       () => {
         if (leftSidebarOpen) {
@@ -21,18 +24,37 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
         } else {
           if (sidebarWidthMemo.current == 0 || window.innerWidth < 420) {
             setSidebarWidth("100%")
-          } else if (window.innerWidth < 768) {
-            setSidebarWidth("35vw")
+          } else if (window.innerWidth < 576) {
+            setSidebarWidth("100%")
           } else {
             setSidebarWidth(sidebarWidthMemo.current)
           }
         }
-        sidebarUserToggleOpen.current = !sidebarUserToggleOpen.current
         setLeftSidebarOpen(!leftSidebarOpen)
 
       },
       [leftSidebarOpen, sidebarWidth],
     )
+
+    const handleWindowViewport = useCallback(() => {
+      if (window.innerWidth < mobileViewWidth) {
+        setIsMobileView(true)
+      } else {
+        setIsMobileView(false)
+      }
+    }, [])
+
+    // Set initial isMobileView for only once
+    useEffect(() => {
+      handleWindowViewport()
+    }, [])
+
+    useEffect(() => {
+      window.addEventListener("resize", handleWindowViewport)
+      return () => {
+        window.removeEventListener("resize", handleWindowViewport)
+      }
+    }, [handleWindowViewport])
 
     const value = useMemo(
         () => ({
@@ -40,9 +62,10 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           setLeftSidebarOpen,
           sidebarWidth,
           setSidebarWidth,
-          handleToggleSidebar
+          handleToggleSidebar,
+          isMobileView
         }),
-        [leftSidebarOpen, sidebarWidth, handleToggleSidebar],
+        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView],
       )
 
     return (

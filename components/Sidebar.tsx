@@ -1,7 +1,7 @@
 import { faAngleDoubleLeft, faClock, faGear, faSearch } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
-import { useAppContext } from "../context/AppContext"
+import { mobileViewWidth, useAppContext } from "../context/AppContext"
 
 
 const Sidebar = () => {
@@ -12,6 +12,7 @@ const Sidebar = () => {
     const sidebarRef: MutableRefObject<HTMLDivElement> = useRef(null);
     // const [sidebarWidth, setSidebarWidth] = useState<any>("auto")
     const [isResizing, setIsResizing] = useState<boolean>(false)
+    const {isMobileView} = appcontext
 
 
     const menus = [
@@ -58,11 +59,11 @@ const Sidebar = () => {
 
     // Auto close menu when on mobile
     const handleAutoResize = useCallback(() => {
-        if (window.innerWidth < 768) {
+        if (isMobileView) {
             setLeftSidebarOpen(false)
             setSidebarWidth(0)
         }
-    }, [setLeftSidebarOpen, setSidebarWidth])
+    }, [isMobileView, setLeftSidebarOpen, setSidebarWidth])
 
     const startResizing = useCallback(() => {
         setIsResizing(true);
@@ -79,22 +80,20 @@ const Sidebar = () => {
         }
     },[isResizing, setSidebarWidth])
 
-    // Set Initial Sidebar  only once (depends on window size)
-    useEffect(() => {
-        console.log("run effect")
-        if (window.innerWidth < 420) {
-            setLeftSidebarOpen(false)
-            setSidebarWidth(0)
-        } else {
-            setSidebarWidth("15rem")
-        }
-    }, [])
+    // Set Initial Sidebar only once (depends on window size)
+    // useEffect(() => {
+    //     if (isMobileView) {
+    //         setLeftSidebarOpen(false)
+    //         setSidebarWidth(0)
+    //     } else {
+    //         setSidebarWidth("15rem")
+    //     }
+    // }, [])
 
     useEffect(() => {
         window.addEventListener("resize", handleAutoResize)
         window.addEventListener("mousemove", resize)
         window.addEventListener("mouseup", stopResizing)
-
 
         return () => {
             window.removeEventListener("resize", handleAutoResize)
@@ -104,8 +103,10 @@ const Sidebar = () => {
     }, [handleAutoResize, leftSidebarOpen, resize, setSidebarWidth, stopResizing])
 
     return (
-        <div className={`h-screen bg-stone-100 relative overflow-x-hidden whitespace-nowrap ${leftSidebarOpen ? `max-w-fit` : ''}
+        <div className={`h-screen bg-stone-100 overflow-x-hidden whitespace-nowrap z-20
+            ${leftSidebarOpen ? `` : '' /* for min-max width*/}
             ${isResizing ? `duration-[0]` : `duration-300`}
+            ${isMobileView ? `fixed` : `relative`}
         `}
             ref={sidebarRef}
             onMouseDown={(e) => e.preventDefault()}
@@ -114,18 +115,20 @@ const Sidebar = () => {
 
             {/* Workspace Title */}
             <div className={`flex gap-x-3 items-center px-3 py-3 hover:bg-stone-200
-                ${!leftSidebarOpen && `scale-0`} `}>
+                ${!leftSidebarOpen && ``}
+                `}>
 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src="/square.svg"
-                    className={`cursor-pointer w-5 duration-500 ${leftSidebarOpen && "rotate-[360deg]"}`}
+                    className={`cursor-pointer w-5 duration-500 ${!leftSidebarOpen && "rotate-[-360deg] scale-0"}`}
                     alt="Logo"
                 />
 
-                <h1 className={`text-slate-700 origin-left font-medium duration-300
+                <h1 className={`text-slate-700 origin-left font-medium duration-300 grow
                     text-ellipsis overflow-hidden
-                 ${!leftSidebarOpen && "scale-0"}`}>
+                 ${!leftSidebarOpen && "scale-0"}
+                 `}>
                     Puwanut Janmee&apos;s Workspace {/* $apos; = ' (single quote) */}
                 </h1>
 
@@ -141,8 +144,10 @@ const Sidebar = () => {
                 {menus.map((menu, index) => (
                     <li key={index}
                         className={`
-                        text-stone-400 flex items-center gap-x-4 cursor-pointer duration-200
-                        px-4 py-1 font-medium text-sm hover:bg-stone-200 origin-left ${!leftSidebarOpen && 'scale-0'}
+                        text-stone-400 flex items-center gap-x-4 cursor-pointer duration-300
+                        px-4 py-1 font-medium text-sm hover:bg-stone-200 origin-left
+                        ${!leftSidebarOpen && 'scale-0'}
+                        ${isMobileView ? 'text-base' : 'text-sm'}
                         `}>
                         <span>{menu.icon}</span>
                         <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
