@@ -10,7 +10,7 @@ const Topbar = () => {
     return (
         <div className="w-full h-12 bg-slate-100 fixed z-10 top-0 items-center flex px-4">
             <FontAwesomeIcon icon={faBars}
-                className={`${!leftSidebarOpen && "hidden"} cursor-pointer`}
+                className={`${leftSidebarOpen && "!hidden"} cursor-pointer`}
                 onClick={handleToggleSidebar}/>
         </div>
     )
