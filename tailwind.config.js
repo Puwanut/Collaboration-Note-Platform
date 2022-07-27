@@ -10,6 +10,9 @@ module.exports = {
     container: {
       center: true
     },
+    screens: {
+      'xs': '576px'
+    }
   },
   plugins: [],
 }

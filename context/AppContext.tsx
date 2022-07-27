@@ -9,6 +9,8 @@ export interface IAppContextProviderProps {
 
 export const mobileViewWidth = 576
 
+// const initialWindowWidth = typeof window !== 'undefined' ? window.innerWidth : 0
+
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
     const [sidebarWidth, setSidebarWidth] = useState<any>(0)
@@ -18,25 +20,27 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     // Memo previous sidebarWidth and setSidebarWidth when toggle on
     const handleToggleSidebar = useCallback(
       () => {
+        console.log("Click Toggle Sidebar")
         if (leftSidebarOpen) {
           sidebarWidthMemo.current = sidebarWidth
           setSidebarWidth(0)
+          setLeftSidebarOpen(false)
         } else {
-          if (sidebarWidthMemo.current == 0 || window.innerWidth < 420) {
-            setSidebarWidth("100%")
-          } else if (window.innerWidth < 576) {
+          setLeftSidebarOpen(true)
+          //
+          if (sidebarWidthMemo.current == 0 || isMobileView) {
             setSidebarWidth("100%")
           } else {
             setSidebarWidth(sidebarWidthMemo.current)
           }
         }
-        setLeftSidebarOpen(!leftSidebarOpen)
 
       },
-      [leftSidebarOpen, sidebarWidth],
+      [isMobileView, leftSidebarOpen, sidebarWidth],
     )
 
     const handleWindowViewport = useCallback(() => {
+      console.log("Handle mobile viewport")
       if (window.innerWidth < mobileViewWidth) {
         setIsMobileView(true)
       } else {

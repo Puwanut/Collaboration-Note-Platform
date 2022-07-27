@@ -1,7 +1,7 @@
 import { faAngleDoubleLeft, faClock, faGear, faSearch } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
-import { mobileViewWidth, useAppContext } from "../context/AppContext"
+import { useAppContext } from "../context/AppContext"
 
 
 const Sidebar = () => {
@@ -62,9 +62,12 @@ const Sidebar = () => {
         if (isMobileView) {
             setLeftSidebarOpen(false)
             setSidebarWidth(0)
+        } else {
+            setLeftSidebarOpen(true)
         }
     }, [isMobileView, setLeftSidebarOpen, setSidebarWidth])
 
+    // Handle Drag Sidebar Slider
     const startResizing = useCallback(() => {
         setIsResizing(true);
       }, []);
@@ -81,14 +84,16 @@ const Sidebar = () => {
     },[isResizing, setSidebarWidth])
 
     // Set Initial Sidebar only once (depends on window size)
-    // useEffect(() => {
-    //     if (isMobileView) {
-    //         setLeftSidebarOpen(false)
-    //         setSidebarWidth(0)
-    //     } else {
-    //         setSidebarWidth("15rem")
-    //     }
-    // }, [])
+    useEffect(() => {
+        if (leftSidebarOpen) {
+            if (isMobileView) {
+                setLeftSidebarOpen(false)
+                setSidebarWidth(0)
+            } else {
+                setSidebarWidth("15rem")
+            }
+        }
+    }, [isMobileView])
 
     useEffect(() => {
         window.addEventListener("resize", handleAutoResize)
@@ -103,10 +108,10 @@ const Sidebar = () => {
     }, [handleAutoResize, leftSidebarOpen, resize, setSidebarWidth, stopResizing])
 
     return (
-        <div className={`h-screen bg-stone-100 overflow-x-hidden whitespace-nowrap z-20
+        <div className={`fixed xs:relative h-screen bg-stone-100 z-20 overflow-x-hidden whitespace-nowrap
             ${leftSidebarOpen ? `` : '' /* for min-max width*/}
             ${isResizing ? `duration-[0]` : `duration-300`}
-            ${isMobileView ? `fixed` : `relative`}
+
         `}
             ref={sidebarRef}
             onMouseDown={(e) => e.preventDefault()}
