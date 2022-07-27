@@ -1,26 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
 import Topbar from "./Topbar";
 
 const Workspace = () => {
-
-    // const {leftSidebarOpen} = useAppContext()
-    // const [leftSidebarOpen_mobile, setLeftSidebarOpen_mobile] = useState(false)
-
-    // const handleHideWorkspace = useCallback(
-    //   () => {
-    //     if (window.innerWidth < 420 && leftSidebarOpen) {
-    //         setLeftSidebarOpen_mobile(true)
-    //     } else {
-    //         setLeftSidebarOpen_mobile(false)
-    //     }
-    //   },
-    //   [leftSidebarOpen],
-    // )
-
-    // useEffect(() => {
-    //     handleHideWorkspace()
-    // }, [handleHideWorkspace])
 
     return (
         // <div className="p-7 text-2xl font-semibold flex-1 h-screen container"></div>
