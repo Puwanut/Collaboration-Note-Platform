@@ -21,18 +21,20 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     const handleToggleSidebar = useCallback(
       () => {
         console.log("Click Toggle Sidebar")
+
         if (leftSidebarOpen) {
           sidebarWidthMemo.current = sidebarWidth
           setSidebarWidth(0)
           setLeftSidebarOpen(false)
         } else {
-          setLeftSidebarOpen(true)
-          //
-          if (sidebarWidthMemo.current == 0 || isMobileView) {
+          if (isMobileView) {
             setSidebarWidth("100%")
-          } else {
+          } else if (sidebarWidthMemo.current !== 0) {
             setSidebarWidth(sidebarWidthMemo.current)
+          } else {
+            setSidebarWidth("15rem")
           }
+          setLeftSidebarOpen(true)
         }
 
       },

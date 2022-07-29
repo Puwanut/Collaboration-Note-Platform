@@ -57,13 +57,11 @@ const Sidebar = () => {
     // ])
 
 
-    // Auto close menu when on mobile
+    // Handle Resize when
     const handleAutoResize = useCallback(() => {
         if (isMobileView) {
             setLeftSidebarOpen(false)
             setSidebarWidth(0)
-        } else {
-            setLeftSidebarOpen(true)
         }
     }, [isMobileView, setLeftSidebarOpen, setSidebarWidth])
 
@@ -85,6 +83,7 @@ const Sidebar = () => {
 
     // Set Initial Sidebar only once (depends on window size)
     useEffect(() => {
+        console.log('useEffect: handle resize when detect mobile <-> desktop')
         if (leftSidebarOpen) {
             if (isMobileView) {
                 setLeftSidebarOpen(false)
