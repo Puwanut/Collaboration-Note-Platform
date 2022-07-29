@@ -10,9 +10,9 @@ const Sidebar = () => {
     const {sidebarWidth, setSidebarWidth} = appcontext
     const {handleToggleSidebar} = appcontext
     const sidebarRef: MutableRefObject<HTMLDivElement> = useRef(null);
-    // const [sidebarWidth, setSidebarWidth] = useState<any>("auto")
     const [isResizing, setIsResizing] = useState<boolean>(false)
     const {isMobileView} = appcontext
+    const [sidebarOpenDone, setSidebarOpenDone] = useState<boolean>(false)
 
 
     const menus = [
@@ -57,70 +57,74 @@ const Sidebar = () => {
     // ])
 
 
-    // Handle Resize when
     const handleAutoResize = useCallback(() => {
         if (isMobileView) {
             setLeftSidebarOpen(false)
             setSidebarWidth(0)
+        } else {
+            setLeftSidebarOpen(true)
+            setSidebarWidth("15rem")
         }
-    }, [isMobileView, setLeftSidebarOpen, setSidebarWidth])
+    }, [isMobileView])
 
-    // Handle Drag Sidebar Slider
+    const handleSidebarMinWidth = useCallback(() => {
+        if (leftSidebarOpen) {
+            setTimeout(() => setSidebarOpenDone(true), 300)
+        } else {
+            setSidebarOpenDone(false)
+        }
+    }, [leftSidebarOpen])
+
+    /* Function Group for Handle Drag Sidebar Slider */
     const startResizing = useCallback(() => {
         setIsResizing(true);
       }, []);
 
-      const stopResizing = useCallback(() => {
+    const stopResizing = useCallback(() => {
         setIsResizing(false);
         setSidebarWidth(sidebarRef.current.getBoundingClientRect().width)
-      }, [setSidebarWidth]);
+    }, [setSidebarWidth]);
 
     const resize = useCallback((mouseMoveEvent: MouseEvent) => {
         if (isResizing) {
             setSidebarWidth(mouseMoveEvent.clientX - sidebarRef.current.getBoundingClientRect().x)
         }
     },[isResizing, setSidebarWidth])
+    /* Function Group for Handle Drag Sidebar Slider */
 
-    // Set Initial Sidebar only once (depends on window size)
+    // Handle Toggle Sidebar between mobile as desktop
     useEffect(() => {
-        console.log('useEffect: handle resize when detect mobile <-> desktop')
-        if (leftSidebarOpen) {
-            if (isMobileView) {
-                setLeftSidebarOpen(false)
-                setSidebarWidth(0)
-            } else {
-                setSidebarWidth("15rem")
-            }
-        }
-    }, [isMobileView])
+        handleAutoResize()
+    }, [handleAutoResize])
 
+    // Handle toggle class min-w-[10rem] when open sidebar
     useEffect(() => {
-        window.addEventListener("resize", handleAutoResize)
+        handleSidebarMinWidth()
+    }, [handleSidebarMinWidth])
+
+    // Handle Resizeable Sidebar
+    useEffect(() => {
         window.addEventListener("mousemove", resize)
         window.addEventListener("mouseup", stopResizing)
 
         return () => {
-            window.removeEventListener("resize", handleAutoResize)
             window.removeEventListener("mousemove", resize)
             window.removeEventListener("mouseup", stopResizing);
         };
-    }, [handleAutoResize, leftSidebarOpen, resize, setSidebarWidth, stopResizing])
+    }, [resize, stopResizing])
 
     return (
-        <div className={`fixed xs:relative h-screen bg-stone-100 z-20 overflow-x-hidden whitespace-nowrap
-            ${leftSidebarOpen ? `` : '' /* for min-max width*/}
+        <div className={`fixed xs:relative xs:max-w-fit h-screen bg-stone-100 z-20 overflow-x-hidden whitespace-nowrap
+            ${leftSidebarOpen && sidebarOpenDone ? `xs:min-w-[10rem]` : ''}
             ${isResizing ? `duration-[0]` : `duration-300`}
-
-        `}
+            `}
             ref={sidebarRef}
             onMouseDown={(e) => e.preventDefault()}
             style={{ width:  sidebarWidth }}
             >
 
             {/* Workspace Title */}
-            <div className={`flex gap-x-3 items-center px-3 py-3 hover:bg-stone-200
-                ${!leftSidebarOpen && ``}
-                `}>
+            <div className={`flex gap-x-3 items-center px-3 py-3 hover:bg-stone-200`}>
 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -149,7 +153,7 @@ const Sidebar = () => {
                     <li key={index}
                         className={`
                         text-stone-400 flex items-center gap-x-4 cursor-pointer duration-300
-                        px-4 py-1 font-medium text-sm hover:bg-stone-200 origin-left
+                        px-4 py-1 font-medium hover:bg-stone-200 origin-left
                         ${!leftSidebarOpen && 'scale-0'}
                         ${isMobileView ? 'text-base' : 'text-sm'}
                         `}>
@@ -165,9 +169,9 @@ const Sidebar = () => {
 
 
             {/* Slider */}
-            <div className={`top-0 w-1 -right-0 absolute h-screen
+            <div className={`top-0 w-1 right-0 absolute h-screen
             cursor-col-resize resize-x border-2 border-transparent bg-stone-100
-            hover:border-stone-300 ${!leftSidebarOpen && "hidden"}`}
+            hover:border-stone-300 ${!leftSidebarOpen && 'hidden'}`}
                 onMouseDown={startResizing}>
             </div>
         </div>

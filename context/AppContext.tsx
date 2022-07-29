@@ -1,27 +1,33 @@
 import { ScriptProps } from "next/script";
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+export interface IAppContextProviderProps {
+    children: ReactNode
+}
+
+
+export const mobileViewWidth = 576
 
 const AppContext = createContext(undefined)
 
-export interface IAppContextProviderProps {
-    children: ReactNode
-  }
-
-export const mobileViewWidth = 576
+// const getInitialWidth = () => {
+//   const hasWindow = typeof window !== 'undefined'
+//   if (hasWindow && window.innerWidth < mobileViewWidth) {
+//     console.log('hasWindow', hasWindow)
+//     return "15rem"
+//   }
+//   return 0
+// }
 
 // const initialWindowWidth = typeof window !== 'undefined' ? window.innerWidth : 0
 
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
-    const [sidebarWidth, setSidebarWidth] = useState<any>(0)
+    const [sidebarWidth, setSidebarWidth] = useState<any>("15rem")
     const [isMobileView, setIsMobileView] = useState<boolean>(false)
     let sidebarWidthMemo = useRef(sidebarWidth)
 
     // Memo previous sidebarWidth and setSidebarWidth when toggle on
-    const handleToggleSidebar = useCallback(
-      () => {
-        console.log("Click Toggle Sidebar")
-
+    const handleToggleSidebar = useCallback(() => {
         if (leftSidebarOpen) {
           sidebarWidthMemo.current = sidebarWidth
           setSidebarWidth(0)
@@ -55,6 +61,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
       handleWindowViewport()
     }, [])
 
+    // Handle isMobile from window width
     useEffect(() => {
       window.addEventListener("resize", handleWindowViewport)
       return () => {

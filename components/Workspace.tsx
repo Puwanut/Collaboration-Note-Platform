@@ -1,14 +1,18 @@
+import { useState } from "react";
 import Topbar from "./Topbar";
 
 const Workspace = () => {
 
+    const [isTop, setIsTop] = useState(true)
+
     return (
-        // <div className="p-7 text-2xl font-semibold flex-1 h-screen container"></div>
         <div className={`flex-1`}>
             <Topbar />
 
-            {/* <div className="pt-16"></div> mt-[6vh] h-[94vh]*/}
-            <div className="mt-12 h-[calc(100vh-3rem)] overflow-y-auto">
+            <div className={`mt-12 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
+                ${isTop ? 'overscroll-auto' : 'overscroll-none'}`}
+                onScroll={(e) => e.currentTarget.scrollTop == 0 ? setIsTop(true) : setIsTop(false)}
+            >
 
                 <div className="pt-8 pb-4 mb-16 px-4 container
                 lg:max-w-screen-md
