@@ -4,7 +4,6 @@ export interface IAppContextProviderProps {
     children: ReactNode
 }
 
-
 export const mobileViewWidth = 576
 
 const AppContext = createContext(undefined)
@@ -48,7 +47,6 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     )
 
     const handleWindowViewport = useCallback(() => {
-      console.log("Handle mobile viewport")
       if (window.innerWidth < mobileViewWidth) {
         setIsMobileView(true)
       } else {

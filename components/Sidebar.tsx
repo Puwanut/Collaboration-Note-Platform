@@ -124,7 +124,7 @@ const Sidebar = () => {
             >
 
             {/* Workspace Title */}
-            <div className={`flex gap-x-3 items-center px-3 py-3 hover:bg-stone-200`}>
+            <div className={`flex gap-x-3 px-3 py-3 hover:bg-stone-200`}>
 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
