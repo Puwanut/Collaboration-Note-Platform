@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 
-
 const Sidebar = () => {
     const appcontext = useAppContext()
     const {leftSidebarOpen, setLeftSidebarOpen} = appcontext
@@ -55,7 +54,6 @@ const Sidebar = () => {
     //     { id: 4, name: "Workbook 4"},
     //     { id: 5, name: "Workbook 5"}
     // ])
-
 
     const handleAutoResize = useCallback(() => {
         if (isMobileView) {
@@ -148,7 +146,7 @@ const Sidebar = () => {
             </div>
 
             {/* Menu */}
-            <ul className="mb-5">
+            <ul className="mb-5" id='items'>
                 {menus.map((menu, index) => (
                     <li key={index}
                         className={`
