@@ -8,21 +8,23 @@ import {
   useSensors,
   TouchSensor,
   MouseSensor,
+  DragOverlay,
 } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import {SortableItem} from './SortableItem';
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { Item } from "./Item";
 
 const Workspace = () => {
 
     const [isTop, setIsTop] = useState(true)
-    const [items, setItems] = useState([1, 2, 3]);
+    const [items, setItems] = useState([1, 2, 3, 4, 5]);
+    const [activeId, setActiveId] = useState(null);
     const sensors = useSensors(
       useSensor(MouseSensor, {
         // Require the mouse to move by 10 pixels before activating
@@ -42,6 +44,12 @@ const Workspace = () => {
       })
     );
 
+    function handleDragStart(event) {
+      const {active} = event;
+
+      setActiveId(active.id);
+    }
+
     function handleDragEnd(event) {
       const {active, over} = event;
 
@@ -53,6 +61,8 @@ const Workspace = () => {
           return arrayMove(items, oldIndex, newIndex);
         });
       }
+
+      setActiveId(null);
     }
 
 
@@ -95,8 +105,9 @@ const Workspace = () => {
                     <DndContext
                       sensors={sensors}
                       collisionDetection={closestCenter}
+                      onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
-                      modifiers={[restrictToVerticalAxis]}
+                      // modifiers={[restrictToVerticalAxis]}
                     >
                       <SortableContext
                         items={items}
@@ -104,6 +115,11 @@ const Workspace = () => {
                       >
                         {items.map(id => <SortableItem key={id} id={id} />)}
                       </SortableContext>
+
+                      <DragOverlay>
+                        {activeId ? <Item id={activeId} /> : null}
+                      </DragOverlay>
+
                     </DndContext>
 
                 </div>

@@ -3,6 +3,7 @@ import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGripVertical } from '@fortawesome/free-solid-svg-icons';
+import { Item } from './Item';
 
 export function SortableItem(props) {
   const {
@@ -19,17 +20,22 @@ export function SortableItem(props) {
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-        <div className='border-cyan-200 flex items-center'>
+    // <div ref={setNodeRef} style={style}>
+        <div className='border-cyan-200 flex items-center group'
+            ref={setNodeRef}
+            style={style}
+        >
             <FontAwesomeIcon icon={faGripVertical}
-                className='text-neutral-400 p-1 mr-2
-                hover:bg-slate-200 duration-300
-                focus:outline-none'
+                className='text-neutral-400 p-1 mr-2 duration-150
+                hover:bg-slate-200
+                focus:outline-none
+                opacity-0 group-hover:opacity-100
+                '
             {...attributes} {...listeners}
 
             />
             <span className='border-2 p-2 flex-1'>List Item {props.id}</span>
         </div>
-    </div>
+        
   );
 }

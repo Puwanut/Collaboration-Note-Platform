@@ -25,7 +25,7 @@
     "**/*.tsx",
     "**/*.css",
     "**.*.js"
-  ],
+, "components/Item.jsx", "components/SortableItem.jsx"  ],
   "exclude": [
     "node_modules"
   ]
