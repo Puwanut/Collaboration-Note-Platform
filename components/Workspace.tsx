@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Topbar from "./Topbar";
 import {
   DndContext,
@@ -17,13 +17,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import {SortableItem} from './SortableItem';
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+// import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { Item } from "./Item";
 
 const Workspace = () => {
 
     const [isTop, setIsTop] = useState(true)
-    const [items, setItems] = useState([1, 2, 3, 4, 5]);
+    const [items, setItems] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
     const [activeId, setActiveId] = useState(null);
     const sensors = useSensors(
       useSensor(MouseSensor, {
@@ -44,14 +44,13 @@ const Workspace = () => {
       })
     );
 
-    function handleDragStart(event) {
-      const {active} = event;
+    const handleDragStart = useCallback((event) => {
+      setActiveId(event.active.id)
+    }, [setActiveId])
 
-      setActiveId(active.id);
-    }
-
-    function handleDragEnd(event) {
-      const {active, over} = event;
+    const handleDragOver = useCallback(
+      (event) => {
+        const {active, over} = event;
 
       if (active.id !== over.id) {
         setItems((items) => {
@@ -62,10 +61,17 @@ const Workspace = () => {
         });
       }
 
-      setActiveId(null);
-    }
+      },
+      [setItems],
+    )
 
+    const handleDragEnd = useCallback(() => {
+      setActiveId(null);  // Reset the active item
+    }, [setActiveId])
 
+    const handleDragCancel = useCallback(() => {
+      setActiveId(null);  // Reset the active item
+    }, [setActiveId])
 
     return (
         <div className={`flex-1`}>
@@ -106,7 +112,9 @@ const Workspace = () => {
                       sensors={sensors}
                       collisionDetection={closestCenter}
                       onDragStart={handleDragStart}
+                      onDragOver={handleDragOver}
                       onDragEnd={handleDragEnd}
+                      onDragCancel={handleDragCancel}
                       // modifiers={[restrictToVerticalAxis]}
                     >
                       <SortableContext
