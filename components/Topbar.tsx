@@ -5,7 +5,7 @@ import { useAppContext } from "../context/AppContext";
 
 const Topbar = () => {
 
-    const { leftSidebarOpen, handleToggleSidebar} = useAppContext()
+    const { leftSidebarOpen, handleToggleSidebar } = useAppContext()
 
     return (
         <div className="w-full h-12 bg-slate-100 fixed z-10 items-center flex px-4">

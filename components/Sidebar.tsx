@@ -12,7 +12,8 @@ const Sidebar = () => {
     const [isResizing, setIsResizing] = useState<boolean>(false)
     const {isMobileView} = appcontext
     const [sidebarOpenDone, setSidebarOpenDone] = useState<boolean>(false)
-
+    const [sidebarLoaded, setSidebarLoaded] = useState<boolean>(false)
+    const transitionDuration = 300 // ms
 
     const menus = [
         { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
@@ -65,9 +66,10 @@ const Sidebar = () => {
         }
     }, [isMobileView])
 
+    // Handle toggle class min-w-[10rem] when open sidebar (delay)
     const handleSidebarMinWidth = useCallback(() => {
         if (leftSidebarOpen) {
-            setTimeout(() => setSidebarOpenDone(true), 300)
+            setTimeout(() => setSidebarOpenDone(true), transitionDuration)
         } else {
             setSidebarOpenDone(false)
         }
@@ -100,6 +102,14 @@ const Sidebar = () => {
         handleSidebarMinWidth()
     }, [handleSidebarMinWidth])
 
+    // If mobileview in first time, setLoaded to true when sidebar is closed
+    useEffect(() => {
+        if (isMobileView && !leftSidebarOpen) {
+            setSidebarLoaded(true)
+        }
+    }, [isMobileView, leftSidebarOpen])
+
+
     // Handle Resizeable Sidebar
     useEffect(() => {
         window.addEventListener("mousemove", resize)
@@ -112,9 +122,10 @@ const Sidebar = () => {
     }, [resize, stopResizing])
 
     return (
-        <div className={`fixed xs:relative xs:max-w-fit h-screen bg-stone-100 z-20 overflow-x-hidden whitespace-nowrap
-            ${leftSidebarOpen && sidebarOpenDone ? `xs:min-w-[10rem]` : ''}
-            ${isResizing ? `duration-[0]` : `duration-300`}
+        <div className={`xs:block fixed xs:relative xs:max-w-fit h-screen bg-stone-100 z-20 overflow-x-hidden whitespace-nowrap
+            ${!sidebarLoaded && `hidden`}
+            ${sidebarOpenDone && `xs:min-w-[10rem]`}
+            ${!isResizing && `duration-${transitionDuration}`}
             `}
             ref={sidebarRef}
             onMouseDown={(e) => e.preventDefault()}
@@ -169,7 +180,7 @@ const Sidebar = () => {
             {/* Slider */}
             <div className={`top-0 w-1 right-0 absolute h-screen
             cursor-col-resize resize-x border-2 border-transparent bg-stone-100
-            hover:border-stone-300 ${!leftSidebarOpen && 'hidden'}`}
+            hover:border-stone-300 ${(!leftSidebarOpen || isMobileView) && 'hidden'}`}
                 onMouseDown={startResizing}>
             </div>
         </div>

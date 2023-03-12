@@ -8,40 +8,28 @@ export const mobileViewWidth = 576
 
 const AppContext = createContext(undefined)
 
-// const getInitialWidth = () => {
-//   const hasWindow = typeof window !== 'undefined'
-//   if (hasWindow && window.innerWidth < mobileViewWidth) {
-//     console.log('hasWindow', hasWindow)
-//     return "15rem"
-//   }
-//   return 0
-// }
-
-// const initialWindowWidth = typeof window !== 'undefined' ? window.innerWidth : 0
-
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
     const [sidebarWidth, setSidebarWidth] = useState<any>("15rem")
     const [isMobileView, setIsMobileView] = useState<boolean>(false)
-    let sidebarWidthMemo = useRef(sidebarWidth)
+    let sidebarWidthMemo = useRef(sidebarWidth) // Memo previous sidebarWidth
 
-    // Memo previous sidebarWidth and setSidebarWidth when toggle on
+    // Use Context to pass down functions to sidebar and topbar components
     const handleToggleSidebar = useCallback(() => {
-        if (leftSidebarOpen) {
-          sidebarWidthMemo.current = sidebarWidth
+        if (leftSidebarOpen) { // Close sidebar
+          sidebarWidthMemo.current = sidebarWidth // Memo previous sidebarWidth
           setSidebarWidth(0)
           setLeftSidebarOpen(false)
-        } else {
+        } else { // Open sidebar
           if (isMobileView) {
             setSidebarWidth("100%")
-          } else if (sidebarWidthMemo.current !== 0) {
+          } else if (sidebarWidthMemo.current !== 0) { // If sidebarWidthMemo is not 0, set sidebarWidth to previous sidebarWidth
             setSidebarWidth(sidebarWidthMemo.current)
-          } else {
+          } else { // If sidebarWidthMemo is 0, set sidebarWidth to default
             setSidebarWidth("15rem")
           }
           setLeftSidebarOpen(true)
         }
-
       },
       [isMobileView, leftSidebarOpen, sidebarWidth],
     )
