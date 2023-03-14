@@ -14,7 +14,7 @@ interface ItemType {
 const Workspace = () => {
   const [markdown, setMarkdown] = useState("")
   const [isTop, setIsTop] = useState(true)
-  const [data, setData] = useState<String>([])
+  const [data, setData] = useState<string>("")
   const [block, setBlock] = useState<ItemType[]>([
     { id: 1, name: "Workbook 1" },
     { id: 2, name: "Workbook 2" },
@@ -24,12 +24,12 @@ const Workspace = () => {
   ])
   const [showCommands, setShowCommands] = useState(false)
 
-  const handleMarkdown = (e) => {
-    if (e.key === "Enter") {
-      setMarkdown(markdown + "\n")
-    }
-    console.log(markdown)
-  }
+  // const handleMarkdown = (e) => {
+  //   if (e.key === "Enter") {
+  //     setMarkdown(markdown + "\n")
+  //   }
+  //   console.log(markdown)
+  // }
 
   const handleEdit = (e: FormEvent) => {
     const target = e.target as HTMLInputElement
@@ -42,11 +42,11 @@ const Workspace = () => {
     }
   }
 
-  const handleNewBlock = (e) => {
-    if (e.key === "Enter") {
-      setData([...data, { id: data.length + 1, name: "" }])
-    }
-  }
+  // const handleNewBlock = (e) => {
+  //   if (e.key === "Enter") {
+  //     setData([...data, { id: data.length + 1, name: "" }])
+  //   }
+  // }
 
   useEffect(() => {
     console.log(block)
@@ -55,18 +55,13 @@ const Workspace = () => {
   return (
     <div className={`flex-1`}>
       <Topbar />
-      <div
-        className={`mt-12 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
+      <div className={`mt-12 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
                 ${isTop ? "overscroll-auto" : "overscroll-none"}`}
         onScroll={(e) =>
           e.currentTarget.scrollTop == 0 ? setIsTop(true) : setIsTop(false)
         }
       >
-        <div
-          className="container mb-16 px-4 pt-8 pb-4
-                lg:max-w-screen-md
-                "
-        >
+        <div className="container mb-16 px-4 pt-8 pb-4 lg:max-w-screen-md">
           <h1 className="mb-5 text-5xl font-bold">Home Page</h1>
           <p>
             Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ipsam
@@ -84,7 +79,7 @@ const Workspace = () => {
             <div
               contentEditable
               onInput={handleEdit}
-              onKeyDown={handleNewBlock}
+              // onKeyDown={handleNewBlock}
               className="editable relative outline-none"
               placeholder="Press '/' for commands..."
             ></div>
