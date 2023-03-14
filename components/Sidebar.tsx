@@ -4,6 +4,7 @@ import { MutableRefObject, useCallback, useEffect, useRef, useState } from "reac
 import { useAppContext } from "../context/AppContext"
 
 const Sidebar = () => {
+
     const appcontext = useAppContext()
     const {leftSidebarOpen, setLeftSidebarOpen} = appcontext
     const {sidebarWidth, setSidebarWidth} = appcontext
@@ -104,10 +105,10 @@ const Sidebar = () => {
 
     // If mobileview in first time, setLoaded to true when sidebar is closed
     useEffect(() => {
-        if (isMobileView && !leftSidebarOpen) {
+        if (isMobileView) {
             setSidebarLoaded(true)
         }
-    }, [isMobileView, leftSidebarOpen])
+    }, [isMobileView])
 
 
     // Handle Resizeable Sidebar

@@ -25,6 +25,7 @@ a {
   font-size: revert;
 }
 
+/* ghostclass for sortable */
 .drop-indicator {
   @apply bg-sky-500 h-1 w-full
 }
@@ -32,3 +33,9 @@ a {
 .drop-indicator * {
   @apply invisible
 }
+/* ghostclass for sortable */
+
+.editable {
+  @apply empty:before:content-[attr(placeholder)] empty:before:italic empty:before:text-neutral-400 cursor-text
+}
+
