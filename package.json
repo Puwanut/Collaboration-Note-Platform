@@ -20,7 +20,8 @@
     "react-dom": "18.2.0",
     "react-markdown": "^8.0.3",
     "react-sortablejs": "^6.1.4",
-    "sortablejs": "^1.15.0"
+    "sortablejs": "^1.15.0",
+    "update-browserslist-db": "^1.0.10"
   },
   "devDependencies": {
     "@types/node": "^18.0.6",
