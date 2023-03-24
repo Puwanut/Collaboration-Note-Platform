@@ -1,19 +1,56 @@
 import { useRef, useEffect, KeyboardEvent, useState } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretStart, setCaretToPosition } from "../lib/setCaret"
+import * as htmlparser2 from "htmlparser2"
 
-const EditableBlock = ({ id, content, tag, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, setKey }) => {
+const typeMapTag = {
+    "text": "div",
+    "h1": "h1",
+    "h2": "h2",
+    "h3": "h3",
+    "img": "img",
+}
+
+const titleConcatenate = (titleArray: string[][]) => {
+    const text = titleArray.map((textArray) => {
+        const textType = textArray?.[1]
+        if (textType) {
+            return `<${textType}>${textArray[0]}</${textType}>`
+        }
+        return textArray[0]
+    })
+    return text.join("")
+}
+
+const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, setKey }) => {
     // const contentRef = useRef(content)
-    const [contentText, setContentText] = useState(content)
+    const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
+    const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
+    const [tag] = useState<string>(typeMapTag[block.type])
 
     const onChangeHandler = (e: ContentEditableEvent) => {
-        // contentRef.current = e.target.value
-        setContentText(e.target.value)
+        const newTitleArray = []
+        let currentTag = ""
+        // parse html to array
+        const parser = new htmlparser2.Parser({
+            onopentag: (tagname) => {
+                currentTag = tagname
+            },
+            ontext: (text) => {
+                newTitleArray.push(!currentTag ? [text] : [text, currentTag])
+            },
+            onclosetag: () => {
+                currentTag = ""
+            }
+        }, { decodeEntities: true })
+        parser.write(e.target.value)
+        parser.end()
+        setTitleArray(newTitleArray) // to update current title properties
+        setTitle(e.target.value) // to update text in contentEditable (for same caret position)
     }
 
     const onClickHandler = () => {
-        // console.log(contentEditableRef.current)
         setCurrentSelectedBlock(contentEditableRef.current)
     }
 
@@ -40,8 +77,8 @@ const EditableBlock = ({ id, content, tag, updatePage, addNextBlock, deleteBlock
                 if (!e.shiftKey) {
                     e.preventDefault()
                     addNextBlock({
-                        id: id,
-                        contentEditableRef: contentEditableRef.current,
+                        id: block.id,
+                        contentEditableRef: contentEditableRef.current
                     })
                 }
                 break
@@ -51,7 +88,7 @@ const EditableBlock = ({ id, content, tag, updatePage, addNextBlock, deleteBlock
                 if (!textBeforeCaret) {
                     e.preventDefault()
                     deleteBlock({
-                        id: id,
+                        id: block.id,
                         contentEditableRef: contentEditableRef.current,
                     }, e.key)
                 }
@@ -62,7 +99,7 @@ const EditableBlock = ({ id, content, tag, updatePage, addNextBlock, deleteBlock
                 if (endOfLine) {
                     e.preventDefault()
                     deleteBlock({
-                        id: id,
+                        id: block.id,
                         contentEditableRef: contentEditableRef.current,
                     }, e.key)
                 }
@@ -74,20 +111,26 @@ const EditableBlock = ({ id, content, tag, updatePage, addNextBlock, deleteBlock
 
 
     useEffect(() => {
-        setContentText(content)
-    }, [content])
+        setTitle(titleConcatenate(block.properties.title))
+        // setTag(typeMapTag[block.type])
+    }, [block.properties.title])
 
     useEffect(() => {
-        updatePage({ id, content: contentText, tag })
-    }, [contentText, tag])
-
-
+        updatePage({
+            ...block,
+            type: "text",
+            properties: {
+                ...block.properties,
+                title: titleArray
+            }
+        })
+    }, [titleArray])
 
     return (
         <ContentEditable
             className="bg-slate-100 outline-none h-auto"
             innerRef={contentEditableRef} // forwards the ref to the DOM node
-            html={contentText}
+            html={title}
             tagName={tag}
             onChange={onChangeHandler}
             onKeyDown={onKeyDownHandler}

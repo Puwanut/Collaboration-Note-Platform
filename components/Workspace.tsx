@@ -10,8 +10,13 @@ import { getCaretStart, setCaretToEnd, setCaretToPosition } from "../lib/setCare
 
 interface IEditableBlock {
   id: string
-  content: string
-  tag: string
+  type: string
+  properties: {
+    title: string[][] // [["text", "bold"], ["text", "italic"]
+    checked?: boolean
+  }
+  children?: string[]
+  parent?: string
 }
 
 interface ICurrentBlock {
@@ -21,10 +26,57 @@ interface ICurrentBlock {
 
 const initialBlock: IEditableBlock = {
   id: uuidv4(),
-  content: "",
-  tag: "div"
+  type: "text",
+  properties: {
+    title: []//[["normal"], ["testbold", "b"], ["testitalic", "i"]]
+  },
+  children: [],
+  parent: null
 }
 
+// titleSlice function
+// input
+// titleArray: [["normal"], ["testbold", "b"], ["testitalic", "i"]]
+// start: 10
+// end: null
+// output
+// [["bold", "b"], ["testitalic", "i"]]
+
+// input
+// titleArray: [["normal"], ["testbold", "b"], ["testitalic", "i"]]
+// start: 0
+// end: 10
+// output
+// [["normal"], ["test", "b"]]
+
+
+const titleSlice = (titleArray: string[][], start: number, end?: number) => {
+  let currentLength = 0
+  const titleUpdatedArray = [...titleArray]
+  for (let index = 0; index < titleArray.length; index++) {
+    const textArray = titleArray[index]
+    const textLength = textArray[0].length
+    if (currentLength + textLength >= start && !end) {
+      const format = textArray?.[1]
+      if (format) {
+        titleUpdatedArray[index] = [textArray[0].substring(start - currentLength), format]
+      } else {
+        titleUpdatedArray[index] = [textArray[0].substring(start - currentLength)]
+      }
+      return titleUpdatedArray.slice(index)
+    } else if (currentLength + textLength >= end && end) {
+      const format = textArray?.[1]
+      if (format) {
+        titleUpdatedArray[index] = [textArray[0].substring(0, end - currentLength), format]
+      } else {
+        titleUpdatedArray[index] = [textArray[0].substring(0, end - currentLength)]
+      }
+      return titleUpdatedArray.slice(0, index + 1)
+    }
+    currentLength += textLength
+  }
+  return []
+}
 
 const Workspace = () => {
   // const [markdown, setMarkdown] = useState<any>("")
@@ -49,35 +101,44 @@ const Workspace = () => {
 
   // Send update function to EditableBlock
   const updatePageHandler = (updatedBlock: IEditableBlock) => {
-    const updatedBlocks = blocks.map(block => {
-      if (block.id === updatedBlock.id) {
-        return {
-          ...block,
-          content: updatedBlock.content,
-          tag: updatedBlock.tag
+    setBlocks(prevState => {
+      const updatedBlocks = prevState.map(block => {
+        if (block.id === updatedBlock.id) {
+          return {
+            ...block,
+            properties: {
+              title: updatedBlock.properties.title,
+            },
+            type: updatedBlock.type
+          }
         }
-      }
-      else {
-        return block
-      }
+        else {
+          return block
+        }
+      })
+      return updatedBlocks
     })
-    setBlocks(updatedBlocks)
   }
 
   const addBlockHandler = (currentBlock: ICurrentBlock) => {
     console.log("++++++++ ADDBLOCK ++++++++")
     const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
-    const newBlock = {
-      id: uuidv4(),
-      content: currentBlock.contentEditableRef.textContent.substring(currentCaretPosition),
-      tag: "div"
-    }
     const currentBlockIndex = blocks.findIndex((block) => block.id === currentBlock.id)
-
     setBlocks(prevState => {
+      const newBlock = {
+        id: uuidv4(),
+        type: "text",
+        properties: {
+          title: titleSlice(prevState[currentBlockIndex].properties.title, currentCaretPosition)
+        },
+        children: [],
+        parent: null
+      }
       const updatedCurrentBlock = {
         ...prevState[currentBlockIndex],
-        content: prevState[currentBlockIndex].content.substring(0, currentCaretPosition)
+        properties: {
+          title: titleSlice(prevState[currentBlockIndex].properties.title, 0, currentCaretPosition)
+        }
       }
       return [
         ...prevState.slice(0, currentBlockIndex),
@@ -97,10 +158,12 @@ const Workspace = () => {
     const currentBlockIndex = blocks.findIndex((b) => b.id === currentBlock.id)
     const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
     if (key === "Backspace" && previousBlock) { // delete current block and bring text to previous block
-      setBlocks((prevState) => {
+      setBlocks(prevState => {
         const updatedPreviousBlock = {
           ...prevState[currentBlockIndex - 1],
-          content: prevState[currentBlockIndex - 1].content + prevState[currentBlockIndex].content
+          properties: {
+            title: [...prevState[currentBlockIndex - 1].properties.title, ...prevState[currentBlockIndex].properties.title]
+          }
         }
         return [
           ...prevState.slice(0, currentBlockIndex - 1),
@@ -113,7 +176,9 @@ const Workspace = () => {
       setBlocks(prevState => {
         const currentUpdatedBlock = {
           ...prevState[currentBlockIndex],
-          content: prevState[currentBlockIndex].content + prevState[currentBlockIndex + 1].content
+          properties: {
+            title: [...prevState[currentBlockIndex].properties.title, ...prevState[currentBlockIndex + 1].properties.title]
+          }
         }
         return [
           ...prevState.slice(0, currentBlockIndex),
@@ -159,9 +224,7 @@ const Workspace = () => {
               return (
               <EditableBlock
                 key={index}
-                id={block.id}
-                tag={block.tag}
-                content={block.content}
+                block={block}
                 updatePage={updatePageHandler}
                 addNextBlock={addBlockHandler}
                 deleteBlock={deleteBlockHandler}

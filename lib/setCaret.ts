@@ -13,7 +13,7 @@ export const getCaretStart = (element: HTMLElement) => {
             preCaretRange.setEnd(range.endContainer, range.endOffset)
             caretOffset = preCaretRange.toString().length
         }
-    } 
+    }
     return caretOffset
 }
 
