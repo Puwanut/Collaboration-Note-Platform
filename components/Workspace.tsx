@@ -1,9 +1,9 @@
-import { FormEvent, useEffect, useRef, useState } from "react"
-import { ReactSortable } from "react-sortablejs"
+import { useEffect, useState } from "react"
+// import { ReactSortable } from "react-sortablejs"
 import Topbar from "./Topbar"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faGripVertical } from "@fortawesome/free-solid-svg-icons"
-import CommandsOverlay from "./CommandsOverlay"
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+// import { faGripVertical } from "@fortawesome/free-solid-svg-icons"
+// import CommandsOverlay from "./CommandsOverlay"
 import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
 import { getCaretStart, setCaretToEnd, setCaretToPosition } from "../lib/setCaret"
@@ -27,25 +27,25 @@ const initialBlock: IEditableBlock = {
 
 
 const Workspace = () => {
-  const [markdown, setMarkdown] = useState<any>("")
+  // const [markdown, setMarkdown] = useState<any>("")
   const [isTop, setIsTop] = useState<boolean>(true)
-  const [commandText, setCommandText] = useState<string>("")
+  // const [commandText, setCommandText] = useState<string>("")
   const [blocks, setBlocks] = useState<IEditableBlock[]>([initialBlock])
-  const [showCommands, setShowCommands] = useState(false)
+  // const [showCommands, setShowCommands] = useState(false)
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>()
   const [key, setKey] = useState<string>("")
 
-  const handleEdit = (e: FormEvent) => {
-    const target = e.target as HTMLInputElement
-    setMarkdown(target.innerText)
-    setCommandText(target.innerText)
-    // set cursor position next to the user's input
-    if (target.innerText.startsWith("/")) {
-      setShowCommands(true)
-    } else {
-      setShowCommands(false)
-    }
-  }
+  // const handleEdit = (e: FormEvent) => {
+  //   const target = e.target as HTMLInputElement
+  //   setMarkdown(target.innerText)
+  //   setCommandText(target.innerText)
+  //   // set cursor position next to the user's input
+  //   if (target.innerText.startsWith("/")) {
+  //     setShowCommands(true)
+  //   } else {
+  //     setShowCommands(false)
+  //   }
+  // }
 
   // Send update function to EditableBlock
   const updatePageHandler = (updatedBlock: IEditableBlock) => {

@@ -6,7 +6,6 @@ const EditableBlock = ({ id, content, tag, updatePage, addNextBlock, deleteBlock
     // const contentRef = useRef(content)
     const [contentText, setContentText] = useState(content)
     const contentEditableRef = useRef<HTMLElement>(null)
-    const [editDisabled, setEditDisabled] = useState(false)
 
     const onChangeHandler = (e: ContentEditableEvent) => {
         // contentRef.current = e.target.value
