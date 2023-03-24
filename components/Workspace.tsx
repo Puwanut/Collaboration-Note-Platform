@@ -1,40 +1,45 @@
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { ReactSortable } from "react-sortablejs"
 import Topbar from "./Topbar"
-import ReactMarkdown from "react-markdown"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faGripVertical } from "@fortawesome/free-solid-svg-icons"
 import CommandsOverlay from "./CommandsOverlay"
+import { v4 as uuidv4 } from "uuid"
+import EditableBlock from "./EditableBlock"
+import { getCaretStart, setCaretToEnd, setCaretToPosition } from "../lib/setCaret"
 
-interface ItemType {
-  id: number
-  name: string
+interface IEditableBlock {
+  id: string
+  content: string
+  tag: string
 }
 
-const Workspace = () => {
-  const [markdown, setMarkdown] = useState("")
-  const [isTop, setIsTop] = useState(true)
-  const [data, setData] = useState<string>("")
-  const [block, setBlock] = useState<ItemType[]>([
-    { id: 1, name: "Workbook 1" },
-    { id: 2, name: "Workbook 2" },
-    { id: 3, name: "Workbook 3" },
-    { id: 4, name: "Workbook 4" },
-    { id: 5, name: "Workbook 5" },
-  ])
-  const [showCommands, setShowCommands] = useState(false)
+interface ICurrentBlock {
+  id: string
+  contentEditableRef: HTMLElement
+}
 
-  // const handleMarkdown = (e) => {
-  //   if (e.key === "Enter") {
-  //     setMarkdown(markdown + "\n")
-  //   }
-  //   console.log(markdown)
-  // }
+const initialBlock: IEditableBlock = {
+  id: uuidv4(),
+  content: "",
+  tag: "div"
+}
+
+
+const Workspace = () => {
+  const [markdown, setMarkdown] = useState<any>("")
+  const [isTop, setIsTop] = useState<boolean>(true)
+  const [commandText, setCommandText] = useState<string>("")
+  const [blocks, setBlocks] = useState<IEditableBlock[]>([initialBlock])
+  const [showCommands, setShowCommands] = useState(false)
+  const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>()
+  const [key, setKey] = useState<string>("")
 
   const handleEdit = (e: FormEvent) => {
     const target = e.target as HTMLInputElement
     setMarkdown(target.innerText)
-    setData(target.innerText)
+    setCommandText(target.innerText)
+    // set cursor position next to the user's input
     if (target.innerText.startsWith("/")) {
       setShowCommands(true)
     } else {
@@ -42,15 +47,91 @@ const Workspace = () => {
     }
   }
 
-  // const handleNewBlock = (e) => {
-  //   if (e.key === "Enter") {
-  //     setData([...data, { id: data.length + 1, name: "" }])
-  //   }
-  // }
+  // Send update function to EditableBlock
+  const updatePageHandler = (updatedBlock: IEditableBlock) => {
+    const updatedBlocks = blocks.map(block => {
+      if (block.id === updatedBlock.id) {
+        return {
+          ...block,
+          content: updatedBlock.content,
+          tag: updatedBlock.tag
+        }
+      }
+      else {
+        return block
+      }
+    })
+    setBlocks(updatedBlocks)
+  }
 
+  const addBlockHandler = (currentBlock: ICurrentBlock) => {
+    console.log("++++++++ ADDBLOCK ++++++++")
+    const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
+    const newBlock = {
+      id: uuidv4(),
+      content: currentBlock.contentEditableRef.textContent.substring(currentCaretPosition),
+      tag: "div"
+    }
+    const currentBlockIndex = blocks.findIndex((block) => block.id === currentBlock.id)
+
+    setBlocks(prevState => {
+      const updatedCurrentBlock = {
+        ...prevState[currentBlockIndex],
+        content: prevState[currentBlockIndex].content.substring(0, currentCaretPosition)
+      }
+      return [
+        ...prevState.slice(0, currentBlockIndex),
+        updatedCurrentBlock,
+        newBlock,
+        ...prevState.slice(currentBlockIndex + 1)
+      ]
+    })
+    // for set focus to new block
+    setCurrentSelectedBlock(currentBlock.contentEditableRef)
+  }
+
+  const deleteBlockHandler = (currentBlock: ICurrentBlock, key: string) => {
+    console.log("-------- DELETE BLOCK --------")
+    const previousBlock = currentBlock.contentEditableRef.previousElementSibling as HTMLElement
+    const nextBlock = currentBlock.contentEditableRef.nextElementSibling as HTMLElement
+    const currentBlockIndex = blocks.findIndex((b) => b.id === currentBlock.id)
+    const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
+    if (key === "Backspace" && previousBlock) { // delete current block and bring text to previous block
+      setBlocks((prevState) => {
+        const updatedPreviousBlock = {
+          ...prevState[currentBlockIndex - 1],
+          content: prevState[currentBlockIndex - 1].content + prevState[currentBlockIndex].content
+        }
+        return [
+          ...prevState.slice(0, currentBlockIndex - 1),
+          updatedPreviousBlock,
+          ...prevState.slice(currentBlockIndex + 1),
+        ]
+      })
+      setCaretToEnd(previousBlock)
+    } else if (key === "Delete" && nextBlock) { // delete next block and bring text to current block
+      setBlocks(prevState => {
+        const currentUpdatedBlock = {
+          ...prevState[currentBlockIndex],
+          content: prevState[currentBlockIndex].content + prevState[currentBlockIndex + 1].content
+        }
+        return [
+          ...prevState.slice(0, currentBlockIndex),
+          currentUpdatedBlock,
+          ...prevState.slice(currentBlockIndex + 2)
+        ]
+      })
+      setCaretToPosition(currentBlock.contentEditableRef, currentCaretPosition)
+    }
+
+  }
+
+  // when user press enter, focus to next block
   useEffect(() => {
-    console.log(block)
-  }, [block])
+    if (key === "Enter") {
+      (currentSelectedBlock.nextElementSibling as HTMLElement).focus()
+    }
+  }, [blocks.length])
 
   return (
     <div className={`flex-1`}>
@@ -73,20 +154,26 @@ const Workspace = () => {
             voluptas laboriosam unde ut quae dicta, minima placeat quo commodi!
           </p>
           <br />
-
-          {showCommands && <CommandsOverlay text={data} />}
-          <div className="disable-global">
-            <div
-              contentEditable
-              onInput={handleEdit}
-              // onKeyDown={handleNewBlock}
-              className="editable relative outline-none"
-              placeholder="Press '/' for commands..."
-            ></div>
-            <ReactMarkdown>{markdown}</ReactMarkdown>
+          <div className="disable-global space-y-2">
+            {blocks.map((block, index) => {
+              return (
+              <EditableBlock
+                key={index}
+                id={block.id}
+                tag={block.tag}
+                content={block.content}
+                updatePage={updatePageHandler}
+                addNextBlock={addBlockHandler}
+                deleteBlock={deleteBlockHandler}
+                setCurrentSelectedBlock={setCurrentSelectedBlock}
+                setKey={setKey}
+              />
+            )})}
           </div>
 
-          <ReactSortable
+
+
+          {/* <ReactSortable
             list={block}
             setList={setBlock}
             // group="groupName"
@@ -103,22 +190,31 @@ const Workspace = () => {
             {block.map((item) => (
               <div
                 key={item.id}
-                className="group flex items-center border-cyan-200"
+                className="group flex border-cyan-200"
               >
                 <FontAwesomeIcon
                   icon={faGripVertical}
-                  className="handle mr-2 p-1 text-neutral-400 opacity-0
+                  className="handle mt-2 mr-2 p-1 text-neutral-400 opacity-0
                               duration-150
                               hover:bg-slate-200
                               focus:outline-none group-hover:opacity-100
                               " // group-hover is active when the parent is hovered
                 />
                 <span className={"flex-1 p-2"}>
-                  {item.id + ": " + item.name}
+                  {showCommands && <CommandsOverlay text={commandText} />}
+                  <div className="disable-global">
+                    <div
+                      contentEditable
+                      onInput={handleEdit}
+                      // onKeyDown={handleNewBlock}
+                      className="editable relative outline-none"
+                      placeholder="Press '/' for commands..."
+                    ></div>
+                  </div>
                 </span>
               </div>
             ))}
-          </ReactSortable>
+          </ReactSortable> */}
         </div>
       </div>
     </div>

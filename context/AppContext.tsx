@@ -14,6 +14,8 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     const [isMobileView, setIsMobileView] = useState<boolean>(false)
     let sidebarWidthMemo = useRef(sidebarWidth) // Memo previous sidebarWidth
 
+    const [isDragging, setIsDragging] = useState<boolean>(false)
+
     // Use Context to pass down functions to sidebar and topbar components
     const handleToggleSidebar = useCallback(() => {
         if (leftSidebarOpen) { // Close sidebar
@@ -62,9 +64,11 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           sidebarWidth,
           setSidebarWidth,
           handleToggleSidebar,
-          isMobileView
+          isMobileView,
+          isDragging,
+          setIsDragging,
         }),
-        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView],
+        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging],
       )
 
     return (
