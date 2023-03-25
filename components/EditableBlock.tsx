@@ -36,6 +36,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         const parser = new htmlparser2.Parser({
             onopentag: (tagname) => {
                 currentTag = tagname
+
             },
             ontext: (text) => {
                 newTitleArray.push(!currentTag ? [text] : [text, currentTag])
@@ -46,6 +47,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         }, { decodeEntities: true })
         parser.write(e.target.value)
         parser.end()
+        console.warn(e.target.value, newTitleArray)
         setTitleArray(newTitleArray) // to update current title properties
         setTitle(e.target.value) // to update text in contentEditable (for same caret position)
     }
@@ -128,7 +130,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
 
     return (
         <ContentEditable
-            className="bg-slate-100 outline-none h-auto"
+            className="bg-slate-100 outline-none whitespace-pre-wrap"
             innerRef={contentEditableRef} // forwards the ref to the DOM node
             html={title}
             tagName={tag}

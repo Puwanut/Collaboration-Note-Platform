@@ -52,11 +52,11 @@ const initialBlock: IEditableBlock = {
 
 const titleSlice = (titleArray: string[][], start: number, end?: number) => {
   let currentLength = 0
-  const titleUpdatedArray = [...titleArray]
+  const titleUpdatedArray = [...titleArray] // [['456']]
   for (let index = 0; index < titleArray.length; index++) {
-    const textArray = titleArray[index]
-    const textLength = textArray[0].length
-    if (currentLength + textLength >= start && !end) {
+    const textArray = titleArray[index] // ['456']
+    const textLength = textArray[0].length // 3
+    if (currentLength + textLength >= start && end === undefined) { // 3 >= 10
       const format = textArray?.[1]
       if (format) {
         titleUpdatedArray[index] = [textArray[0].substring(start - currentLength), format]
@@ -64,7 +64,7 @@ const titleSlice = (titleArray: string[][], start: number, end?: number) => {
         titleUpdatedArray[index] = [textArray[0].substring(start - currentLength)]
       }
       return titleUpdatedArray.slice(index)
-    } else if (currentLength + textLength >= end && end) {
+    } else if (currentLength + textLength >= end && end !== undefined) {
       const format = textArray?.[1]
       if (format) {
         titleUpdatedArray[index] = [textArray[0].substring(0, end - currentLength), format]
@@ -75,6 +75,7 @@ const titleSlice = (titleArray: string[][], start: number, end?: number) => {
     }
     currentLength += textLength
   }
+  console.log("nothing")
   return []
 }
 
