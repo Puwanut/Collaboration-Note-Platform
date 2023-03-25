@@ -2,6 +2,7 @@ import { useRef, useEffect, KeyboardEvent, useState } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretStart, setCaretToPosition } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
+import { encode, decode } from "html-entities"
 
 const typeMapTag = {
     "text": "div",
@@ -14,10 +15,11 @@ const typeMapTag = {
 const titleConcatenate = (titleArray: string[][]) => {
     const text = titleArray.map((textArray) => {
         const textType = textArray?.[1]
+        const textContent = encode(textArray[0])
         if (textType) {
-            return `<${textType}>${textArray[0]}</${textType}>`
+            return `<${textType}>${textContent}</${textType}>`
         }
-        return textArray[0]
+        return textContent
     })
     return text.join("")
 }
@@ -32,24 +34,24 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const onChangeHandler = (e: ContentEditableEvent) => {
         const newTitleArray = []
         let currentTag = ""
+
         // parse html to array
         const parser = new htmlparser2.Parser({
             onopentag: (tagname) => {
                 currentTag = tagname
-
             },
             ontext: (text) => {
-                newTitleArray.push(!currentTag ? [text] : [text, currentTag])
+                newTitleArray.push(!currentTag ? [decode(text)] : [decode(text), currentTag])
             },
             onclosetag: () => {
                 currentTag = ""
             }
-        }, { decodeEntities: true })
+        }, { decodeEntities: false }) // to prevent html entities from being decoded (e.g. &lt; to <)
         parser.write(e.target.value)
         parser.end()
-        console.warn(e.target.value, newTitleArray)
         setTitleArray(newTitleArray) // to update current title properties
         setTitle(e.target.value) // to update text in contentEditable (for same caret position)
+
     }
 
     const onClickHandler = () => {
@@ -107,7 +109,6 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 }
                 break
             }
-
         }
     }
 
@@ -117,6 +118,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         // setTag(typeMapTag[block.type])
     }, [block.properties.title])
 
+    // update when onChangeHandler is called
     useEffect(() => {
         updatePage({
             ...block,

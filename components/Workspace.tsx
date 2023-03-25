@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
 import { getCaretStart, setCaretToEnd, setCaretToPosition } from "../lib/setCaret"
 
+
 interface IEditableBlock {
   id: string
   type: string
@@ -28,11 +29,21 @@ const initialBlock: IEditableBlock = {
   id: uuidv4(),
   type: "text",
   properties: {
-    title: []//[["normal"], ["testbold", "b"], ["testitalic", "i"]]
+    title: [["<b>normal</b>"], ["testbold", "b"], ["testitalic", "i"]]
   },
   children: [],
   parent: null
 }
+
+// const initialBlock: IEditableBlock = {
+//   id: uuidv4(),
+//   type: "text",
+//   properties: {
+//     title: []//[["normal"], ["testbold", "b"], ["testitalic", "i"]]
+//   },
+//   children: [],
+//   parent: null
+// }
 
 // titleSlice function
 // input
@@ -52,10 +63,10 @@ const initialBlock: IEditableBlock = {
 
 const titleSlice = (titleArray: string[][], start: number, end?: number) => {
   let currentLength = 0
-  const titleUpdatedArray = [...titleArray] // [['456']]
+  const titleUpdatedArray = [...titleArray]
   for (let index = 0; index < titleArray.length; index++) {
     const textArray = titleArray[index] // ['456']
-    const textLength = textArray[0].length // 3
+    const textLength = textArray[0].length
     if (currentLength + textLength >= start && end === undefined) { // 3 >= 10
       const format = textArray?.[1]
       if (format) {
@@ -75,7 +86,6 @@ const titleSlice = (titleArray: string[][], start: number, end?: number) => {
     }
     currentLength += textLength
   }
-  console.log("nothing")
   return []
 }
 
