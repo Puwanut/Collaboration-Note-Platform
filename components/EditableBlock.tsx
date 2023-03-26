@@ -3,6 +3,8 @@ import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretStart, setCaretToPosition } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
 import { escapeUTF8 , decodeHTML } from "entities"
+import { faGripVertical, faPlus } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 const typeMapTag = {
     "text": "div",
@@ -24,7 +26,7 @@ const titleConcatenate = (titleArray: string[][]) => {
     return text.join("")
 }
 
-const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, setKey }) => {
+const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, setKey, dataPosition }) => {
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
@@ -57,7 +59,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     }
 
     const onKeyDownHandler = (e: KeyboardEvent) => {
-        setKey(e.key)
+        setKey(e)
         switch (e.key) {
             case "ArrowUp": {
                 e.preventDefault()
@@ -134,16 +136,29 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     }, [titleArray])
 
     return (
+      <div className="group flex items-center ">
+        <div className="mr-2 space-x-1 text-neutral-400 opacity-0 duration-150 focus:outline-none group-hover:opacity-100">
+          <FontAwesomeIcon
+            icon={faPlus}
+            className="p-1.5 duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+          />
+          <FontAwesomeIcon
+            icon={faGripVertical}
+            className="handle p-1.5 duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+          />
+        </div>
         <ContentEditable
-            className="bg-slate-100 outline-none whitespace-pre-wrap"
-            innerRef={contentEditableRef} // forwards the ref to the DOM node
-            html={title}
-            tagName={tag}
-            onChange={onChangeHandler}
-            onKeyDown={onKeyDownHandler}
-            onClick={onClickHandler}
+          className="flex-1 overflow-hidden whitespace-pre-wrap bg-slate-100 outline-none"
+          innerRef={contentEditableRef} // forwards the ref to the DOM node
+          html={title}
+          tagName={tag}
+          onChange={onChangeHandler}
+          onKeyDown={onKeyDownHandler}
+          onClick={onClickHandler}
+          data-position={dataPosition}
         />
-    )
+      </div>
+    );
 }
 
 export default EditableBlock

@@ -38,4 +38,3 @@ a {
 .editable {
   @apply empty:before:content-[attr(placeholder)] empty:before:italic empty:before:text-neutral-400 cursor-text
 }
-

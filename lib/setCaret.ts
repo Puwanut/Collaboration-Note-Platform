@@ -29,17 +29,23 @@ export const setCaretToEnd = (element: HTMLElement) => {
 }
 
 export const setCaretToPosition = (element: HTMLElement, caretPosition: number) => {
+    const sel = window.getSelection()
     const range = document.createRange()
-    const selection = window.getSelection()
-    range.selectNodeContents(element)
+    range.setStart(element.childNodes[0], caretPosition)
     range.collapse(true)
-    if (element.innerText) {
-        range.setStart(element.childNodes[0], caretPosition)
-        range.setEnd(element.childNodes[0], caretPosition)
-    }
-    selection.removeAllRanges()
-    selection.addRange(range)
-    element.focus()
+    sel.removeAllRanges()
+    sel.addRange(range)
+    // const range = document.createRange()
+    // const selection = window.getSelection()
+    // range.selectNodeContents(element)
+    // range.collapse(true)
+    // if (element.innerText) {
+    //     range.setStart(element.childNodes[0], caretPosition)
+    //     range.setEnd(element.childNodes[0], caretPosition)
+    // }
+    // selection.removeAllRanges()
+    // selection.addRange(range)
+    // element.focus()
 }
 
 export const setCaretToStart = (element: HTMLElement) => {
