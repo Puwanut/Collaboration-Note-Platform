@@ -2,7 +2,7 @@ import { useRef, useEffect, KeyboardEvent, useState } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretStart, setCaretToPosition } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
-import { encode, decode } from "html-entities"
+import { escapeUTF8 , decodeHTML } from "entities"
 
 const typeMapTag = {
     "text": "div",
@@ -15,7 +15,7 @@ const typeMapTag = {
 const titleConcatenate = (titleArray: string[][]) => {
     const text = titleArray.map((textArray) => {
         const textType = textArray?.[1]
-        const textContent = encode(textArray[0])
+        const textContent = escapeUTF8(textArray[0]).replace(/&apos;/g, "'").replace(/&quot;/g, '"')
         if (textType) {
             return `<${textType}>${textContent}</${textType}>`
         }
@@ -25,7 +25,6 @@ const titleConcatenate = (titleArray: string[][]) => {
 }
 
 const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, setKey }) => {
-    // const contentRef = useRef(content)
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
@@ -41,7 +40,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 currentTag = tagname
             },
             ontext: (text) => {
-                newTitleArray.push(!currentTag ? [decode(text)] : [decode(text), currentTag])
+                newTitleArray.push(!currentTag ? [decodeHTML(text)] : [decodeHTML(text), currentTag])
             },
             onclosetag: () => {
                 currentTag = ""
@@ -51,7 +50,6 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         parser.end()
         setTitleArray(newTitleArray) // to update current title properties
         setTitle(e.target.value) // to update text in contentEditable (for same caret position)
-
     }
 
     const onClickHandler = () => {
@@ -109,14 +107,19 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 }
                 break
             }
+            default: {
+                break
+            }
         }
     }
 
-
+    // update when Parent rerenders
     useEffect(() => {
+        setTitleArray(block.properties.title)
         setTitle(titleConcatenate(block.properties.title))
         // setTag(typeMapTag[block.type])
     }, [block.properties.title])
+
 
     // update when onChangeHandler is called
     useEffect(() => {

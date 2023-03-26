@@ -15,7 +15,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "html-entities": "^2.3.3",
+    "entities": "^4.4.0",
     "htmlparser2": "^8.0.2",
     "next": "12.2.2",
     "react": "18.2.0",

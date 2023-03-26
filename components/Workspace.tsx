@@ -7,6 +7,7 @@ import Topbar from "./Topbar"
 import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
 import { getCaretStart, setCaretToEnd, setCaretToPosition } from "../lib/setCaret"
+import Head from "next/head"
 
 
 interface IEditableBlock {
@@ -25,25 +26,25 @@ interface ICurrentBlock {
   contentEditableRef: HTMLElement
 }
 
-const initialBlock: IEditableBlock = {
-  id: uuidv4(),
-  type: "text",
-  properties: {
-    title: [["<b>normal</b>"], ["testbold", "b"], ["testitalic", "i"]]
-  },
-  children: [],
-  parent: null
-}
-
 // const initialBlock: IEditableBlock = {
 //   id: uuidv4(),
 //   type: "text",
 //   properties: {
-//     title: []//[["normal"], ["testbold", "b"], ["testitalic", "i"]]
+//     title: [["<scrit>bold</scrit>"], ["testbold", "b"], ["testitalic", "i"]]
 //   },
 //   children: [],
 //   parent: null
 // }
+
+const initialBlock: IEditableBlock = {
+  id: uuidv4(),
+  type: "text",
+  properties: {
+    title: []
+  },
+  children: [],
+  parent: null
+}
 
 // titleSlice function
 // input
@@ -129,6 +130,7 @@ const Workspace = () => {
       })
       return updatedBlocks
     })
+    console.log("[WORKSPACE] UPDATE BLOCKS")
   }
 
   const addBlockHandler = (currentBlock: ICurrentBlock) => {
@@ -209,8 +211,16 @@ const Workspace = () => {
     }
   }, [blocks.length])
 
+  useEffect(() => {
+    console.log("[WORKSPACE] blocks", blocks[0].properties.title)
+  }, [blocks])
+
   return (
     <div className={`flex-1`}>
+      <Head>
+        <title>Notion Clone</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Topbar />
       <div className={`mt-12 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
                 ${isTop ? "overscroll-auto" : "overscroll-none"}`}
