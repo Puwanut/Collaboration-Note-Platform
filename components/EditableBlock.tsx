@@ -1,6 +1,6 @@
 import { useRef, useEffect, KeyboardEvent, useState } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
-import { getCaretStart, setCaretToPosition } from "../lib/setCaret"
+import { getCaretStart, isCaretOnBottom, isCaretOnTop, setCaretToPosition } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
 import { decodeHTML } from "entities"
 import { faGripVertical, faPlus } from "@fortawesome/free-solid-svg-icons"
@@ -27,7 +27,7 @@ const typeMapTag = {
 //     return text.join("")
 // }
 
-const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, dataPosition }) => {
+const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, dataPosition, setKey }) => {
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
@@ -61,20 +61,32 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     }
 
     const onKeyDownHandler = (e: KeyboardEvent) => {
+        setKey(e)
         switch (e.key) {
+            case "ArrowLeft": {
+                break
+            }
+            case "ArrowRight": {
+                // e.preventDefault()
+                break
+            }
             case "ArrowUp": {
-                e.preventDefault()
-                const previousBlock = contentEditableRef.current.previousElementSibling as HTMLElement
-                if (previousBlock) {
-                    setCaretToPosition(previousBlock, Math.min(e.target.textContent.length, previousBlock.textContent.length))
+                if (isCaretOnTop()) {
+                    e.preventDefault()
+                    const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`)
+                    if (previousBlock) {
+                        setCaretToPosition(previousBlock, Math.min(e.target.textContent.length, previousBlock.textContent.length))
+                    }
                 }
                 break
             }
             case "ArrowDown": {
-                e.preventDefault()
-                const nextBlock = contentEditableRef.current.nextElementSibling as HTMLElement
-                if (nextBlock) {
-                    setCaretToPosition(nextBlock, Math.min(e.target.textContent.length, nextBlock.textContent.length))
+                if (isCaretOnBottom()) {
+                    e.preventDefault()
+                    const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`)
+                    if (nextBlock) {
+                        setCaretToPosition(nextBlock, Math.min(e.target.textContent.length, nextBlock.textContent.length))
+                    }
                 }
                 break
             }
@@ -116,30 +128,34 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         }
     }
 
-    // update when Parent rerenders
+    // update when block is changed
     useEffect(() => {
         console.log("USEEFFECT: Set Title",  `[${dataPosition}]`,block.id)
         setTitle(titleConcatenate(block.properties.title))
+        setTitleArray(block.properties.title)
         // setTag(typeMapTag[block.type])
     }, [block.properties.title])
 
 
     // update blocks in parent
     useEffect(() => {
-        console.log("USEEFFECT 2: Update block.properties.title on titleArray change")
-        updatePage({
-            ...block,
-            type: "text",
-            properties: {
-                ...block.properties,
-                title: titleArray
-            }
-        })
+        console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
+        if (block.properties.title !== titleArray) {
+            updatePage({
+                ...block,
+                type: "text",
+                properties: {
+                    ...block.properties,
+                    title: titleArray
+                }
+            })
+
+        }
     }, [titleArray])
 
     return (
-      <div className="group flex mb-1">
-        <div className="mr-2 space-x-1 text-neutral-400 opacity-0 duration-150 focus:outline-none group-hover:opacity-100">
+      <div className="group flex mb-1 w-full">
+        <div className="flex mr-2 space-x-1 text-neutral-400 opacity-0 duration-150 focus:outline-none group-hover:opacity-100">
           <FontAwesomeIcon
             icon={faPlus}
             className="p-1.5 duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
@@ -147,11 +163,12 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
           <FontAwesomeIcon
             icon={faGripVertical}
             className="handle p-1.5 duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+            onClick={() => console.log("showmenu")}
           />
         </div>
         <ContentEditable
           key={dataPosition} // to rerender when dataPosition changes
-          className="flex-1 p-1 overflow-hidden whitespace-pre-wrap bg-slate-100 outline-none"
+          className="w-full p-1 whitespace-pre-wrap bg-slate-100 outline-none break-words"
           innerRef={contentEditableRef} // forwards the ref to the DOM node
           html={title}
           tagName={tag}

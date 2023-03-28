@@ -4,7 +4,7 @@ import Topbar from "./Topbar"
 // import CommandsOverlay from "./CommandsOverlay"/
 import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
-import { getCaretStart, setCaretToEnd, setCaretToPosition, setCaretToStart } from "../lib/setCaret"
+import { getCaretStart, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import Head from "next/head"
 import usePrevious from "../hooks/usePrevious"
 
@@ -77,7 +77,8 @@ const titleSlice = (titleArray: string[][], start: number, end?: number) => {
   for (let index = 0; index < titleArray.length; index++) {
     const textArray = titleArray[index] // ['456']
     const textLength = textArray[0].length
-    if (currentLength + textLength >= start && end === undefined) { // 3 >= 10
+    // Slice title for new block
+    if (currentLength + textLength > start && end === undefined) { // 3 >= 10
       const format = textArray?.[1]
       if (format) {
         titleUpdatedArray[index] = [textArray[0].substring(start - currentLength), format]
@@ -85,7 +86,9 @@ const titleSlice = (titleArray: string[][], start: number, end?: number) => {
         titleUpdatedArray[index] = [textArray[0].substring(start - currentLength)]
       }
       return titleUpdatedArray.slice(index)
-    } else if (currentLength + textLength >= end && end !== undefined) {
+    }
+    // Slice title for current block
+    else if (currentLength + textLength >= end && end !== undefined) {
       const format = textArray?.[1]
       if (format) {
         titleUpdatedArray[index] = [textArray[0].substring(0, end - currentLength), format]
@@ -107,7 +110,7 @@ const Workspace = () => {
   // const [showCommands, setShowCommands] = useState(false)
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
   // const currentSelectedBlock = useRef<HTMLElement>(null) // useRef for unnessary re-render
-  // const [key, setKey] = useState<KeyboardEvent>(null)
+  const [key, setKey] = useState<KeyboardEvent>(null)
   const [previousBlocks, titlesLength] = usePrevious(blocks)
 
   // const handleEdit = (e: FormEvent) => {
@@ -129,15 +132,7 @@ const Workspace = () => {
       const updatedBlocks = prevState.map(block => {
         if (block.id === updatedBlock.id) {
           return updatedBlock
-          // return {
-          //   ...block,
-          //   properties: {
-          //     title: updatedBlock.properties.title,
-          //   },
-          //   type: updatedBlock.type
-          // }
-        }
-        else {
+        } else {
           return block
         }
       })
@@ -217,33 +212,36 @@ const Workspace = () => {
 
   // Handle Caret Position
   useEffect(() => {
+    console.log("[CURRENT]", currentSelectedBlock)
     console.log(previousBlocks, previousBlocks?.length, blocks?.length)
     const currentBlockPosition = currentSelectedBlock?.getAttribute("data-position")
     // when user press enter, focus to next block
     if (previousBlocks && previousBlocks.length + 1 === blocks.length) {
-      console.log("currentBlockPos", currentBlockPosition)
       const nextBlock = document.querySelector(`[data-position="${parseInt(currentBlockPosition) + 1}"]`) as HTMLElement
       if (nextBlock) {
         setCurrentSelectedBlock(nextBlock)
-        // currentSelectedBlock.current = nextBlock
         setCaretToStart(nextBlock)
-        // setCurrentSelectedBlock(nextBlock)
       }
     }
     else if (previousBlocks && previousBlocks.length - 1 === blocks.length){
-      const previousBlockIndex = parseInt(currentBlockPosition) - 1
-      const previousBlock = document.querySelector(`[data-position="${previousBlockIndex}"]`) as HTMLElement
-      if (previousBlock) {
-        setCurrentSelectedBlock(previousBlock)
-        if (titlesLength[previousBlockIndex] === 0) {
+      if (key?.key === "Backspace") {
+        const previousBlockIndex = parseInt(currentBlockPosition) - 1
+        const previousBlock = document.querySelector(`[data-position="${previousBlockIndex}"]`) as HTMLElement
+        if (previousBlock) {
+          console.log("[PREV]", previousBlock, titlesLength)
+          setCurrentSelectedBlock(previousBlock)
+          // if (titlesLength[previousBlockIndex] === 0) {
           setCaretToEnd(previousBlock)
-        } else {
-          setCaretToPosition(previousBlock, titlesLength[previousBlockIndex])
+          // }
+          // else {
+          //   setSelectionRange(previousBlock, titlesLength[previousBlockIndex], titlesLength[previousBlockIndex])
+          // }
         }
       }
     }
 
-  }, [blocks])
+  }, [blocks, previousBlocks])
+
 
   return (
     <div className={`flex-1`}>
@@ -298,6 +296,7 @@ const Workspace = () => {
                   deleteBlock={deleteBlockHandler}
                   setCurrentSelectedBlock={setCurrentSelectedBlock}
                   dataPosition={index}
+                  setKey={setKey}
                 />
               )})}
             </ReactSortable>
