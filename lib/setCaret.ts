@@ -38,29 +38,29 @@ export const setCaretToStart = (element: HTMLElement) => {
     element.focus()
 }
 
-export const setCaretToaPosition = (element: HTMLElement, caretPosition: number) => {
-    const selection = document.getSelection()
-    // const range = document.createRange()
-    selection.collapse(element, 0)
-    console.log(caretPosition)
-    for (let i = 0; i < caretPosition; i++) {
-        selection.modify("move", "forward", "character")
-    }
+// export const setCaretToaPosition = (element: HTMLElement, caretPosition: number) => {
+//     const selection = document.getSelection()
+//     // const range = document.createRange()
+//     selection.collapse(element, 0)
+//     console.log(caretPosition)
+//     for (let i = 0; i < caretPosition; i++) {
+//         selection.modify("move", "forward", "character")
+//     }
 
-    // const sel = window.getSelection()
-    // const range = document.createRange()
-    // // loop through all child nodes and add their lengths to the total
-    // let totalLength = 0
-    // for (let i = 0; i < element.childNodes.length - 1; i++) {
-    //     totalLength += element.childNodes[i].textContent.length
-    // }
-    // console.log(totalLength, caretPosition - totalLength, element.childNodes.length, element.childNodes)
-    // range.setStart(element.childNodes[element.childNodes.length - 1], caretPosition - totalLength)
-    // range.collapse(true)
-    // sel.removeAllRanges()
-    // sel.addRange(range)
-    // element.focus()
-}
+//     // const sel = window.getSelection()
+//     // const range = document.createRange()
+//     // // loop through all child nodes and add their lengths to the total
+//     // let totalLength = 0
+//     // for (let i = 0; i < element.childNodes.length - 1; i++) {
+//     //     totalLength += element.childNodes[i].textContent.length
+//     // }
+//     // console.log(totalLength, caretPosition - totalLength, element.childNodes.length, element.childNodes)
+//     // range.setStart(element.childNodes[element.childNodes.length - 1], caretPosition - totalLength)
+//     // range.collapse(true)
+//     // sel.removeAllRanges()
+//     // sel.addRange(range)
+//     // element.focus()
+// }
 
 
 // export const setCaretToPosition = (element: HTMLElement, caretPosition: number) => {
