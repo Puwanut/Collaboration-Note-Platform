@@ -4,11 +4,12 @@ import Topbar from "./Topbar"
 // import CommandsOverlay from "./CommandsOverlay"/
 import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
-import { getCaretStart, setCaretToPosition } from "../lib/setCaret"
+import { getCaretStart, setCaretToEnd, setCaretToPosition, setCaretToStart } from "../lib/setCaret"
 import Head from "next/head"
+import usePrevious from "../hooks/usePrevious"
 
 
-interface IEditableBlock {
+export interface IEditableBlock {
   id: string
   type: string
   properties: {
@@ -28,7 +29,7 @@ const initialBlock: IEditableBlock = {
   id: uuidv4(),
   type: "text",
   properties: {
-    title: [["<scrit>bold</scrit>"], ["testbold", "b"], ["testitalic", "i"]]
+    title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic", "i"]]
   },
   children: [],
   parent: null
@@ -38,7 +39,7 @@ const initialBlock2: IEditableBlock = {
   id: uuidv4(),
   type: "text",
   properties: {
-    title: [[""], ["testbold", "b"], ["testitalic", "i"]]
+    title: [["stronger", "b"], ["aeeng", "i"]]
   },
   children: [],
   parent: null
@@ -104,8 +105,10 @@ const Workspace = () => {
   // const [commandText, setCommandText] = useState<string>("")
   const [blocks, setBlocks] = useState<IEditableBlock[]>([initialBlock, initialBlock2])
   // const [showCommands, setShowCommands] = useState(false)
-  const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>()
-  const [key, setKey] = useState<KeyboardEvent>()
+  const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
+  // const currentSelectedBlock = useRef<HTMLElement>(null) // useRef for unnessary re-render
+  // const [key, setKey] = useState<KeyboardEvent>(null)
+  const [previousBlocks, titlesLength] = usePrevious(blocks)
 
   // const handleEdit = (e: FormEvent) => {
   //   const target = e.target as HTMLInputElement
@@ -121,16 +124,18 @@ const Workspace = () => {
 
   // Send update function to EditableBlock
   const updatePageHandler = (updatedBlock: IEditableBlock) => {
+
     setBlocks(prevState => {
       const updatedBlocks = prevState.map(block => {
         if (block.id === updatedBlock.id) {
-          return {
-            ...block,
-            properties: {
-              title: updatedBlock.properties.title,
-            },
-            type: updatedBlock.type
-          }
+          return updatedBlock
+          // return {
+          //   ...block,
+          //   properties: {
+          //     title: updatedBlock.properties.title,
+          //   },
+          //   type: updatedBlock.type
+          // }
         }
         else {
           return block
@@ -138,13 +143,12 @@ const Workspace = () => {
       })
       return updatedBlocks
     })
-    console.log("[WORKSPACE] UPDATE BLOCKS")
+    // console.log("[WORKSPACE] UPDATE BLOCKS")
   }
 
   const addBlockHandler = (currentBlock: ICurrentBlock) => {
     console.log("++++++++ ADDBLOCK ++++++++")
     const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
-    console.log(currentCaretPosition)
     const currentBlockIndex = blocks.findIndex((block) => block.id === currentBlock.id)
     setBlocks(prevState => {
       const newBlock = {
@@ -169,17 +173,18 @@ const Workspace = () => {
         ...prevState.slice(currentBlockIndex + 1)
       ]
     })
-    // for set focus to new block
     setCurrentSelectedBlock(currentBlock.contentEditableRef)
+    // currentSelectedBlock.current = currentBlock.contentEditableRef
+    // for set focus to new block
   }
 
   const deleteBlockHandler = (currentBlock: ICurrentBlock, key: string) => {
     console.log("-------- DELETE BLOCK --------")
-    const previousBlock = currentBlock.contentEditableRef.previousElementSibling as HTMLElement
-    const nextBlock = currentBlock.contentEditableRef.nextElementSibling as HTMLElement
     const currentBlockIndex = blocks.findIndex((b) => b.id === currentBlock.id)
-    const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
-    if (key === "Backspace" && blocks.length > 1) { // delete current block and bring text to previous block
+    // const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
+    const previousBlock = document.querySelector(`[data-position="${currentBlockIndex - 1}"]`) as HTMLElement
+    const nextBlock = document.querySelector(`[data-position="${currentBlockIndex + 1}"]`) as HTMLElement
+    if (key === "Backspace" && previousBlock) { // delete current block and bring text to previous block
       setBlocks(prevState => {
         const updatedPreviousBlock = {
           ...prevState[currentBlockIndex - 1],
@@ -193,7 +198,7 @@ const Workspace = () => {
           ...prevState.slice(currentBlockIndex + 1),
         ]
       })
-    } else if (key === "Delete" && blocks.length > 1) { // delete next block and bring text to current block
+    } else if (key === "Delete" && nextBlock) { // delete next block and bring text to current block
       setBlocks(prevState => {
         const currentUpdatedBlock = {
           ...prevState[currentBlockIndex],
@@ -207,29 +212,43 @@ const Workspace = () => {
           ...prevState.slice(currentBlockIndex + 2)
         ]
       })
-      setCaretToPosition(currentBlock.contentEditableRef, currentCaretPosition)
     }
-
   }
 
+  // Handle Caret Position
   useEffect(() => {
-    const currentBlock = currentSelectedBlock?.getAttribute("data-position")
+    console.log(previousBlocks, previousBlocks?.length, blocks?.length)
+    const currentBlockPosition = currentSelectedBlock?.getAttribute("data-position")
     // when user press enter, focus to next block
-    if (key?.key === "Enter" && !key.shiftKey) {
-      const nextBlock = document.querySelector(`[data-position="${parseInt(currentBlock) + 1}"]`) as HTMLElement
+    if (previousBlocks && previousBlocks.length + 1 === blocks.length) {
+      console.log("currentBlockPos", currentBlockPosition)
+      const nextBlock = document.querySelector(`[data-position="${parseInt(currentBlockPosition) + 1}"]`) as HTMLElement
       if (nextBlock) {
-        setCaretToPosition(nextBlock, 0)
+        setCurrentSelectedBlock(nextBlock)
+        // currentSelectedBlock.current = nextBlock
+        setCaretToStart(nextBlock)
+        // setCurrentSelectedBlock(nextBlock)
       }
     }
-    // } else if (key?.key === "Backspace" ) {
-    //   const previousBlock = document.querySelector(`[data-position="${parseInt(currentBlock) - 1}"]`) as HTMLElement
+    else if (previousBlocks && previousBlocks.length - 1 === blocks.length){
+      const previousBlockIndex = parseInt(currentBlockPosition) - 1
+      const previousBlock = document.querySelector(`[data-position="${previousBlockIndex}"]`) as HTMLElement
+      if (previousBlock) {
+        setCurrentSelectedBlock(previousBlock)
+        if (titlesLength[previousBlockIndex] === 0) {
+          setCaretToEnd(previousBlock)
+        } else {
+          setCaretToPosition(previousBlock, titlesLength[previousBlockIndex])
+        }
+      }
+    }
 
   }, [blocks])
 
   return (
     <div className={`flex-1`}>
       <Head>
-        <title>Notion Clone</title>
+        <title>Notion Clone By Puwanut</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Topbar />
@@ -265,21 +284,22 @@ const Workspace = () => {
               handle=".handle"
               ghostClass="drop-indicator"
               fallbackTolerance={10}
+              id="SortableList"
               // onEnd={handleDragEnd}
             >
-              {blocks.map((block, index) => (
+              {blocks.map((block, index) => {
+                return (
                 // {showCommands && <CommandsOverlay text={commandText} />}
                 <EditableBlock
-                  key={index}
+                  key={block.id}
                   block={block}
                   updatePage={updatePageHandler}
                   addNextBlock={addBlockHandler}
                   deleteBlock={deleteBlockHandler}
                   setCurrentSelectedBlock={setCurrentSelectedBlock}
-                  setKey={setKey}
                   dataPosition={index}
                 />
-              ))}
+              )})}
             </ReactSortable>
           </div>
 
