@@ -156,30 +156,77 @@ export const getCaretInfo = (): Record<string, number> => {
     // Get Caret Coordinates
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
-    const rect = range.getBoundingClientRect()
+    const { caretTop, caretLeft } = getCaretCoordinates()
 
     // Get Nearest Parent Element (ancestor)
-    let parentElement = range.commonAncestorContainer.parentElement as HTMLElement
+    let parentNode = range.commonAncestorContainer
 
-    // find next ancestor until found contenteditable element (which has data-position attribute)
-    while (parentElement.attributes.getNamedItem('data-position') === null) {
-        parentElement = parentElement.parentElement
+    // Find Parent Element which has data-position attribute
+    let contentEditableElement: HTMLElement
+    if (parentNode.nodeType !== 3) {
+      // 3 is Text Nodetype (true if caret on start or end of line which occurs when movecaret <- -> to other block)
+      console.log("NodeType !== text")
+      contentEditableElement = parentNode.parentElement.lastElementChild as HTMLElement
+    } else {
+      console.log("NodeType === text")
+      // find next ancestor until found contenteditable element (which has data-position attribute)
+      contentEditableElement = parentNode.parentElement as HTMLElement
+      while (!contentEditableElement.hasAttribute("data-position")) {
+          contentEditableElement = contentEditableElement.parentElement
+      }
     }
 
-    // Get Parent Element Coordinates
-    const parentRect = parentElement.getBoundingClientRect()
-
-    // Get Parent Element Height
-    const parentOffsetHeight = parentElement.offsetHeight
+     // Get Parent Element Height
+    const parentOffsetHeight = contentEditableElement.offsetHeight
 
     // Get Caret Position inside Parent Element (offset from top)
-    const caretOffsetTop = rect.top - parentRect.top
+    const caretOffsetTop = caretTop - contentEditableElement.offsetTop
 
-    // Get Line Height of text in Parent Element
-    const lineHeight = parseInt(window.getComputedStyle(parentElement).getPropertyValue("line-height").slice(0, -2))
+    // Get Line Height of text in Parent Element (slice(0, -2) to remove "px")
+    const lineHeight = parseInt(window.getComputedStyle(contentEditableElement).getPropertyValue("line-height").slice(0, -2))
 
-    return { caretOffsetTop, lineHeight, parentOffsetHeight }
+    console.log("caretOffsetTop", caretOffsetTop)
+    console.log("lineHeight", lineHeight)
+    console.log("parentOffsetHeight", parentOffsetHeight)
+    console.log("caret", caretLeft, caretTop)
+    return { caretOffsetTop, lineHeight, parentOffsetHeight, caretTop, caretLeft }
 
+}
+
+export const getCaretCoordinates = (caretStart?: number): Record<string, number> => {
+    const selection = document.getSelection()
+    const range = selection.getRangeAt(0)
+    console.log(range)
+    const parentNode = range.commonAncestorContainer
+
+    // handle caret at start or end of line
+    if (parentNode.nodeType !== 3) { // if parent node is not text node, use contenteditable as a caret coordinates
+      let contentEditableElement = parentNode.parentElement.lastElementChild as HTMLElement
+      let caretTop, caretLeft: number
+
+      let caretAtEnd = false
+      console.log("caretStart", caretStart)
+      console.log("contentEditableElement.innerText.length", contentEditableElement.innerText.length)
+      if (caretStart && contentEditableElement.innerText.length === caretStart) {
+        caretAtEnd = true
+      }
+      // if caret at end of line, use last child element as a caret coordinates
+      // else caret at start of line, use first child element as a caret coordinates
+      if (caretAtEnd) {
+        contentEditableElement = contentEditableElement.lastElementChild as HTMLElement
+        console.dir(contentEditableElement)
+        caretTop = contentEditableElement.offsetTop
+        caretLeft = contentEditableElement.offsetLeft + contentEditableElement.offsetWidth
+      } else {
+        caretTop = contentEditableElement.offsetTop + 5 // 5 is padding of contenteditable element
+        caretLeft = contentEditableElement.offsetLeft + 5
+      }
+      return { caretLeft, caretTop }
+    }
+    else { // if parent node is text node, use range as a caret coordinates
+      const rect = range.getBoundingClientRect()
+      return { caretLeft: rect.left, caretTop: rect.top }
+    }
 }
 
 export const isCaretOnTop = (): boolean => {
@@ -192,8 +239,15 @@ export const isCaretOnBottom = (): boolean => {
     return 2 * lineHeight + caretOffsetTop > parentOffsetHeight
 }
 
+export const moveCaret = (x, y) => {
+  let sel = window.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(document.caretRangeFromPoint(x, y))
+}
+
+
 // export function getCaretCoordinates() {
-//   var sel = window.getSelection();
+//   var sel = window.getSelection()
 //   if (sel.rangeCount) {
 //     var range = sel.getRangeAt(0);
 //     var caretRange = range.cloneRange();

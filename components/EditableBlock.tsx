@@ -1,6 +1,6 @@
 import { useRef, useEffect, KeyboardEvent, useState } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
-import { getCaretStart, isCaretOnBottom, isCaretOnTop, setCaretToPosition } from "../lib/setCaret"
+import { getCaretCoordinates, getCaretStart, isCaretOnBottom, isCaretOnTop, moveCaret, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
 import { decodeHTML } from "entities"
 import { faGripVertical, faPlus } from "@fortawesome/free-solid-svg-icons"
@@ -64,28 +64,56 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         setKey(e)
         switch (e.key) {
             case "ArrowLeft": {
+                // if caret is at start of block, move caret to end of previous block
+                // else do default behaviour
+                if (getCaretStart(contentEditableRef.current) === 0) {
+                    e.preventDefault()
+                    const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
+                    if (previousBlock) {
+                        setCaretToEnd(previousBlock)
+                        console.log("[Move to end]")
+                    }
+                }
                 break
             }
             case "ArrowRight": {
-                // e.preventDefault()
+                // if caret is at end of block, move caret to start of next block
+                // else do default behaviour
+                if (getCaretStart(contentEditableRef.current) === e.target.textContent.length) {
+                    e.preventDefault()
+                    const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
+                    if (nextBlock) {
+                        setCaretToStart(nextBlock)
+                        console.log("[Move to start]")
+                    }
+                }
                 break
             }
             case "ArrowUp": {
+                // if caret is on top of block, move caret to last line of previous block
+                // else do default behaviour
                 if (isCaretOnTop()) {
                     e.preventDefault()
-                    const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`)
+                    const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
                     if (previousBlock) {
-                        setCaretToPosition(previousBlock, Math.min(e.target.textContent.length, previousBlock.textContent.length))
+                        const { caretLeft } = getCaretCoordinates()
+                        const lastLinePreviousBlockOffsetTop = previousBlock.offsetTop + previousBlock.offsetHeight - parseInt(window.getComputedStyle(previousBlock).getPropertyValue("line-height"))
+                        moveCaret(caretLeft, lastLinePreviousBlockOffsetTop)
+                        console.log("[Move to]", caretLeft, lastLinePreviousBlockOffsetTop)
                     }
                 }
                 break
             }
             case "ArrowDown": {
+                // if caret is on bottom of block, move caret to first line of next block
+                // else do default behaviour
                 if (isCaretOnBottom()) {
                     e.preventDefault()
-                    const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`)
+                    const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
                     if (nextBlock) {
-                        setCaretToPosition(nextBlock, Math.min(e.target.textContent.length, nextBlock.textContent.length))
+                        const { caretLeft } = getCaretCoordinates(getCaretStart(contentEditableRef.current)) // true to get Caret coordinates from last text node
+                        moveCaret(caretLeft, nextBlock.offsetTop)
+                        console.log("[Move to]", caretLeft, nextBlock.offsetTop)
                     }
                 }
                 break
@@ -154,7 +182,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     }, [titleArray])
 
     return (
-      <div className="group flex mb-1 w-full">
+      <div className="group flex mb-1 w-full" data-block-id={block.id}>
         <div className="flex mr-2 space-x-1 text-neutral-400 opacity-0 duration-150 focus:outline-none group-hover:opacity-100">
           <FontAwesomeIcon
             icon={faPlus}

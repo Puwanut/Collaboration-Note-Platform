@@ -25,25 +25,7 @@ interface ICurrentBlock {
   contentEditableRef: HTMLElement
 }
 
-const initialBlock: IEditableBlock = {
-  id: uuidv4(),
-  type: "text",
-  properties: {
-    title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic", "i"]]
-  },
-  children: [],
-  parent: null
-}
 
-const initialBlock2: IEditableBlock = {
-  id: uuidv4(),
-  type: "text",
-  properties: {
-    title: [["stronger", "b"], ["aeeng", "i"]]
-  },
-  children: [],
-  parent: null
-}
 
 // const initialBlock: IEditableBlock = {
 //   id: uuidv4(),
@@ -106,7 +88,7 @@ const Workspace = () => {
   // const [markdown, setMarkdown] = useState<any>("")
   const [isTop, setIsTop] = useState<boolean>(true)
   // const [commandText, setCommandText] = useState<string>("")
-  const [blocks, setBlocks] = useState<IEditableBlock[]>([initialBlock, initialBlock2])
+  const [blocks, setBlocks] = useState<IEditableBlock[]>([])
   // const [showCommands, setShowCommands] = useState(false)
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
   // const currentSelectedBlock = useRef<HTMLElement>(null) // useRef for unnessary re-render
@@ -241,6 +223,30 @@ const Workspace = () => {
     }
 
   }, [blocks, previousBlocks])
+
+  // Mockup initial blocks
+  useEffect(() => {
+    const initialBlock: IEditableBlock = {
+      id: uuidv4(),
+      type: "text",
+      properties: {
+        title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic", "i"]]
+      },
+      children: [],
+      parent: null
+    }
+
+    const initialBlock2: IEditableBlock = {
+      id: uuidv4(),
+      type: "text",
+      properties: {
+        title: [["stronger", "b"], ["aeeng", "i"]]
+      },
+      children: [],
+      parent: null
+    }
+    setBlocks([initialBlock, initialBlock2])
+  }, [])
 
 
   return (
