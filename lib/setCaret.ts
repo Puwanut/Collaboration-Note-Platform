@@ -5,24 +5,47 @@ export const getCaretStart = (element: HTMLElement) => {
     const win = doc.defaultView
     let sel
     if (typeof win.getSelection != "undefined") {
-        sel = win.getSelection()
-        if (sel.rangeCount > 0) {
-            const range = win.getSelection().getRangeAt(0)
-            const preCaretRange = range.cloneRange()
-            preCaretRange.selectNodeContents(element)
-            preCaretRange.setEnd(range.endContainer, range.endOffset)
-            caretOffset = preCaretRange.toString().length
-        }
+      sel = win.getSelection()
+      if (sel.rangeCount > 0) {
+        const range = win.getSelection().getRangeAt(0)
+        const preCaretRange = range.cloneRange()
+        preCaretRange.selectNodeContents(element)
+        preCaretRange.setEnd(range.endContainer, range.endOffset)
+        caretOffset = preCaretRange.toString().length
+      }
     }
     return caretOffset
 }
 
+
 // set Caret to end of previous block
+// export const setCaretToEnd = (element: HTMLElement) => {
+//     const range = document.createRange()
+//     const selection = window.getSelection()
+//     range.selectNodeContents(element)
+//     range.collapse(false)
+//     selection.removeAllRanges()
+//     selection.addRange(range)
+//     element.focus()
+// }
+
 export const setCaretToEnd = (element: HTMLElement) => {
+    // /*
+    // arg: element is contenteditable element
+    // in element will contain text node e.g. "Hello World" or <b>Bold</b> or <i>"line1" "line2"</i>
+    // this function will move caret to the end of "LAST" text node (last child of element)
+    // ENSURE That caret will be "INSIDE" of last child of element
+    // */
     const range = document.createRange()
     const selection = window.getSelection()
-    range.selectNodeContents(element)
-    range.collapse(false)
+    if (element.innerText) {
+      if (element.lastChild.nodeType === Node.TEXT_NODE) {
+        range.setStart(element.lastChild, element.lastChild.textContent.length)
+      } else {
+        range.setStart(element.lastElementChild.lastChild, element.lastElementChild.lastChild.textContent.length)
+      }
+    }
+    range.collapse(true)
     selection.removeAllRanges()
     selection.addRange(range)
     element.focus()
@@ -162,13 +185,11 @@ export const getCaretInfo = (): Record<string, number> => {
     let parentNode = range.commonAncestorContainer
 
     // Find Parent Element which has data-position attribute
-    let contentEditableElement: HTMLElement
-    if (parentNode.nodeType !== 3) {
+    let contentEditableElement: HTMLElement;
+    if (parentNode.nodeType !== Node.TEXT_NODE) {
       // 3 is Text Nodetype (true if caret on start or end of line which occurs when movecaret <- -> to other block)
-      console.log("NodeType !== text")
       contentEditableElement = parentNode.parentElement.lastElementChild as HTMLElement
     } else {
-      console.log("NodeType === text")
       // find next ancestor until found contenteditable element (which has data-position attribute)
       contentEditableElement = parentNode.parentElement as HTMLElement
       while (!contentEditableElement.hasAttribute("data-position")) {
@@ -185,48 +206,54 @@ export const getCaretInfo = (): Record<string, number> => {
     // Get Line Height of text in Parent Element (slice(0, -2) to remove "px")
     const lineHeight = parseInt(window.getComputedStyle(contentEditableElement).getPropertyValue("line-height").slice(0, -2))
 
-    console.log("caretOffsetTop", caretOffsetTop)
-    console.log("lineHeight", lineHeight)
-    console.log("parentOffsetHeight", parentOffsetHeight)
-    console.log("caret", caretLeft, caretTop)
     return { caretOffsetTop, lineHeight, parentOffsetHeight, caretTop, caretLeft }
 
 }
 
-export const getCaretCoordinates = (caretStart?: number): Record<string, number> => {
+export const getCaretCoordinates = (): Record<string, number> => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
-    console.log(range)
     const parentNode = range.commonAncestorContainer
-
-    // handle caret at start or end of line
-    if (parentNode.nodeType !== 3) { // if parent node is not text node, use contenteditable as a caret coordinates
-      let contentEditableElement = parentNode.parentElement.lastElementChild as HTMLElement
-      let caretTop, caretLeft: number
-
-      let caretAtEnd = false
-      console.log("caretStart", caretStart)
-      console.log("contentEditableElement.innerText.length", contentEditableElement.innerText.length)
-      if (caretStart && contentEditableElement.innerText.length === caretStart) {
-        caretAtEnd = true
-      }
-      // if caret at end of line, use last child element as a caret coordinates
-      // else caret at start of line, use first child element as a caret coordinates
-      if (caretAtEnd) {
-        contentEditableElement = contentEditableElement.lastElementChild as HTMLElement
-        console.dir(contentEditableElement)
-        caretTop = contentEditableElement.offsetTop
-        caretLeft = contentEditableElement.offsetLeft + contentEditableElement.offsetWidth
-      } else {
-        caretTop = contentEditableElement.offsetTop + 5 // 5 is padding of contenteditable element
-        caretLeft = contentEditableElement.offsetLeft + 5
-      }
+    if (parentNode.nodeType !== Node.TEXT_NODE) {
+      const contentEditableElement = parentNode.parentElement.lastElementChild as HTMLElement
+      const caretLeft = contentEditableElement.offsetLeft + 5
+      const caretTop = contentEditableElement.offsetTop + contentEditableElement.offsetHeight/2
       return { caretLeft, caretTop }
+    } else {
+      const rect = range.getClientRects()
+      const rectIndex = rect.length - 1
+      return { caretLeft: rect[rectIndex].left, caretTop: rect[rectIndex].top }
     }
-    else { // if parent node is text node, use range as a caret coordinates
-      const rect = range.getBoundingClientRect()
-      return { caretLeft: rect.left, caretTop: rect.top }
-    }
+
+    // // range.getBoundingClientRect() returns DOMRect which all values are 0 if caret on Non-Text Node
+    // // handle caret at start or end of line
+    // if (parentNode.nodeType !== Node.TEXT_NODE) { // if parent node is not text node, use contenteditable as a caret coordinates
+    //   let contentEditableElement = parentNode.parentElement.lastElementChild as HTMLElement
+    //   let caretAtEnd = false
+    //   if (caretStart !== null && contentEditableElement.innerText.length === caretStart) {
+    //     caretAtEnd = true
+    //   }
+    //   let caretTop, caretLeft: number
+    //   // if caret at end of line, use last child element as a caret coordinates
+    //   // else caret at start of line, use first child element as a caret coordinates
+    //   if (caretAtEnd) {
+    //     console.log("End of line")
+    //     const parentOfTextNode = contentEditableElement.lastElementChild as HTMLElement
+    //     const textnode = parentOfTextNode.lastChild as HTMLElement
+    //     caretTop = contentEditableElement.offsetTop
+    //     caretLeft = contentEditableElement.offsetLeft + contentEditableElement.offsetWidth
+    //   } else {
+    //     console.log("Start of line")
+    //     caretTop = contentEditableElement.offsetTop + 5
+    //     caretLeft = contentEditableElement.offsetLeft + 5
+    //   }
+    //   console.log("Caret in GetCaretCoordinates", caretLeft, caretTop)
+    //   return { caretLeft, caretTop }
+    // }
+    // else { // if parent node is text node, use range as a caret coordinates
+      // const rect = range.getBoundingClientRect()
+      // return { caretLeft: rect.left, caretTop: rect.top }
+    // }
 }
 
 export const isCaretOnTop = (): boolean => {

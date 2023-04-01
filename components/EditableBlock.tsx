@@ -33,10 +33,9 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const contentEditableRef = useRef<HTMLElement>(null)
     const [tag] = useState<string>(typeMapTag[block.type])
 
-    const onChangeHandler = (e: ContentEditableEvent) => {
+    const titleParser = (htmlString: string): string[][] => {
         const newTitleArray = []
         let currentTag = ""
-
         // parse html to array
         const parser = new htmlparser2.Parser({
             onopentag: (tagname) => {
@@ -49,16 +48,39 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 currentTag = ""
             }
         }, { decodeEntities: false }) // to prevent html entities from being decoded (e.g. &lt; to <)
-        parser.write(e.target.value)
+        parser.write(htmlString)
         parser.end()
-        setTitleArray(newTitleArray) // to update current title properties
-        setTitle(e.target.value) // to update text in contentEditable (for same caret position)
+        return newTitleArray
     }
+
+    const onChangeHandler = (e: ContentEditableEvent) => {
+        // prevent <br> from being added to contentEditable after deleting text until line is blank
+        // and ensure that line still present even if no any text in line
+        const newText = e.target.value.replace("<br>", "\n")
+
+        const newTitleArray = titleParser(newText)
+        setTitleArray(newTitleArray) // to update current title properties
+        setTitle(newText) // to update text in contentEditable (for same caret position)
+    }
+
+
 
     const onSelectHandler = () => {
         setCurrentSelectedBlock(contentEditableRef.current)
         // currentSelectedBlock.current = contentEditableRef.current
     }
+
+    const handleDeleteLineBreak = (e: KeyboardEvent) => {
+    const input = e.target as HTMLInputElement;
+      const countNewLine = input.innerText.match(/\n*$/g)[0].length;
+      if (input.innerText.endsWith("\n\n") && countNewLine === 2) {
+        e.preventDefault()
+        setTitleArray(titleParser(e.currentTarget.innerHTML.replace("\n\n", "")))
+        setTitle(e.currentTarget.innerHTML.replace("\n\n", ""))
+      }
+    }
+
+
 
     const onKeyDownHandler = (e: KeyboardEvent) => {
         setKey(e)
@@ -66,7 +88,8 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             case "ArrowLeft": {
                 // if caret is at start of block, move caret to end of previous block
                 // else do default behaviour
-                if (getCaretStart(contentEditableRef.current) === 0) {
+                const isCaretAtStart = getCaretStart(contentEditableRef.current) === 0
+                if (isCaretAtStart) {
                     e.preventDefault()
                     const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
                     if (previousBlock) {
@@ -79,6 +102,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             case "ArrowRight": {
                 // if caret is at end of block, move caret to start of next block
                 // else do default behaviour
+                console.log(e.currentTarget.textContent.length, getCaretStart(contentEditableRef.current))
                 if (getCaretStart(contentEditableRef.current) === e.target.textContent.length) {
                     e.preventDefault()
                     const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
@@ -93,6 +117,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 // if caret is on top of block, move caret to last line of previous block
                 // else do default behaviour
                 if (isCaretOnTop()) {
+                    console.log("Top")
                     e.preventDefault()
                     const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
                     if (previousBlock) {
@@ -108,10 +133,11 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 // if caret is on bottom of block, move caret to first line of next block
                 // else do default behaviour
                 if (isCaretOnBottom()) {
+                    console.log("Bottom")
                     e.preventDefault()
                     const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
                     if (nextBlock) {
-                        const { caretLeft } = getCaretCoordinates(getCaretStart(contentEditableRef.current)) // true to get Caret coordinates from last text node
+                        const { caretLeft } = getCaretCoordinates() // true to get Caret coordinates from last text node
                         moveCaret(caretLeft, nextBlock.offsetTop)
                         console.log("[Move to]", caretLeft, nextBlock.offsetTop)
                     }
@@ -129,6 +155,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 break
             }
             case "Backspace": {
+                handleDeleteLineBreak(e)
                 const textBeforeCaret = e.target.textContent.substring(0, getCaretStart(contentEditableRef.current))
                 if (!textBeforeCaret) {
                     e.preventDefault()
@@ -140,6 +167,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 break
             }
             case "Delete": {
+                handleDeleteLineBreak(e)
                 const endOfLine = getCaretStart(contentEditableRef.current) === e.target.textContent.length
                 if (endOfLine) {
                     e.preventDefault()
@@ -156,9 +184,10 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         }
     }
 
+
     // update when block is changed
     useEffect(() => {
-        console.log("USEEFFECT: Set Title",  `[${dataPosition}]`,block.id)
+        // console.log("USEEFFECT: Set Title",  `[${dataPosition}]`,block.id)
         setTitle(titleConcatenate(block.properties.title))
         setTitleArray(block.properties.title)
         // setTag(typeMapTag[block.type])
@@ -167,7 +196,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
 
     // update blocks in parent
     useEffect(() => {
-        console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
+        // console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
         if (block.properties.title !== titleArray) {
             updatePage({
                 ...block,

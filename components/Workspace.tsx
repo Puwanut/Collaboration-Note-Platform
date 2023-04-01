@@ -194,8 +194,8 @@ const Workspace = () => {
 
   // Handle Caret Position
   useEffect(() => {
-    console.log("[CURRENT]", currentSelectedBlock)
-    console.log(previousBlocks, previousBlocks?.length, blocks?.length)
+    // console.log("[CURRENT]", currentSelectedBlock)
+    // console.log(previousBlocks, previousBlocks?.length, blocks?.length)
     const currentBlockPosition = currentSelectedBlock?.getAttribute("data-position")
     // when user press enter, focus to next block
     if (previousBlocks && previousBlocks.length + 1 === blocks.length) {
@@ -230,7 +230,7 @@ const Workspace = () => {
       id: uuidv4(),
       type: "text",
       properties: {
-        title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic", "i"]]
+        title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic very long long long long long long long long text", "i"]]
       },
       children: [],
       parent: null
