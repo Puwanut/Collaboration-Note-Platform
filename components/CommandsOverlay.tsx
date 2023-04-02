@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { commands } from "./commands"
+import { basicBlocks } from "../shared/blockType"
 
 interface CommandsOverlayProps {
   text: string
@@ -9,11 +9,11 @@ const CommandsOverlay = ({ text }: CommandsOverlayProps) => {
   // activeIndex is the index of the command that is currently being hovered over
   const [activeIndex, setActiveIndex] = useState<Number>(0)
 
-  const filteredCommandsByName = commands.filter((command) =>
+  const filteredCommandsByName = basicBlocks.filter((command) =>
     command.name.toLowerCase().includes(text.replaceAll("/", ""))
   )
 
-  const filteredCommandsByKeywords = commands.filter((command) =>
+  const filteredCommandsByKeywords = basicBlocks.filter((command) =>
     command.keywords.some((keyword) =>
       keyword.toLowerCase().includes(text.replaceAll("/", ""))
     )

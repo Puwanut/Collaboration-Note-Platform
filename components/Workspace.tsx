@@ -228,9 +228,11 @@ const Workspace = () => {
   useEffect(() => {
     const initialBlock: IEditableBlock = {
       id: uuidv4(),
-      type: "text",
+      type: "Text",
       properties: {
-        title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic very long long long long long long long long text", "i"]]
+        title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic very long long long long long long long long text", "i"]
+        , ["testitalic very long long long long long long long long text", "i"]
+      ]
       },
       children: [],
       parent: null
@@ -238,7 +240,7 @@ const Workspace = () => {
 
     const initialBlock2: IEditableBlock = {
       id: uuidv4(),
-      type: "text",
+      type: "Text",
       properties: {
         title: [["stronger", "b"], ["aeeng", "i"]]
       },

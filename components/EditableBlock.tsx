@@ -6,14 +6,11 @@ import { decodeHTML } from "entities"
 import { faGripVertical, faPlus } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { titleConcatenate } from "../lib/titleConcatenate"
-
-const typeMapTag = {
-    "text": "div",
-    "h1": "h1",
-    "h2": "h2",
-    "h3": "h3",
-    "img": "img",
-}
+import { Tooltip } from "react-tooltip"
+import MenuOverlay from "./MenuOverlay"
+import { typeMapTag } from "../shared/blockType"
+import { getKeyByValue } from "../lib/getKeyByValue"
+import { useClickAway } from "react-use"
 
 // const titleConcatenate = (titleArray: string[][]) => {
 //     const text = titleArray.map((textArray) => {
@@ -31,7 +28,10 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
-    const [tag] = useState<string>(typeMapTag[block.type])
+    const [tag, setTag] = useState<string>(typeMapTag[block.type])
+
+    const [menuOpen, setMenuOpen] = useState<boolean>(false)
+    const menuRef = useRef<HTMLDivElement>(null)
 
     const titleParser = (htmlString: string): string[][] => {
         const newTitleArray = []
@@ -63,24 +63,20 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         setTitle(newText) // to update text in contentEditable (for same caret position)
     }
 
-
-
     const onSelectHandler = () => {
         setCurrentSelectedBlock(contentEditableRef.current)
         // currentSelectedBlock.current = contentEditableRef.current
     }
 
     const handleDeleteLineBreak = (e: KeyboardEvent) => {
-    const input = e.target as HTMLInputElement;
-      const countNewLine = input.innerText.match(/\n*$/g)[0].length;
-      if (input.innerText.endsWith("\n\n") && countNewLine === 2) {
-        e.preventDefault()
-        setTitleArray(titleParser(e.currentTarget.innerHTML.replace("\n\n", "")))
-        setTitle(e.currentTarget.innerHTML.replace("\n\n", ""))
-      }
+        const input = e.target as HTMLInputElement
+        const countNewLine = input.innerText.match(/\n*$/g)[0].length
+        if (input.innerText.endsWith("\n\n") && countNewLine === 2) {
+            e.preventDefault()
+            setTitleArray(titleParser(e.currentTarget.innerHTML.replace("\n\n", "")))
+            setTitle(e.currentTarget.innerHTML.replace("\n\n", ""))
+        }
     }
-
-
 
     const onKeyDownHandler = (e: KeyboardEvent) => {
         setKey(e)
@@ -184,7 +180,6 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         }
     }
 
-
     // update when block is changed
     useEffect(() => {
         // console.log("USEEFFECT: Set Title",  `[${dataPosition}]`,block.id)
@@ -196,36 +191,56 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
 
     // update blocks in parent
     useEffect(() => {
-        // console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
-        if (block.properties.title !== titleArray) {
-            updatePage({
-                ...block,
-                type: "text",
-                properties: {
-                    ...block.properties,
-                    title: titleArray
-                }
-            })
+        console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
+        updatePage({
+            ...block,
+            type: getKeyByValue(typeMapTag, tag),
+            properties: {
+                ...block.properties,
+                title: titleArray
+            }
+        })
+    }, [titleArray, tag])
 
-        }
-    }, [titleArray])
+    // Close menu when clicking outside
+    useClickAway(menuRef, () =>
+        setMenuOpen(false)
+    )
 
     return (
-      <div className="group flex mb-1 w-full" data-block-id={block.id}>
-        <div className="flex mr-2 space-x-1 text-neutral-400 opacity-0 duration-150 focus:outline-none group-hover:opacity-100">
+    <div className="relative" data-block-id={block.id} >
+      { menuOpen && <MenuOverlay activeBlockType={block.type} setTag={setTag} setMenuOpen={setMenuOpen} ref={menuRef}/> }
+      <div className="group/button mb-1 flex w-full" >
+        <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 outline-none group-hover/button:opacity-100">
           <FontAwesomeIcon
             icon={faPlus}
-            className="p-1.5 duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+            className="p-1.5 duration-150 hover:bg-slate-100 outline-none cursor-grab" // group-hover is active when the parent is hovered
+            data-tooltip-id="tooltip-add-block"
+            data-tooltip-delay-show={100}
           />
           <FontAwesomeIcon
             icon={faGripVertical}
-            className="handle p-1.5 duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
-            onClick={() => console.log("showmenu")}
-          />
+            className="handle p-1.5 duration-150 hover:bg-slate-100 outline-none cursor-grab" // group-hover is active when the parent is hovered
+            data-tooltip-id="tooltip-menu"
+            data-tooltip-delay-show={100}
+            onClick={() => setMenuOpen(prev => !prev)}
+            />
+          <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
+            <div className="text-neutral-400 font-bold text-xs text-center">
+                <span className="text-neutral-100">Click</span> to add a block
+            </div>
+          </Tooltip>
+          <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>
+            <div className="text-neutral-400 font-bold text-xs text-center">
+                <p><span className="text-neutral-100">Drag</span> to move</p>
+                <p><span className="text-neutral-100">Click</span> to open menu</p>
+            </div>
+          </Tooltip>
         </div>
+
         <ContentEditable
           key={dataPosition} // to rerender when dataPosition changes
-          className="w-full p-1 whitespace-pre-wrap bg-slate-100 outline-none break-words"
+          className="w-full whitespace-pre-wrap break-words bg-slate-100 p-1 outline-none"
           innerRef={contentEditableRef} // forwards the ref to the DOM node
           html={title}
           tagName={tag}
@@ -235,6 +250,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
           data-position={dataPosition}
         />
       </div>
+    </div>
     );
 }
 
