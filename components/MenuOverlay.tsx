@@ -1,8 +1,8 @@
 import { faAngleRight, faCheck, faRepeat, faTrashCan } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { basicBlocks, typeMapTag } from "../shared/blockType"
-import Image from "next/image";
 import { Dispatch, SetStateAction, forwardRef } from "react";
+import Image from "next/image";
 
 interface IMenuOverlayProps {
     activeBlockType: string
@@ -68,8 +68,8 @@ const MenuOverlay = forwardRef<HTMLDivElement, IMenuOverlayProps>(function MenuO
                       <div className="relative h-6 w-6 rounded-md border-[1px]">
                         <Image
                           src={`${subMenu.thumbnail}`}
-                          layout="fill"
-                          objectFit="cover"
+                          fill
+                          sizes="100%"
                           alt={`${subMenu.name} thumbnail`}
                         />
                       </div>
