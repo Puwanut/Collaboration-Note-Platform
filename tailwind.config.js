@@ -19,10 +19,11 @@ module.exports = {
       '2xl': '1536px',
     }
   },
-  variants: {
-    extend: {
-        display: ["group-hover"],
-    },
-  },
+  // variants: {
+  //   extend: {
+  //       display: ["group-hover"],
+  //       opacity: ["group-hover"],
+  //   },
+  // },
   plugins: [],
 }
