@@ -179,7 +179,7 @@ export const getCaretInfo = (): Record<string, number> => {
     // Get Caret Coordinates
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
-    const { caretTop, caretLeft } = getCaretCoordinates()
+    const { caretLeft, caretTop } = getCaretCoordinates()
 
     // Get Nearest Parent Element (ancestor)
     let parentNode = range.commonAncestorContainer
@@ -201,10 +201,11 @@ export const getCaretInfo = (): Record<string, number> => {
     const parentOffsetHeight = contentEditableElement.offsetHeight
 
     // Get Caret Position inside Parent Element (offset from top)
-    const caretOffsetTop = caretTop - contentEditableElement.offsetTop
+    const caretOffsetTop = caretTop - contentEditableElement.getBoundingClientRect().top
 
     // Get Line Height of text in Parent Element (slice(0, -2) to remove "px")
     const lineHeight = parseInt(window.getComputedStyle(contentEditableElement).getPropertyValue("line-height").slice(0, -2))
+    // console.log(caretLeft, caretTop, parentOffsetHeight, caretOffsetTop, lineHeight)
 
     return { caretOffsetTop, lineHeight, parentOffsetHeight, caretTop, caretLeft }
 
@@ -215,9 +216,11 @@ export const getCaretCoordinates = (): Record<string, number> => {
     const range = selection.getRangeAt(0)
     const parentNode = range.commonAncestorContainer
     if (parentNode.nodeType !== Node.TEXT_NODE) {
+      // just in case caret is at start of block after moving caret <- -> to other block
       const contentEditableElement = parentNode.parentElement.lastElementChild as HTMLElement
-      const caretLeft = contentEditableElement.offsetLeft + 5
-      const caretTop = contentEditableElement.offsetTop + contentEditableElement.offsetHeight/2
+      const contentEditableRect = contentEditableElement.getBoundingClientRect()
+      const caretLeft = contentEditableRect.left + 5
+      const caretTop = contentEditableRect.top + 5
       return { caretLeft, caretTop }
     } else {
       const rect = range.getClientRects()
@@ -266,7 +269,7 @@ export const isCaretOnBottom = (): boolean => {
     return 2 * lineHeight + caretOffsetTop > parentOffsetHeight
 }
 
-export const moveCaret = (x, y) => {
+export const moveCaret = (x: number, y: number) => {
   let sel = window.getSelection()
   sel.removeAllRanges()
   sel.addRange(document.caretRangeFromPoint(x, y))

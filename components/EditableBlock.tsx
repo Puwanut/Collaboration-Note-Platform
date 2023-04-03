@@ -110,7 +110,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 break
             }
             case "ArrowUp": {
-                // if caret is on top of block, move caret to last line of previous block
+                // if caret is on top of block, move caret to same x of previous block
                 // else do default behaviour
                 if (isCaretOnTop()) {
                     console.log("Top")
@@ -118,7 +118,8 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
                     if (previousBlock) {
                         const { caretLeft } = getCaretCoordinates()
-                        const lastLinePreviousBlockOffsetTop = previousBlock.offsetTop + previousBlock.offsetHeight - parseInt(window.getComputedStyle(previousBlock).getPropertyValue("line-height"))
+                        const { bottom: previousBlockBottom } = previousBlock.getBoundingClientRect()
+                        const lastLinePreviousBlockOffsetTop = previousBlockBottom + 5 - parseInt(window.getComputedStyle(previousBlock).getPropertyValue("line-height"))
                         moveCaret(caretLeft, lastLinePreviousBlockOffsetTop)
                         console.log("[Move to]", caretLeft, lastLinePreviousBlockOffsetTop)
                     }
@@ -126,7 +127,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 break
             }
             case "ArrowDown": {
-                // if caret is on bottom of block, move caret to first line of next block
+                // if caret is on bottom of block, move caret to same x of next block
                 // else do default behaviour
                 if (isCaretOnBottom()) {
                     console.log("Bottom")
@@ -134,8 +135,9 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
                     if (nextBlock) {
                         const { caretLeft } = getCaretCoordinates() // true to get Caret coordinates from last text node
-                        moveCaret(caretLeft, nextBlock.offsetTop)
-                        console.log("[Move to]", caretLeft, nextBlock.offsetTop)
+                        const { top: nextBlockTop } = nextBlock.getBoundingClientRect()
+                        moveCaret(caretLeft, nextBlockTop + 5) // +5 for padding
+                        console.log("[Move to]", caretLeft, nextBlockTop + 5)
                     }
                 }
                 break
@@ -211,7 +213,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     <div className="relative" data-block-id={block.id} >
       { menuOpen && <MenuOverlay activeBlockType={block.type} setTag={setTag} setMenuOpen={setMenuOpen} ref={menuRef}/> }
       <div className="group/button mb-1 flex w-full" >
-        <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 outline-none group-hover/button:opacity-100">
+        <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 group-hover/button:opacity-100">
           <FontAwesomeIcon
             icon={faPlus}
             className="p-1.5 duration-150 hover:bg-slate-100 outline-none cursor-grab" // group-hover is active when the parent is hovered
