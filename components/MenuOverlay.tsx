@@ -8,25 +8,28 @@ interface IMenuOverlayProps {
     activeBlockType: string
     setTag: Dispatch<SetStateAction<string>>
     setMenuOpen: Dispatch<SetStateAction<boolean>>
+    deleteBlock: () => void
 }
 
-const MenuList = [
-  {
-    name: "Turn into",
-    icon: <FontAwesomeIcon icon={faRepeat} className="text-neutral-500" />,
-    subMenus: basicBlocks.map((block) => ({
-      name: block.name,
-      thumbnail: block.thumbnail,
-    })),
-  },
-  {
-    name: "Delete",
-    icon: <FontAwesomeIcon icon={faTrashCan} className="text-neutral-500" />,
-  },
-];
 
 
-const MenuOverlay = forwardRef<HTMLDivElement, IMenuOverlayProps>(function MenuOverlay({ activeBlockType, setTag, setMenuOpen } , ref) {
+const MenuOverlay = forwardRef<HTMLDivElement, IMenuOverlayProps>(function MenuOverlay({ activeBlockType, setTag, setMenuOpen, deleteBlock } , ref) {
+  const MenuList = [
+    {
+      name: "Turn into",
+      icon: <FontAwesomeIcon icon={faRepeat} className="text-neutral-500" />,
+      subMenus: basicBlocks.map((block) => ({
+        name: block.name,
+        thumbnail: block.thumbnail,
+      })),
+    },
+    {
+      name: "Delete",
+      icon: <FontAwesomeIcon icon={faTrashCan} className="text-neutral-500" />,
+      action: deleteBlock
+    },
+  ]
+
   const handleChangeBlockType = (blockType) => {
     setTag(typeMapTag[blockType])
     setMenuOpen(false)
@@ -41,7 +44,10 @@ const MenuOverlay = forwardRef<HTMLDivElement, IMenuOverlayProps>(function MenuO
       <div className="min-w-[12rem] rounded-sm border-[1px] bg-white p-1 shadow-2xl">
         {MenuList.map((menu) => (
           <div className="group relative" key={menu.name}>
-            <div className="flex items-center justify-between px-2 py-1 hover:cursor-pointer hover:bg-neutral-200/60">
+            <div
+              className="flex items-center justify-between px-2 py-1 hover:cursor-pointer hover:bg-neutral-200/60"
+              onClick={menu.action}
+            >
               <div>
                 <div className="inline-block w-4 text-center">{menu.icon}</div>
                 <span className="ml-2 text-sm">{menu.name}</span>

@@ -155,7 +155,7 @@ const Workspace = () => {
     // for set focus to new block
   }
 
-  const deleteBlockHandler = (currentBlock: ICurrentBlock, key: string) => {
+  const deleteBlockHandler = (currentBlock: ICurrentBlock, key?: string) => {
     console.log("-------- DELETE BLOCK --------")
     const currentBlockIndex = blocks.findIndex((b) => b.id === currentBlock.id)
     // const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
@@ -187,6 +187,13 @@ const Workspace = () => {
           ...prevState.slice(0, currentBlockIndex),
           currentUpdatedBlock,
           ...prevState.slice(currentBlockIndex + 2)
+        ]
+      })
+    } else if (!key) { // delete current block from menu
+      setBlocks(prevState => {
+        return [
+          ...prevState.slice(0, currentBlockIndex),
+          ...prevState.slice(currentBlockIndex + 1)
         ]
       })
     }

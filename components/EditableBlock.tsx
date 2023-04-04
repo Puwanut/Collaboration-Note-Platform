@@ -223,6 +223,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             activeBlockType={block.type}
             setTag={setTag}
             setMenuOpen={setMenuOpen}
+            deleteBlock={() => deleteBlock({ id: block.id, contentEditableRef: contentEditableRef.current })}
             ref={menuRef}
           />
         )}
