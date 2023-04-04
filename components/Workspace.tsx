@@ -123,34 +123,77 @@ const Workspace = () => {
     // console.log("[WORKSPACE] UPDATE BLOCKS")
   }
 
-  const addBlockHandler = (currentBlock: ICurrentBlock) => {
+  const addBlockHandler = (currentBlock: ICurrentBlock, actionSrc: string) => {
     console.log("++++++++ ADDBLOCK ++++++++")
-    const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
     const currentBlockIndex = blocks.findIndex((block) => block.id === currentBlock.id)
-    setBlocks(prevState => {
-      const newBlock = {
-        id: uuidv4(),
-        type: "text",
-        properties: {
-          title: titleSlice(prevState[currentBlockIndex].properties.title, currentCaretPosition)
-        },
-        children: [],
-        parent: null
-      }
-      const updatedCurrentBlock = {
-        ...prevState[currentBlockIndex],
-        properties: {
-          title: titleSlice(prevState[currentBlockIndex].properties.title, 0, currentCaretPosition)
+    if (actionSrc === "Enter") {
+      const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
+      setCurrentSelectedBlock(currentBlock.contentEditableRef)
+
+      setBlocks(prevState => {
+        const newBlock = {
+          id: uuidv4(),
+          type: "Text",
+          properties: {
+            title: titleSlice(prevState[currentBlockIndex].properties.title, currentCaretPosition)
+          },
+          children: [],
+          parent: null
         }
-      }
-      return [
-        ...prevState.slice(0, currentBlockIndex),
-        updatedCurrentBlock,
-        newBlock,
-        ...prevState.slice(currentBlockIndex + 1)
-      ]
-    })
-    setCurrentSelectedBlock(currentBlock.contentEditableRef)
+        const updatedCurrentBlock = {
+          ...prevState[currentBlockIndex],
+          properties: {
+            title: titleSlice(prevState[currentBlockIndex].properties.title, 0, currentCaretPosition)
+          }
+        }
+        return [
+          ...prevState.slice(0, currentBlockIndex),
+          updatedCurrentBlock,
+          newBlock,
+          ...prevState.slice(currentBlockIndex + 1)
+        ]
+      })
+    } else if (actionSrc === "MenuClick") {
+      setCurrentSelectedBlock(currentBlock.contentEditableRef)
+
+      setBlocks(prevState => {
+        const newBlock = {
+          id: uuidv4(),
+          type: "Text",
+          properties: {
+            title: []
+          },
+          children: [],
+          parent: null
+        }
+        return [
+          ...prevState.slice(0, currentBlockIndex+1),
+          newBlock,
+          ...prevState.slice(currentBlockIndex+1)
+        ]
+      })
+    } else if (actionSrc === "MenuAltClick") {
+      setCurrentSelectedBlock(
+        document.querySelector(`[data-position="${currentBlockIndex - 1}"]`) as HTMLElement ??
+        currentBlock.contentEditableRef
+      ) // Workaround for focus to previous block (not working on first block)
+      setBlocks(prevState => {
+        const newBlock = {
+          id: uuidv4(),
+          type: "Text",
+          properties: {
+            title: []
+          },
+          children: [],
+          parent: null
+        }
+        return [
+          ...prevState.slice(0, currentBlockIndex),
+          newBlock,
+          ...prevState.slice(currentBlockIndex)
+        ]
+      })
+    }
     // currentSelectedBlock.current = currentBlock.contentEditableRef
     // for set focus to new block
   }

@@ -48,6 +48,8 @@ a {
 }
 /* ghostclass for sortable */
 
+/* .sortable-drag { opacity: 0; } */
+
 .editable {
   @apply empty:before:content-[attr(placeholder)] empty:before:italic empty:before:text-neutral-400 cursor-text
 }

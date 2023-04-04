@@ -148,7 +148,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     addNextBlock({
                         id: block.id,
                         contentEditableRef: contentEditableRef.current
-                    })
+                    }, "Enter")
                 }
                 break
             }
@@ -232,6 +232,11 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             <FontAwesomeIcon
               icon={faPlus}
               className="cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+              onClick={(e) => {
+                e.altKey ?
+                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, "MenuAltClick") :
+                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, "MenuClick")
+            }}
               data-tooltip-id="tooltip-add-block"
               data-tooltip-delay-show={200}
             />
@@ -244,7 +249,12 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             />
             <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
               <div className="text-center text-xs font-bold text-neutral-400">
-                <span className="text-neutral-100">Click</span> to add a block
+                <p>
+                    <span className="text-neutral-100">Click</span> to add a block below
+                </p>
+                <p>
+                    <span className="text-neutral-100">Alt-click</span> to add a block above
+                </p>
               </div>
             </Tooltip>
             <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>

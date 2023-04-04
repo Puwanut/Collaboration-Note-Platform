@@ -13,7 +13,13 @@ interface IMenuOverlayProps {
 
 
 
-const MenuOverlay = forwardRef<HTMLDivElement, IMenuOverlayProps>(function MenuOverlay({ activeBlockType, setTag, setMenuOpen, deleteBlock } , ref) {
+const MenuOverlay = forwardRef<HTMLDivElement, IMenuOverlayProps>(function MenuOverlay({
+   activeBlockType,
+   setTag,
+   setMenuOpen,
+   deleteBlock
+  } , ref) {
+
   const MenuList = [
     {
       name: "Turn into",
