@@ -123,17 +123,16 @@ const Workspace = () => {
     // console.log("[WORKSPACE] UPDATE BLOCKS")
   }
 
-  const addBlockHandler = (currentBlock: ICurrentBlock, actionSrc: string) => {
+  const addBlockHandler = (currentBlock: ICurrentBlock, options: Record<string, string>) => {
     console.log("++++++++ ADDBLOCK ++++++++")
     const currentBlockIndex = blocks.findIndex((block) => block.id === currentBlock.id)
-    if (actionSrc === "Enter") {
+    if (options.actionSrc === "Enter") {
       const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
       setCurrentSelectedBlock(currentBlock.contentEditableRef)
-
       setBlocks(prevState => {
         const newBlock = {
           id: uuidv4(),
-          type: "Text",
+          type: options.blockType,
           properties: {
             title: titleSlice(prevState[currentBlockIndex].properties.title, currentCaretPosition)
           },
@@ -153,13 +152,12 @@ const Workspace = () => {
           ...prevState.slice(currentBlockIndex + 1)
         ]
       })
-    } else if (actionSrc === "MenuClick") {
+    } else if (options.actionSrc === "MenuClick") {
       setCurrentSelectedBlock(currentBlock.contentEditableRef)
-
       setBlocks(prevState => {
         const newBlock = {
           id: uuidv4(),
-          type: "Text",
+          type: options.blockType,
           properties: {
             title: []
           },
@@ -172,7 +170,7 @@ const Workspace = () => {
           ...prevState.slice(currentBlockIndex+1)
         ]
       })
-    } else if (actionSrc === "MenuAltClick") {
+    } else if (options.actionSrc === "MenuAltClick") {
       setCurrentSelectedBlock(
         document.querySelector(`[data-position="${currentBlockIndex - 1}"]`) as HTMLElement ??
         currentBlock.contentEditableRef
@@ -180,7 +178,7 @@ const Workspace = () => {
       setBlocks(prevState => {
         const newBlock = {
           id: uuidv4(),
-          type: "Text",
+          type: options.blockType,
           properties: {
             title: []
           },
@@ -272,7 +270,8 @@ const Workspace = () => {
       } // key === "Delete" setCaretToStart
     }
 
-  }, [blocks, previousBlocks])
+  }, [blocks])
+
 
   // Mockup initial blocks
   useEffect(() => {

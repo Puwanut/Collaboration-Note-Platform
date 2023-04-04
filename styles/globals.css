@@ -27,15 +27,19 @@ a {
 }
 
 .revert-global h1 {
-  font-size: 1.875rem;
+  font-size: 1.875rem; /* 30px */
 }
 
 .revert-global h2 {
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* 24px */
 }
 
 .revert-global h3 {
-  font-size: 1.25rem;
+  font-size: 1.25rem; /* 20px */
+}
+
+.revert-global ul,ol {
+  list-style: revert;
 }
 
 /* ghostclass for sortable */

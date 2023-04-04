@@ -1,5 +1,5 @@
 import { useRef, useEffect, KeyboardEvent, useState } from "react"
-import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
+import { ContentEditableEvent } from "react-contenteditable"
 import { getCaretCoordinates, getCaretStart, isCaretOnBottom, isCaretOnTop, moveCaret, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
 import { decodeHTML } from "entities"
@@ -9,8 +9,9 @@ import { titleConcatenate } from "../lib/titleConcatenate"
 import { Tooltip } from "react-tooltip"
 import MenuOverlay from "./MenuOverlay"
 import { typeMapTag } from "../shared/blockType"
-import { getKeyByValue } from "../lib/getKeyByValue"
+import { getKeyByValueAtIndex } from "../lib/getKeyByValue"
 import { useClickAway } from "react-use"
+import ContentEditableBlockWrapper from "./ContentEditableBlockWrapper"
 
 // const titleConcatenate = (titleArray: string[][]) => {
 //     const text = titleArray.map((textArray) => {
@@ -28,7 +29,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
-    const [tag, setTag] = useState<string>(typeMapTag[block.type])
+    const [tag, setTag] = useState<string[]>(typeMapTag[block.type])
 
     const [menuOpen, setMenuOpen] = useState<boolean>(false)
     const menuRef = useRef<HTMLDivElement>(null)
@@ -70,7 +71,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
 
     const handleDeleteLineBreak = (e: KeyboardEvent) => {
         const input = e.target as HTMLInputElement
-        const countNewLine = input.innerText.match(/\n*$/g)[0].length
+        const countNewLine = input.innerText.match(/\n*$/g)[0].length // count number of new line at the end of text
         if (input.innerText.endsWith("\n\n") && countNewLine === 2) {
             e.preventDefault()
             setTitleArray(titleParser(e.currentTarget.innerHTML.replace("\n\n", "")))
@@ -118,10 +119,11 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
                     if (previousBlock) {
                         const { caretLeft } = getCaretCoordinates()
-                        const { bottom: previousBlockBottom } = previousBlock.getBoundingClientRect()
+                        const { left: previousBlockLeft, bottom: previousBlockBottom } = previousBlock.getBoundingClientRect()
                         const lastLinePreviousBlockOffsetTop = previousBlockBottom + 5 - parseInt(window.getComputedStyle(previousBlock).getPropertyValue("line-height"))
-                        moveCaret(caretLeft, lastLinePreviousBlockOffsetTop)
-                        console.log("[Move to]", caretLeft, lastLinePreviousBlockOffsetTop)
+                        const possibleCaretLeft = caretLeft < previousBlockLeft ? previousBlockLeft : caretLeft
+                        moveCaret(possibleCaretLeft, lastLinePreviousBlockOffsetTop)
+                        console.log("[Move to]", possibleCaretLeft, lastLinePreviousBlockOffsetTop)
                     }
                 }
                 break
@@ -135,9 +137,10 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
                     if (nextBlock) {
                         const { caretLeft } = getCaretCoordinates() // true to get Caret coordinates from last text node
-                        const { top: nextBlockTop } = nextBlock.getBoundingClientRect()
-                        moveCaret(caretLeft, nextBlockTop + 5) // +5 for padding
-                        console.log("[Move to]", caretLeft, nextBlockTop + 5)
+                        const { left: nextBlockLeft, top: nextBlockTop } = nextBlock.getBoundingClientRect()
+                        const possibleCaretLeft = caretLeft < nextBlockLeft ? nextBlockLeft : caretLeft
+                        moveCaret(possibleCaretLeft, nextBlockTop + 5) // +5 for padding
+                        console.log("[Move to]", possibleCaretLeft, nextBlockTop + 5)
                     }
                 }
                 break
@@ -148,19 +151,28 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     addNextBlock({
                         id: block.id,
                         contentEditableRef: contentEditableRef.current
-                    }, "Enter")
+                    }, {
+                        actionSrc: "Enter",
+                        // block.type not in ["Heading 1", "Heading 2", "Heading 3"]
+                        blockType: ["Heading 1", "Heading 2", "Heading 3"].includes(block.type) ? "Text" : block.type,
+                    })
                 }
                 break
             }
             case "Backspace": {
                 handleDeleteLineBreak(e)
                 const textBeforeCaret = e.target.textContent.substring(0, getCaretStart(contentEditableRef.current))
+
                 if (!textBeforeCaret) {
                     e.preventDefault()
-                    deleteBlock({
-                        id: block.id,
-                        contentEditableRef: contentEditableRef.current,
-                    }, e.key)
+                    if (block.type === "Bulleted List" || block.type === "Numbered List") {
+                        setTag(typeMapTag["Text"])
+                    } else {
+                        deleteBlock({
+                            id: block.id,
+                            contentEditableRef: contentEditableRef.current,
+                        }, e.key)
+                    }
                 }
                 break
             }
@@ -196,13 +208,19 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
         updatePage({
             ...block,
-            type: getKeyByValue(typeMapTag, tag),
+            type: getKeyByValueAtIndex(typeMapTag, tag, 0),
             properties: {
                 ...block.properties,
                 title: titleArray
             }
         })
     }, [titleArray, tag])
+
+    // set caret to start after block type change
+    useEffect(() => {
+        const currentBlock = document.querySelector(`[data-position="${dataPosition}"]`) as HTMLElement
+        setCaretToStart(currentBlock)
+    }, [block.type])
 
     // Close menu when clicking outside
     useClickAway(menuRef, () =>
@@ -268,18 +286,20 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
               </div>
             </Tooltip>
           </div>
-          <ContentEditable
+
+          <ContentEditableBlockWrapper
             key={dataPosition} // to rerender when dataPosition changes
             className="w-full whitespace-pre-wrap break-words bg-slate-100 p-1 outline-none"
             style={{ wordBreak: "break-word" }} // workaround for break long words
             innerRef={contentEditableRef} // forwards the ref to the DOM node
             html={title}
-            tagName={tag}
+            tag={tag}
             onChange={onChangeHandler}
             onKeyDown={onKeyDownHandler}
             onFocus={onSelectHandler}
             data-position={dataPosition}
-          />
+        />
+
         </div>
       </div>
     );

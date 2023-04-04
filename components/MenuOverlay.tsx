@@ -6,7 +6,7 @@ import Image from "next/image";
 
 interface IMenuOverlayProps {
     activeBlockType: string
-    setTag: Dispatch<SetStateAction<string>>
+    setTag: Dispatch<SetStateAction<string[]>>
     setMenuOpen: Dispatch<SetStateAction<boolean>>
     deleteBlock: () => void
 }
@@ -36,7 +36,7 @@ const MenuOverlay = forwardRef<HTMLDivElement, IMenuOverlayProps>(function MenuO
     },
   ]
 
-  const handleChangeBlockType = (blockType) => {
+  const handleChangeBlockType = (blockType: string) => {
     setTag(typeMapTag[blockType])
     setMenuOpen(false)
   }
