@@ -21,8 +21,21 @@ a {
   box-sizing: border-box;
 }
 
-.disable-global h1,h2,h3,h4,h5,h6 {
-  font-size: revert;
+/* For Contenteditable Tag */
+.revert-global h1,h2,h3 {
+  font-weight: 600;
+}
+
+.revert-global h1 {
+  font-size: 1.875rem;
+}
+
+.revert-global h2 {
+  font-size: 1.5rem;
+}
+
+.revert-global h3 {
+  font-size: 1.25rem;
 }
 
 /* ghostclass for sortable */
@@ -38,4 +51,3 @@ a {
 .editable {
   @apply empty:before:content-[attr(placeholder)] empty:before:italic empty:before:text-neutral-400 cursor-text
 }
-

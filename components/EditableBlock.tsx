@@ -210,49 +210,67 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     )
 
     return (
-    <div className="relative" data-block-id={block.id} >
-      { menuOpen && <MenuOverlay activeBlockType={block.type} setTag={setTag} setMenuOpen={setMenuOpen} ref={menuRef}/> }
-      <div className="group/button mb-1 flex w-full" >
-        <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 group-hover/button:opacity-100">
-          <FontAwesomeIcon
-            icon={faPlus}
-            className="p-1.5 duration-150 hover:bg-slate-100 outline-none cursor-grab" // group-hover is active when the parent is hovered
-            data-tooltip-id="tooltip-add-block"
-            data-tooltip-delay-show={100}
+      <div
+        data-block-id={block.id}
+        className={`relative
+        ${block.type === "Heading 1" && "mb-1 mt-8"}
+        ${block.type === "Heading 2" && "mb-px mt-6"}
+        ${block.type === "Heading 3" && "mb-px mt-4"}
+    `}
+      >
+        {menuOpen && (
+          <MenuOverlay
+            activeBlockType={block.type}
+            setTag={setTag}
+            setMenuOpen={setMenuOpen}
+            ref={menuRef}
           />
-          <FontAwesomeIcon
-            icon={faGripVertical}
-            className="handle p-1.5 duration-150 hover:bg-slate-100 outline-none cursor-grab" // group-hover is active when the parent is hovered
-            data-tooltip-id="tooltip-menu"
-            data-tooltip-delay-show={100}
-            onClick={() => setMenuOpen(prev => !prev)}
+        )}
+        <div className="group/button mb-1 flex w-full">
+          <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 group-hover/button:opacity-100">
+            <FontAwesomeIcon
+              icon={faPlus}
+              className="cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+              data-tooltip-id="tooltip-add-block"
+              data-tooltip-delay-show={200}
             />
-          <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
-            <div className="text-neutral-400 font-bold text-xs text-center">
+            <FontAwesomeIcon
+              icon={faGripVertical}
+              className="handle cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+              data-tooltip-id="tooltip-menu"
+              data-tooltip-delay-show={200}
+              onClick={() => setMenuOpen((prev) => !prev)}
+            />
+            <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
+              <div className="text-center text-xs font-bold text-neutral-400">
                 <span className="text-neutral-100">Click</span> to add a block
-            </div>
-          </Tooltip>
-          <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>
-            <div className="text-neutral-400 font-bold text-xs text-center">
-                <p><span className="text-neutral-100">Drag</span> to move</p>
-                <p><span className="text-neutral-100">Click</span> to open menu</p>
-            </div>
-          </Tooltip>
+              </div>
+            </Tooltip>
+            <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>
+              <div className="text-center text-xs font-bold text-neutral-400">
+                <p>
+                  <span className="text-neutral-100">Drag</span> to move
+                </p>
+                <p>
+                  <span className="text-neutral-100">Click</span> to open menu
+                </p>
+              </div>
+            </Tooltip>
+          </div>
+          <ContentEditable
+            key={dataPosition} // to rerender when dataPosition changes
+            className="w-full whitespace-pre-wrap break-words bg-slate-100 p-1 outline-none"
+            style={{ wordBreak: "break-word" }} // workaround for break long words
+            innerRef={contentEditableRef} // forwards the ref to the DOM node
+            html={title}
+            tagName={tag}
+            onChange={onChangeHandler}
+            onKeyDown={onKeyDownHandler}
+            onFocus={onSelectHandler}
+            data-position={dataPosition}
+          />
         </div>
-
-        <ContentEditable
-          key={dataPosition} // to rerender when dataPosition changes
-          className="w-full whitespace-pre-wrap break-words bg-slate-100 p-1 outline-none"
-          innerRef={contentEditableRef} // forwards the ref to the DOM node
-          html={title}
-          tagName={tag}
-          onChange={onChangeHandler}
-          onKeyDown={onKeyDownHandler}
-          onFocus={onSelectHandler}
-          data-position={dataPosition}
-        />
       </div>
-    </div>
     );
 }
 

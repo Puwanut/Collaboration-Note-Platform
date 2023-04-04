@@ -219,7 +219,7 @@ const Workspace = () => {
           //   setSelectionRange(previousBlock, titlesLength[previousBlockIndex], titlesLength[previousBlockIndex])
           // }
         }
-      }
+      } // key === "Delete" setCaretToStart
     }
 
   }, [blocks, previousBlocks])
@@ -277,7 +277,7 @@ const Workspace = () => {
             voluptas laboriosam unde ut quae dicta, minima placeat quo commodi!
           </p>
           <br />
-          <div className="disable-global">
+          <div className="revert-global">
             <ReactSortable
               list={blocks}
               setList={setBlocks}

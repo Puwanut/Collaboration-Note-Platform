@@ -123,7 +123,7 @@ const Sidebar = () => {
     }, [resize, stopResizing])
 
     return (
-        <div className={`xs:block fixed xs:relative xs:max-w-fit h-screen bg-stone-100 z-20 overflow-x-hidden whitespace-nowrap
+        <div className={`xs:block fixed xs:relative xs:max-w-fit h-screen bg-neutral-50 z-20 overflow-x-hidden whitespace-nowrap
             ${!sidebarLoaded && `hidden`}
             ${sidebarOpenDone && `xs:min-w-[10rem]`}
             ${!isResizing && `duration-${transitionDuration}`}
@@ -180,8 +180,8 @@ const Sidebar = () => {
 
             {/* Slider */}
             <div className={`top-0 w-1 right-0 absolute h-screen
-            cursor-col-resize resize-x border-2 border-transparent bg-stone-100
-            hover:border-stone-300 ${(!leftSidebarOpen || isMobileView) && 'hidden'}`}
+            cursor-col-resize resize-x border-2 border-transparent bg-neutral-50
+            hover:border-neutral-200 ${(!leftSidebarOpen || isMobileView) && 'hidden'}`}
                 onMouseDown={startResizing}>
             </div>
         </div>
