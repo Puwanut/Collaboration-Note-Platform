@@ -9,7 +9,8 @@ export const typeMapTag = {
   "Text": "div",
   "Heading 1": "h1",
   "Heading 2": "h2",
-  "Heading 3": "h3"
+  "Heading 3": "h3",
+  "Bulleted List": "li",
 }
 
 export const basicBlocks: DataBlock[] = [
