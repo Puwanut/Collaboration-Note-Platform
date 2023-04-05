@@ -240,6 +240,19 @@ const Workspace = () => {
     }
   }
 
+  const getNumberedListOrder = (currentBlockIndex: number): number => {
+    const beforeBlocks = blocks.slice(0, currentBlockIndex).reverse()
+    let counter = 1
+    for (let i = 0; i < beforeBlocks.length; i++) {
+      if (beforeBlocks[i].type === "Numbered List") {
+        counter++
+      } else {
+        break
+      }
+    }
+    return counter
+  }
+
   // Handle Caret Position
   useEffect(() => {
     // console.log("[CURRENT]", currentSelectedBlock)
@@ -289,14 +302,24 @@ const Workspace = () => {
 
     const initialBlock2: IEditableBlock = {
       id: uuidv4(),
-      type: "Text",
+      type: "Numbered List",
       properties: {
         title: [["stronger", "b"], ["aeeng", "i"]]
       },
       children: [],
       parent: null
     }
-    setBlocks([initialBlock, initialBlock2])
+
+    const initialBlock3: IEditableBlock = {
+      id: uuidv4(),
+      type: "Numbered List",
+      properties: {
+        title: [["simpleText"]]
+      },
+      children: [],
+      parent: null
+    }
+    setBlocks([initialBlock, initialBlock2, initialBlock3])
   }, [])
 
 
@@ -343,6 +366,7 @@ const Workspace = () => {
               // onEnd={handleDragEnd}
             >
               {blocks.map((block, index) => {
+                const numberedListOrder = getNumberedListOrder(index)
                 return (
                 // {showCommands && <CommandsOverlay text={commandText} />}
                 <EditableBlock
@@ -352,6 +376,7 @@ const Workspace = () => {
                   addNextBlock={addBlockHandler}
                   deleteBlock={deleteBlockHandler}
                   setCurrentSelectedBlock={setCurrentSelectedBlock}
+                  numberedListOrder={numberedListOrder}
                   dataPosition={index}
                   setKey={setKey}
                 />

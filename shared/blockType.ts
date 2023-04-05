@@ -6,12 +6,12 @@ interface DataBlock {
 }
 
 export const typeMapTag = {
-  "Text": ["div"],
-  "Heading 1": ["h1"],
-  "Heading 2": ["h2"],
-  "Heading 3": ["h3"],
-  "Bulleted List": ["ul", "li"],
-  "Numbered List": ["ol", "li"]
+  "Text": "div",
+  "Heading 1": "h1",
+  "Heading 2": "h2",
+  "Heading 3": "h3",
+  "Bulleted List": "ul",
+  "Numbered List": "ol"
 }
 
 export const basicBlocks: DataBlock[] = [

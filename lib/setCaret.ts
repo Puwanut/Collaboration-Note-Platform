@@ -266,10 +266,10 @@ export const isCaretOnTop = (): boolean => {
 
 export const isCaretOnBottom = (): boolean => {
     const { caretOffsetTop, lineHeight, parentOffsetHeight } = getCaretInfo()
-    return 2 * lineHeight + caretOffsetTop > parentOffsetHeight
+    return 2 * lineHeight + caretOffsetTop > parentOffsetHeight + 4 // 4 is padding p-1
 }
 
-export const moveCaret = (x: number, y: number) => {
+export const moveCaret = (x: number, y: number): void => {
   let sel = window.getSelection()
   sel.removeAllRanges()
   sel.addRange(document.caretRangeFromPoint(x, y))

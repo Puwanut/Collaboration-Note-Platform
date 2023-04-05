@@ -1,5 +1,5 @@
 import { useRef, useEffect, KeyboardEvent, useState } from "react"
-import { ContentEditableEvent } from "react-contenteditable"
+import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretCoordinates, getCaretStart, isCaretOnBottom, isCaretOnTop, moveCaret, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
 import { decodeHTML } from "entities"
@@ -9,9 +9,8 @@ import { titleConcatenate } from "../lib/titleConcatenate"
 import { Tooltip } from "react-tooltip"
 import MenuOverlay from "./MenuOverlay"
 import { typeMapTag } from "../shared/blockType"
-import { getKeyByValueAtIndex } from "../lib/getKeyByValue"
+import { getKeyByValue } from "../lib/getKeyByValue"
 import { useClickAway } from "react-use"
-import ContentEditableBlockWrapper from "./ContentEditableBlockWrapper"
 
 // const titleConcatenate = (titleArray: string[][]) => {
 //     const text = titleArray.map((textArray) => {
@@ -25,11 +24,11 @@ import ContentEditableBlockWrapper from "./ContentEditableBlockWrapper"
 //     return text.join("")
 // }
 
-const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, dataPosition, setKey }) => {
+const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, numberedListOrder, dataPosition, setKey }) => {
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
-    const [tag, setTag] = useState<string[]>(typeMapTag[block.type])
+    const [tag, setTag] = useState<string>(typeMapTag[block.type])
 
     const [menuOpen, setMenuOpen] = useState<boolean>(false)
     const menuRef = useRef<HTMLDivElement>(null)
@@ -120,7 +119,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     if (previousBlock) {
                         const { caretLeft } = getCaretCoordinates()
                         const { left: previousBlockLeft, bottom: previousBlockBottom } = previousBlock.getBoundingClientRect()
-                        const lastLinePreviousBlockOffsetTop = previousBlockBottom + 5 - parseInt(window.getComputedStyle(previousBlock).getPropertyValue("line-height"))
+                        const lastLinePreviousBlockOffsetTop = previousBlockBottom - parseInt(window.getComputedStyle(previousBlock).getPropertyValue("line-height"))
                         const possibleCaretLeft = caretLeft < previousBlockLeft ? previousBlockLeft : caretLeft
                         moveCaret(possibleCaretLeft, lastLinePreviousBlockOffsetTop)
                         console.log("[Move to]", possibleCaretLeft, lastLinePreviousBlockOffsetTop)
@@ -139,8 +138,8 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                         const { caretLeft } = getCaretCoordinates() // true to get Caret coordinates from last text node
                         const { left: nextBlockLeft, top: nextBlockTop } = nextBlock.getBoundingClientRect()
                         const possibleCaretLeft = caretLeft < nextBlockLeft ? nextBlockLeft : caretLeft
-                        moveCaret(possibleCaretLeft, nextBlockTop + 5) // +5 for padding
-                        console.log("[Move to]", possibleCaretLeft, nextBlockTop + 5)
+                        moveCaret(possibleCaretLeft, nextBlockTop) // +5 for padding
+                        console.log("[Move to]", possibleCaretLeft, nextBlockTop)
                     }
                 }
                 break
@@ -200,7 +199,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         setTitle(titleConcatenate(block.properties.title))
         setTitleArray(block.properties.title)
         // setTag(typeMapTag[block.type])
-    }, [block.properties.title])
+    }, [block.properties.title, block.type])
 
 
     // update blocks in parent
@@ -208,7 +207,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
         updatePage({
             ...block,
-            type: getKeyByValueAtIndex(typeMapTag, tag, 0),
+            type: getKeyByValue(typeMapTag, tag),
             properties: {
                 ...block.properties,
                 title: titleArray
@@ -286,20 +285,59 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
               </div>
             </Tooltip>
           </div>
-
-          <ContentEditableBlockWrapper
-            key={dataPosition} // to rerender when dataPosition changes
-            className="w-full whitespace-pre-wrap break-words bg-slate-100 p-1 outline-none"
-            style={{ wordBreak: "break-word" }} // workaround for break long words
-            innerRef={contentEditableRef} // forwards the ref to the DOM node
-            html={title}
-            tag={tag}
-            onChange={onChangeHandler}
-            onKeyDown={onKeyDownHandler}
-            onFocus={onSelectHandler}
-            data-position={dataPosition}
-        />
-
+          {!["Bulleted List", "Numbered List"].includes(block.type)  &&
+            <div className="p-1 bg-neutral-100 w-full">
+                <ContentEditable
+                    key={dataPosition}
+                    innerRef={contentEditableRef}
+                    html={title}
+                    tagName={tag}
+                    className="whitespace-pre-wrap break-words outline-none"
+                    style={{ wordBreak: "break-word" }} // workaround for break long words
+                    onChange={onChangeHandler}
+                    onKeyDown={onKeyDownHandler}
+                    onFocus={onSelectHandler}
+                    data-position={dataPosition}
+                    data-block-type={block.type}
+                />
+            </div>
+            }
+            {block.type === "Bulleted List" &&
+                <div className="flex w-full p-1 bg-neutral-100">
+                    <span className="mx-2 before:content-['•'] text-[1.5rem] leading-6 "></span>
+                    <ContentEditable
+                        key={dataPosition}
+                        innerRef={contentEditableRef}
+                        html={title}
+                        tagName={"div"}
+                        className="w-full whitespace-pre-wrap break-words outline-none"
+                        style={{ wordBreak: "break-word" }} // workaround for break long words
+                        onChange={onChangeHandler}
+                        onKeyDown={onKeyDownHandler}
+                        onFocus={onSelectHandler}
+                        data-position={dataPosition}
+                        data-block-type={block.type}
+                    />
+                </div>
+            }
+            {block.type === "Numbered List" &&
+                <div className="flex w-full p-1 bg-neutral-100">
+                    <span data-numbered-list-order={numberedListOrder + '.'} className="mx-2 before:content-[attr(data-numbered-list-order)]"></span>
+                    <ContentEditable
+                        key={dataPosition}
+                        innerRef={contentEditableRef}
+                        html={title}
+                        tagName={"div"}
+                        className="w-full whitespace-pre-wrap break-words outline-none"
+                        style={{ wordBreak: "break-word" }} // workaround for break long words
+                        onChange={onChangeHandler}
+                        onKeyDown={onKeyDownHandler}
+                        onFocus={onSelectHandler}
+                        data-position={dataPosition}
+                        data-block-type={block.type}
+                    />
+                </div>
+            }
         </div>
       </div>
     );
