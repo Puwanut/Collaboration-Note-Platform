@@ -252,8 +252,8 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
               className="cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
               onClick={(e) => {
                 e.altKey ?
-                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, "MenuAltClick") :
-                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, "MenuClick")
+                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, {actionSrc: "MenuAltClick"}) :
+                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, {actionSrc: "MenuClick"})
             }}
               data-tooltip-id="tooltip-add-block"
               data-tooltip-delay-show={200}

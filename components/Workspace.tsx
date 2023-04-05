@@ -157,7 +157,7 @@ const Workspace = () => {
       setBlocks(prevState => {
         const newBlock = {
           id: uuidv4(),
-          type: options.blockType,
+          type: options.blockType ?? "Text",
           properties: {
             title: []
           },
@@ -178,7 +178,7 @@ const Workspace = () => {
       setBlocks(prevState => {
         const newBlock = {
           id: uuidv4(),
-          type: options.blockType,
+          type: options?.blockType ?? "Text",
           properties: {
             title: []
           },
