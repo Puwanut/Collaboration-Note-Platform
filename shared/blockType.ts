@@ -11,7 +11,8 @@ export const typeMapTag = {
   "Heading 2": "h2",
   "Heading 3": "h3",
   "Bulleted List": "ul",
-  "Numbered List": "ol"
+  "Numbered List": "ol",
+  "Code": "code"
 }
 
 export const basicBlocks: DataBlock[] = [

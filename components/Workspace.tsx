@@ -15,6 +15,7 @@ export interface IEditableBlock {
   properties: {
     title: string[][] // [["text", "bold"], ["text", "italic"]
     checked?: boolean
+    language?: string
   }
   children?: string[]
   parent?: string
@@ -319,7 +320,18 @@ const Workspace = () => {
       children: [],
       parent: null
     }
-    setBlocks([initialBlock, initialBlock2, initialBlock3])
+
+    const initialBlock4: IEditableBlock = {
+      id: uuidv4(),
+      type: "Code",
+      properties: {
+        title: [["const a = 1\nconst b = 2\nconsole.log(a+b)"]],
+        language: "javascript"
+      },
+      children: [],
+      parent: null
+    }
+    setBlocks([initialBlock, initialBlock2, initialBlock3, initialBlock4])
   }, [])
 
 

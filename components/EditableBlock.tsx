@@ -1,4 +1,4 @@
-import { useRef, useEffect, KeyboardEvent, useState } from "react"
+import { useRef, useEffect, KeyboardEvent, useState, useMemo } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretCoordinates, getCaretStart, isCaretOnBottom, isCaretOnTop, moveCaret, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import * as htmlparser2 from "htmlparser2"
@@ -11,6 +11,10 @@ import MenuOverlay from "./MenuOverlay"
 import { typeMapTag } from "../shared/blockType"
 import { getKeyByValue } from "../lib/getKeyByValue"
 import { useClickAway } from "react-use"
+import ReactCodeMirror from "@uiw/react-codemirror"
+import { Extension } from "@codemirror/state"
+import { loadLanguage, langNames, LanguageName } from '@uiw/codemirror-extensions-langs';
+// type LangName = typeof langNames[number]
 
 // const titleConcatenate = (titleArray: string[][]) => {
 //     const text = titleArray.map((textArray) => {
@@ -29,6 +33,14 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
     const [tag, setTag] = useState<string>(typeMapTag[block.type])
+    const [codeLanguage, setCodeLanguage] = useState<LanguageName>(block.properties?.language)
+    const codeExtension: Extension[] = useMemo(() => {
+        if (codeLanguage && codeLanguage !== "plaintext" as LanguageName) {
+            return [loadLanguage(codeLanguage)]
+        } else {
+            return []
+        }
+    }, [codeLanguage])
 
     const [menuOpen, setMenuOpen] = useState<boolean>(false)
     const menuRef = useRef<HTMLDivElement>(null)
@@ -56,11 +68,16 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const onChangeHandler = (e: ContentEditableEvent) => {
         // prevent <br> from being added to contentEditable after deleting text until line is blank
         // and ensure that line still present even if no any text in line
-        const newText = e.target.value.replace("<br>", "\n")
 
+        const newText = e.target.value.replace("<br>", "\n")
         const newTitleArray = titleParser(newText)
         setTitleArray(newTitleArray) // to update current title properties
+
         setTitle(newText) // to update text in contentEditable (for same caret position)
+    }
+
+    const onCodeChangeHandler = (value: string, viewUpdate: any) => {
+        console.log(value, viewUpdate)
     }
 
     const onSelectHandler = () => {
@@ -145,7 +162,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 break
             }
             case "Enter": {
-                if (!e.shiftKey) {
+                if (!e.shiftKey && block.type !== "Code") {
                     e.preventDefault()
                     addNextBlock({
                         id: block.id,
@@ -201,6 +218,9 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         // setTag(typeMapTag[block.type])
     }, [block.properties.title, block.type])
 
+    useEffect(() => {
+        setCodeLanguage(block.properties.language)
+    }, [block.properties.language])
 
     // update blocks in parent
     useEffect(() => {
@@ -210,21 +230,26 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             type: getKeyByValue(typeMapTag, tag),
             properties: {
                 ...block.properties,
-                title: titleArray
+                title: titleArray,
             }
         })
-    }, [titleArray, tag])
+    }, [titleArray, tag, codeLanguage])
 
     // set caret to start after block type change
     useEffect(() => {
         const currentBlock = document.querySelector(`[data-position="${dataPosition}"]`) as HTMLElement
-        setCaretToStart(currentBlock)
+        if (block.type !== "Code") {
+            setCaretToStart(currentBlock)
+        }
     }, [block.type])
+
+
 
     // Close menu when clicking outside
     useClickAway(menuRef, () =>
         setMenuOpen(false)
     )
+
 
     return (
       <div
@@ -285,25 +310,24 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
               </div>
             </Tooltip>
           </div>
-          {!["Bulleted List", "Numbered List"].includes(block.type)  &&
-            <div className="p-1 bg-neutral-100 w-full">
+          {!["Bulleted List", "Numbered List", "Code"].includes(block.type)  &&
+            <div className="p-1 bg-neutral-100 w-full min-w-0">
                 <ContentEditable
                     key={dataPosition}
                     innerRef={contentEditableRef}
                     html={title}
                     tagName={tag}
                     className="whitespace-pre-wrap break-words outline-none"
-                    style={{ wordBreak: "break-word" }} // workaround for break long words
+                    style={{wordBreak: "break-word"}}
                     onChange={onChangeHandler}
                     onKeyDown={onKeyDownHandler}
                     onFocus={onSelectHandler}
                     data-position={dataPosition}
-                    data-block-type={block.type}
                 />
             </div>
             }
             {block.type === "Bulleted List" &&
-                <div className="flex w-full p-1 bg-neutral-100">
+                <div className="flex w-full p-1 bg-neutral-100 min-w-0">
                     <span className="mx-2 before:content-['•'] text-[1.5rem] leading-6 "></span>
                     <ContentEditable
                         key={dataPosition}
@@ -311,17 +335,16 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                         html={title}
                         tagName={"div"}
                         className="w-full whitespace-pre-wrap break-words outline-none"
-                        style={{ wordBreak: "break-word" }} // workaround for break long words
+                        style={{wordBreak: "break-word"}}
                         onChange={onChangeHandler}
                         onKeyDown={onKeyDownHandler}
                         onFocus={onSelectHandler}
                         data-position={dataPosition}
-                        data-block-type={block.type}
                     />
                 </div>
             }
             {block.type === "Numbered List" &&
-                <div className="flex w-full p-1 bg-neutral-100">
+                <div className="flex w-full p-1 bg-neutral-100 min-w-0">
                     <span data-numbered-list-order={numberedListOrder + '.'} className="mx-2 before:content-[attr(data-numbered-list-order)]"></span>
                     <ContentEditable
                         key={dataPosition}
@@ -329,14 +352,55 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                         html={title}
                         tagName={"div"}
                         className="w-full whitespace-pre-wrap break-words outline-none"
-                        style={{ wordBreak: "break-word" }} // workaround for break long words
+                        style={{wordBreak: "break-word"}}
                         onChange={onChangeHandler}
                         onKeyDown={onKeyDownHandler}
                         onFocus={onSelectHandler}
                         data-position={dataPosition}
-                        data-block-type={block.type}
                     />
                 </div>
+            }
+            {block.type === "Code" &&
+                <div className="relative w-full min-w-0">
+                    <select
+                        className="absolute m-2 px-1 text-sm text-neutral-500 bg-transparent hover:bg-neutral-200 rounded-md outline-none"
+                        value={codeLanguage ?? "plaintext"}
+                        onChange={(e) => setCodeLanguage(e.target.value as LanguageName)}
+                    >
+                        <option value="plaintext">plaintext</option>
+                        {langNames.map((langName, index) => (
+                            <option key={index} value={langName}>{langName}</option>
+                            ))
+                        }
+                    </select>
+
+                    <div className="w-full p-8 pr-4 bg-neutral-100 ">
+                        <ReactCodeMirror
+                            value={title}
+                            height="auto border-none"
+                            className=""
+                            basicSetup={true}
+                            extensions={codeExtension}
+                            onChange={onCodeChangeHandler}
+                        />
+                    </div>
+                </div>
+                // <div className="flex w-full p-1 bg-neutral-100">
+                //     <pre className="w-full">
+                //     <ContentEditable
+                //         key={dataPosition}
+                //         innerRef={contentEditableRef}
+                //         html={title}
+                //         tagName={"code"}
+                //         className="w-full whitespace-pre-wrap break-words outline-none language-javascript"
+                //         style={{ wordBreak: "break-word" }} // workaround for break long words
+                //         onChange={onChangeHandler}
+                //         onKeyDown={onKeyDownHandler}
+                //         onFocus={onSelectHandler}
+                //         data-position={dataPosition}
+                //     />
+                //     </pre>
+                // </div>
             }
         </div>
       </div>
