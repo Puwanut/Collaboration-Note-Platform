@@ -211,7 +211,7 @@ export const getCaretInfo = (): Record<string, number> => {
 
 }
 
-export const getCaretCoordinates = (): Record<string, number> => {
+export const getCaretCoordinates = () => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
     const parentNode = range.commonAncestorContainer

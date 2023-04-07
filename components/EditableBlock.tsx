@@ -16,6 +16,7 @@ import { Extension } from "@codemirror/state"
 import { loadLanguage, langNames, LanguageName } from '@uiw/codemirror-extensions-langs';
 import { githubLightInit } from "@uiw/codemirror-themes-all"
 import { EditorView } from "@codemirror/view";
+import CommandsOverlay from "./CommandsOverlay"
 // type LangName = typeof langNames[number]
 
 // const titleConcatenate = (titleArray: string[][]) => {
@@ -31,11 +32,17 @@ import { EditorView } from "@codemirror/view";
 // }
 
 const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, numberedListOrder, dataPosition, setKey }) => {
+    // common states and refs
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
+    const [titleArrayBackup, setTitleArrayBackup] = useState<string[][]>(block.properties.title)
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
     const [tag, setTag] = useState<string>(typeMapTag[block.type])
+
+    // state for To-do block
     const [toDoChecked, setToDoChecked] = useState<boolean>(block.properties.checked)
+
+    // state and extension for Code block
     const [codeLanguage, setCodeLanguage] = useState<LanguageName | "plaintext">(block.properties?.language)
     const codeExtension: Extension[] = useMemo(() => {
         // remove outline when focused (https://github.com/uiwjs/react-codemirror/issues/355#issuecomment-1178993647)
@@ -52,9 +59,29 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         }
     }, [codeLanguage])
 
-    // for menu overlay + click away
+    // state and ref for MenuOverlay
     const [menuOpen, setMenuOpen] = useState<boolean>(false)
     const menuRef = useRef<HTMLDivElement>(null)
+
+    // state for CommandOverlay
+    const [commandOverlayOpen, setCommandOverlayOpen] = useState<boolean>(false)
+    const commandOverlayRef = useRef<HTMLDivElement>(null)
+    const commandOverlayCoordinate = useMemo(() => {
+        if (commandOverlayOpen) {
+            const caretCoordinates = getCaretCoordinates()
+            const contentEditableRect = contentEditableRef.current?.getBoundingClientRect()
+            return {
+                x: caretCoordinates.caretLeft - contentEditableRect?.left + 90,
+                y: caretCoordinates.caretTop - contentEditableRect?.top
+            }
+        }
+    }, [commandOverlayOpen])
+    const caretCommandOffset = useMemo(() => {
+        if (commandOverlayOpen) {
+            const caretCharOffset = getCaretStart(contentEditableRef.current)
+            return caretCharOffset
+        }
+    }, [commandOverlayOpen])
 
     const titleParser = (htmlString: string): string[][] => {
         const newTitleArray = []
@@ -83,7 +110,6 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         const newText = e.target.value.replace("<br>", "\n")
         const newTitleArray = titleParser(newText)
         setTitleArray(newTitleArray) // to update current title properties
-
         setTitle(newText) // to update text in contentEditable (for same caret position)
     }
 
@@ -111,6 +137,11 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const onKeyDownHandler = (e: KeyboardEvent) => {
         setKey(e)
         switch (e.key) {
+            case "/": {
+                setCommandOverlayOpen(true)
+                setTitleArrayBackup(titleArray)
+                break
+            }
             case "ArrowLeft": {
                 // if caret is at start of block, move caret to end of previous block
                 // else do default behaviour
@@ -175,7 +206,8 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 break
             }
             case "Enter": {
-                if (!e.shiftKey && block.type !== "Code") {
+                console.log(commandOverlayOpen)
+                if (!e.shiftKey && !commandOverlayOpen) {
                     e.preventDefault()
                     addNextBlock({
                         id: block.id,
@@ -194,7 +226,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
 
                 if (!textBeforeCaret) {
                     e.preventDefault()
-                    if (block.type === "Bulleted List" || block.type === "Numbered List") {
+                    if (["Bulleted List", "Numbered List", "To-do List"].includes(block.type)) {
                         setTag(typeMapTag["Text"])
                     } else {
                         deleteBlock({
@@ -267,16 +299,29 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         setMenuOpen(false)
     )
 
+    useClickAway(commandOverlayRef, () =>
+        setCommandOverlayOpen(false)
+    )
 
     return (
+      <>
       <div
         data-block-id={block.id}
         className={`relative
         ${block.type === "Heading 1" && "mb-1 mt-8"}
         ${block.type === "Heading 2" && "mb-px mt-6"}
         ${block.type === "Heading 3" && "mb-px mt-4"}
-    `}
-      >
+        `}
+        >
+        {commandOverlayOpen && (
+            <CommandsOverlay
+                text={contentEditableRef.current.innerText.slice(caretCommandOffset)}
+                coordinate={commandOverlayCoordinate}
+                setCommandOverlayOpen={setCommandOverlayOpen}
+                setTag={setTag}
+                ref={commandOverlayRef}
+            />
+        )}
         {menuOpen && (
           <MenuOverlay
             activeBlockType={block.type}
@@ -327,6 +372,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
               </div>
             </Tooltip>
           </div>
+
           {["Text", "Heading 1", "Heading 2", "Heading 3"].includes(block.type)  &&
             <div className="p-1 bg-neutral-100 w-full min-w-0">
                 <ContentEditable
@@ -436,6 +482,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             }
         </div>
       </div>
+      </>
     );
 }
 

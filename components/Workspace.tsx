@@ -338,7 +338,6 @@ const Workspace = () => {
       type: "To-do List",
       properties: {
         title: [["do homework"]],
-        checked: true
       },
       children: [],
       parent: null
@@ -348,12 +347,11 @@ const Workspace = () => {
 
 
   return (
-    <div className={`flex-1`}>
+    <>
       <Head>
         <title>Notion Clone By Puwanut</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Topbar />
       <div
         className={`mt-12 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
                 ${isTop ? "overscroll-auto" : "overscroll-none"}`}
@@ -410,7 +408,7 @@ const Workspace = () => {
 
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
