@@ -12,7 +12,8 @@ export const typeMapTag = {
   "Heading 3": "h3",
   "Bulleted List": "ul",
   "Numbered List": "ol",
-  "Code": "code"
+  "Code": "code",
+  "To-do List": "to_do",
 }
 
 export const basicBlocks: DataBlock[] = [
@@ -63,6 +64,12 @@ export const basicBlocks: DataBlock[] = [
     keywords: ["code", "pre", "snippet"],
     thumbnail: "/images/thumbnails/thumb_code.png",
   },
+  {
+    name: "To-do List",
+    description: "Tracks tasks with a to-do list.",
+    keywords: ["todo", "to-do", "task", "checklist"],
+    thumbnail: "/images/thumbnails/thumb_todo.png",
+  }
   // {
   //   name: "Divider",
   //   description: "Add a horizontal line to your page.",

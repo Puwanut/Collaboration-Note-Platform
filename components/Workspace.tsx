@@ -332,7 +332,18 @@ const Workspace = () => {
       children: [],
       parent: null
     }
-    setBlocks([initialBlock, initialBlock2, initialBlock3, initialBlock4])
+
+    const initialBlock5: IEditableBlock = {
+      id: uuidv4(),
+      type: "To-do List",
+      properties: {
+        title: [["do homework"]],
+        checked: true
+      },
+      children: [],
+      parent: null
+    }
+    setBlocks([initialBlock, initialBlock2, initialBlock3, initialBlock4, initialBlock5])
   }, [])
 
 

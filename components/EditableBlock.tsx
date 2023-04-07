@@ -35,6 +35,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
     const [tag, setTag] = useState<string>(typeMapTag[block.type])
+    const [toDoChecked, setToDoChecked] = useState<boolean>(block.properties.checked)
     const [codeLanguage, setCodeLanguage] = useState<LanguageName | "plaintext">(block.properties?.language)
     const codeExtension: Extension[] = useMemo(() => {
         // remove outline when focused (https://github.com/uiwjs/react-codemirror/issues/355#issuecomment-1178993647)
@@ -181,7 +182,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                         contentEditableRef: contentEditableRef.current
                     }, {
                         actionSrc: "Enter",
-                        // block.type not in ["Heading 1", "Heading 2", "Heading 3"]
+                        // continue next block with same type of current block
                         blockType: ["Heading 1", "Heading 2", "Heading 3"].includes(block.type) ? "Text" : block.type,
                     })
                 }
@@ -247,10 +248,11 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             properties: {
                 ...block.properties,
                 title: titleArray,
-                language: codeLanguage
+                language: codeLanguage,
+                checked: toDoChecked
             }
         })
-    }, [titleArray, tag, codeLanguage])
+    }, [titleArray, tag, codeLanguage, toDoChecked])
 
     // set caret to start after block type change
     useEffect(() => {
@@ -259,8 +261,6 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             setCaretToStart(currentBlock)
         }
     }, [block.type])
-
-
 
     // Close menu when clicking outside
     useClickAway(menuRef, () =>
@@ -327,7 +327,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
               </div>
             </Tooltip>
           </div>
-          {!["Bulleted List", "Numbered List", "Code"].includes(block.type)  &&
+          {["Text", "Heading 1", "Heading 2", "Heading 3"].includes(block.type)  &&
             <div className="p-1 bg-neutral-100 w-full min-w-0">
                 <ContentEditable
                     key={dataPosition}
@@ -409,22 +409,30 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                         />
                     </div>
                 </div>
-                // <div className="flex w-full p-1 bg-neutral-100">
-                //     <pre className="w-full">
-                //     <ContentEditable
-                //         key={dataPosition}
-                //         innerRef={contentEditableRef}
-                //         html={title}
-                //         tagName={"code"}
-                //         className="w-full whitespace-pre-wrap break-words outline-none language-javascript"
-                //         style={{ wordBreak: "break-word" }} // workaround for break long words
-                //         onChange={onChangeHandler}
-                //         onKeyDown={onKeyDownHandler}
-                //         onFocus={onSelectHandler}
-                //         data-position={dataPosition}
-                //     />
-                //     </pre>
-                // </div>
+            }
+            {block.type === "To-do List" &&
+            <div className="flex w-full p-1 bg-neutral-100 min-w-0">
+                <input
+                    type="checkbox"
+                    className="ml-1 mr-2 accent-blue-500 w-5 cursor-pointer"
+                    checked={toDoChecked ?? false}
+                    onChange={(e) => setToDoChecked(e.target.checked)}
+                />
+                <ContentEditable
+                    key={dataPosition}
+                    innerRef={contentEditableRef}
+                    html={title}
+                    tagName={"div"}
+                    className={`w-full whitespace-pre-wrap break-words outline-none
+                        ${toDoChecked ? "line-through text-neutral-400" : ""}
+                    `}
+                    style={{wordBreak: "break-word"}}
+                    onChange={onChangeHandler}
+                    onKeyDown={onKeyDownHandler}
+                    onFocus={onSelectHandler}
+                    data-position={dataPosition}
+                />
+            </div>
             }
         </div>
       </div>
