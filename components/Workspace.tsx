@@ -7,6 +7,7 @@ import EditableBlock from "./EditableBlock"
 import { getCaretStart, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import Head from "next/head"
 import usePrevious from "../hooks/usePrevious"
+import { LanguageName } from "@uiw/codemirror-extensions-langs"
 
 
 export interface IEditableBlock {
@@ -15,7 +16,7 @@ export interface IEditableBlock {
   properties: {
     title: string[][] // [["text", "bold"], ["text", "italic"]
     checked?: boolean
-    language?: string
+    language?: LanguageName | "plaintext"
   }
   children?: string[]
   parent?: string

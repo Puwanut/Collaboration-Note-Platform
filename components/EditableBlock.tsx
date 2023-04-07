@@ -14,6 +14,8 @@ import { useClickAway } from "react-use"
 import ReactCodeMirror from "@uiw/react-codemirror"
 import { Extension } from "@codemirror/state"
 import { loadLanguage, langNames, LanguageName } from '@uiw/codemirror-extensions-langs';
+import { githubLightInit } from "@uiw/codemirror-themes-all"
+import { EditorView } from "@codemirror/view";
 // type LangName = typeof langNames[number]
 
 // const titleConcatenate = (titleArray: string[][]) => {
@@ -33,15 +35,23 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
     const contentEditableRef = useRef<HTMLElement>(null)
     const [tag, setTag] = useState<string>(typeMapTag[block.type])
-    const [codeLanguage, setCodeLanguage] = useState<LanguageName>(block.properties?.language)
+    const [codeLanguage, setCodeLanguage] = useState<LanguageName | "plaintext">(block.properties?.language)
     const codeExtension: Extension[] = useMemo(() => {
-        if (codeLanguage && codeLanguage !== "plaintext" as LanguageName) {
-            return [loadLanguage(codeLanguage)]
+        // remove outline when focused (https://github.com/uiwjs/react-codemirror/issues/355#issuecomment-1178993647)
+        const removedOutlineStyle = EditorView.baseTheme({
+            "&.cm-editor.cm-focused": {
+                outline: "none"
+              }
+        })
+        // load language if language is not plaintext
+        if (codeLanguage && codeLanguage !== "plaintext") {
+            return [removedOutlineStyle, loadLanguage(codeLanguage)]
         } else {
-            return []
+            return [removedOutlineStyle]
         }
     }, [codeLanguage])
 
+    // for menu overlay + click away
     const [menuOpen, setMenuOpen] = useState<boolean>(false)
     const menuRef = useRef<HTMLDivElement>(null)
 
@@ -77,6 +87,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     }
 
     const onCodeChangeHandler = (value: string, viewUpdate: any) => {
+        setTitleArray([[value]])
         console.log(value, viewUpdate)
     }
 
@@ -213,7 +224,11 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     // update when block is changed
     useEffect(() => {
         // console.log("USEEFFECT: Set Title",  `[${dataPosition}]`,block.id)
-        setTitle(titleConcatenate(block.properties.title))
+        if (block.type !== "Code") {
+            setTitle(titleConcatenate(block.properties.title))
+        } else {
+            setTitle(block.properties.title[0][0])
+        }
         setTitleArray(block.properties.title)
         // setTag(typeMapTag[block.type])
     }, [block.properties.title, block.type])
@@ -231,6 +246,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             properties: {
                 ...block.properties,
                 title: titleArray,
+                language: codeLanguage
             }
         })
     }, [titleArray, tag, codeLanguage])
@@ -377,9 +393,16 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                     <div className="w-full p-8 pr-4 bg-neutral-100 ">
                         <ReactCodeMirror
                             value={title}
-                            height="auto border-none"
-                            className=""
-                            basicSetup={true}
+                            theme={githubLightInit({
+                                settings: {
+                                    background: "var(--bg-neutral-100)"
+                                }
+                            })}
+                            basicSetup={{
+                                lineNumbers: false,
+                                highlightActiveLine: false,
+                                foldGutter: false,
+                            }}
                             extensions={codeExtension}
                             onChange={onCodeChangeHandler}
                         />
