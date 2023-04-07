@@ -87,7 +87,8 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     }
 
     const onCodeChangeHandler = (value: string, viewUpdate: any) => {
-        setTitleArray([[value]])
+        setTitleArray([[value]]) // for now can't have multiple format in code block
+        setTitle(value)
         console.log(value, viewUpdate)
     }
 
@@ -231,7 +232,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         }
         setTitleArray(block.properties.title)
         // setTag(typeMapTag[block.type])
-    }, [block.properties.title, block.type])
+    }, [block.properties.title])
 
     useEffect(() => {
         setCodeLanguage(block.properties.language)
