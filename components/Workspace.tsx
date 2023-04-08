@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react"
 import { ReactSortable } from "react-sortablejs"
-import Topbar from "./Topbar"
-// import CommandsOverlay from "./CommandsOverlay"/
 import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
 import { getCaretStart, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
@@ -26,18 +24,6 @@ interface ICurrentBlock {
   id: string
   contentEditableRef: HTMLElement
 }
-
-
-
-// const initialBlock: IEditableBlock = {
-//   id: uuidv4(),
-//   type: "text",
-//   properties: {
-//     title: []
-//   },
-//   children: [],
-//   parent: null
-// }
 
 // titleSlice function
 // input
@@ -136,6 +122,7 @@ const Workspace = () => {
           id: uuidv4(),
           type: options.blockType,
           properties: {
+            ...prevState[currentBlockIndex].properties,
             title: titleSlice(prevState[currentBlockIndex].properties.title, currentCaretPosition)
           },
           children: [],
@@ -144,6 +131,7 @@ const Workspace = () => {
         const updatedCurrentBlock = {
           ...prevState[currentBlockIndex],
           properties: {
+            ...prevState[currentBlockIndex].properties,
             title: titleSlice(prevState[currentBlockIndex].properties.title, 0, currentCaretPosition)
           }
         }
@@ -154,7 +142,7 @@ const Workspace = () => {
           ...prevState.slice(currentBlockIndex + 1)
         ]
       })
-    } else if (options.actionSrc === "MenuClick") {
+    } else if (options.actionSrc === "MenuClick" || options.actionSrc === "CommandSelect") {
       setCurrentSelectedBlock(currentBlock.contentEditableRef)
       setBlocks(prevState => {
         const newBlock = {
@@ -194,8 +182,6 @@ const Workspace = () => {
         ]
       })
     }
-    // currentSelectedBlock.current = currentBlock.contentEditableRef
-    // for set focus to new block
   }
 
   const deleteBlockHandler = (currentBlock: ICurrentBlock, key?: string) => {
@@ -266,6 +252,7 @@ const Workspace = () => {
       if (nextBlock) {
         setCurrentSelectedBlock(nextBlock)
         setCaretToStart(nextBlock)
+        nextBlock.scrollIntoView({ behavior: "smooth", block: "center" })
       }
     }
     else if (previousBlocks && previousBlocks.length - 1 === blocks.length){
@@ -326,7 +313,7 @@ const Workspace = () => {
       id: uuidv4(),
       type: "Code",
       properties: {
-        title: [["const a = 1\nconst b = 2\nconsole.log(a+b)"]],
+        title: [["const a = 1\nconst b = 2 ; ; ; ; ; ;  ;;d fsd;ds fsdfsddsdfdf sdfsd sd fsdf sdf sdf sdf d\nconsole.log(a+b)"]],
         language: "javascript"
       },
       children: [],
@@ -359,17 +346,8 @@ const Workspace = () => {
           e.currentTarget.scrollTop == 0 ? setIsTop(true) : setIsTop(false)
         }
       >
-        <div className="container mb-16 px-4 pt-8 pb-4 lg:max-w-screen-md">
-          <h1 className="mb-5 text-5xl font-bold">Home Page</h1>
-          <p>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ipsam
-            quisquam aliquam cupiditate ab saepe dolorum doloremque doloribus
-            eligendi repellendus deserunt voluptas laboriosam unde ut quae
-            dicta, minima placeat quo commodi! Lorem ipsum dolor, sit amet
-            consectetur adipisicing elit. Ipsam quisquam aliquam cupiditate ab
-            saepe dolorum doloremque doloribus eligendi repellendus deserunt
-            voluptas laboriosam unde ut quae dicta, minima placeat quo commodi!
-          </p>
+        <div className="mx-auto mb-16 px-4 pt-8 pb-4 max-w-screen-md">
+          <h1 id="page-title" className="ml-14 mb-5 text-5xl font-bold">Home Page</h1>
           <br />
           <div className="revert-global">
             <ReactSortable
@@ -390,7 +368,6 @@ const Workspace = () => {
               {blocks.map((block, index) => {
                 const numberedListOrder = getNumberedListOrder(index)
                 return (
-                // {showCommands && <CommandsOverlay text={commandText} />}
                 <EditableBlock
                   key={block.id}
                   block={block}

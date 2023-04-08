@@ -52,6 +52,7 @@ export const setCaretToEnd = (element: HTMLElement) => {
 }
 
 export const setCaretToStart = (element: HTMLElement) => {
+  if (element) {
     const range = document.createRange()
     const selection = window.getSelection()
     range.selectNodeContents(element)
@@ -59,6 +60,7 @@ export const setCaretToStart = (element: HTMLElement) => {
     selection.removeAllRanges()
     selection.addRange(range)
     element.focus()
+  }
 }
 
 // export const setCaretToaPosition = (element: HTMLElement, caretPosition: number) => {

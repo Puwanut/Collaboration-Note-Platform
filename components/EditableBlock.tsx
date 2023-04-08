@@ -1,11 +1,9 @@
-import { useRef, useEffect, KeyboardEvent, useState, useMemo } from "react"
+import { useRef, useEffect, KeyboardEvent, useState, useMemo, useCallback } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretCoordinates, getCaretStart, isCaretOnBottom, isCaretOnTop, moveCaret, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
-import * as htmlparser2 from "htmlparser2"
-import { decodeHTML } from "entities"
 import { faGripVertical, faPlus } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { titleConcatenate } from "../lib/titleConcatenate"
+import { titleConcatenate, titleParser } from "../lib/manageTitle"
 import { Tooltip } from "react-tooltip"
 import MenuOverlay from "./MenuOverlay"
 import { typeMapTag } from "../shared/blockType"
@@ -17,25 +15,13 @@ import { loadLanguage, langNames, LanguageName } from '@uiw/codemirror-extension
 import { githubLightInit } from "@uiw/codemirror-themes-all"
 import { EditorView } from "@codemirror/view";
 import CommandsOverlay from "./CommandsOverlay"
-// type LangName = typeof langNames[number]
 
-// const titleConcatenate = (titleArray: string[][]) => {
-//     const text = titleArray.map((textArray) => {
-//         const textType = textArray?.[1]
-//         const textContent = escapeUTF8(textArray[0]).replace(/&apos;/g, "'").replace(/&quot;/g, '"')
-//         if (textType) {
-//             return `<${textType}>${textContent}</${textType}>`
-//         }
-//         return textContent
-//     })
-//     return text.join("")
-// }
 
 const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurrentSelectedBlock, numberedListOrder, dataPosition, setKey }) => {
     // common states and refs
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties.title)
     const [titleArrayBackup, setTitleArrayBackup] = useState<string[][]>(block.properties.title)
-    const [title, setTitle] = useState<string>(titleConcatenate(block.properties.title))
+    const title = useMemo(() => titleConcatenate(titleArray), [titleArray])
     const contentEditableRef = useRef<HTMLElement>(null)
     const [tag, setTag] = useState<string>(typeMapTag[block.type])
 
@@ -65,43 +51,26 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
 
     // state for CommandOverlay
     const [commandOverlayOpen, setCommandOverlayOpen] = useState<boolean>(false)
+    const isCommandOverlayOpen = useRef<boolean>(false) // workaround for react-contenteditable's onkeydown event
     const commandOverlayRef = useRef<HTMLDivElement>(null)
     const commandOverlayCoordinate = useMemo(() => {
         if (commandOverlayOpen) {
             const caretCoordinates = getCaretCoordinates()
             const contentEditableRect = contentEditableRef.current?.getBoundingClientRect()
+            const windowHeight = window.innerHeight
+            // if caret Coordinates too close to bottom of window, move overlay to top of caret
+            if (caretCoordinates.caretTop > windowHeight / 2) {
+                return {
+                    x: caretCoordinates.caretLeft - contentEditableRect?.left + 90,
+                    y: caretCoordinates.caretTop - contentEditableRect?.top - 275
+                }
+            }
             return {
                 x: caretCoordinates.caretLeft - contentEditableRect?.left + 90,
                 y: caretCoordinates.caretTop - contentEditableRect?.top
             }
         }
     }, [commandOverlayOpen])
-    const caretCommandOffset = useMemo(() => {
-        if (commandOverlayOpen) {
-            const caretCharOffset = getCaretStart(contentEditableRef.current)
-            return caretCharOffset
-        }
-    }, [commandOverlayOpen])
-
-    const titleParser = (htmlString: string): string[][] => {
-        const newTitleArray = []
-        let currentTag = ""
-        // parse html to array
-        const parser = new htmlparser2.Parser({
-            onopentag: (tagname) => {
-                currentTag = tagname
-            },
-            ontext: (text) => {
-                newTitleArray.push(!currentTag ? [decodeHTML(text)] : [decodeHTML(text), currentTag])
-            },
-            onclosetag: () => {
-                currentTag = ""
-            }
-        }, { decodeEntities: false }) // to prevent html entities from being decoded (e.g. &lt; to <)
-        parser.write(htmlString)
-        parser.end()
-        return newTitleArray
-    }
 
     const onChangeHandler = (e: ContentEditableEvent) => {
         // prevent <br> from being added to contentEditable after deleting text until line is blank
@@ -110,13 +79,11 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         const newText = e.target.value.replace("<br>", "\n")
         const newTitleArray = titleParser(newText)
         setTitleArray(newTitleArray) // to update current title properties
-        setTitle(newText) // to update text in contentEditable (for same caret position)
+        // setTitle(newText) // to update text in contentEditable (for same caret position)
     }
 
-    const onCodeChangeHandler = (value: string, viewUpdate: any) => {
+    const onCodeChangeHandler = (value: string) => {
         setTitleArray([[value]]) // for now can't have multiple format in code block
-        setTitle(value)
-        console.log(value, viewUpdate)
     }
 
     const onSelectHandler = () => {
@@ -124,13 +91,33 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         // currentSelectedBlock.current = contentEditableRef.current
     }
 
+    const onSelectCommandHandler = useCallback((type: string) => {
+        if (type) {
+            if (titleArrayBackup.length === 0 || titleArrayBackup[0][0] === "") {
+                // if line is empty, restore title and set tag of current block
+                setTitleArray([])
+                setTag(typeMapTag[type])
+            } else {
+                // if line is not empty, restore current block and add new block
+                setTitleArray(titleArrayBackup)
+                addNextBlock({
+                    id: block.id,
+                    contentEditableRef: contentEditableRef.current
+                }, {
+                    actionSrc: "CommandSelect",
+                    blockType: type,
+                })
+            }
+            setCommandOverlayOpen(false)
+        }
+    }, [addNextBlock, block.id, titleArrayBackup])
+
     const handleDeleteLineBreak = (e: KeyboardEvent) => {
         const input = e.target as HTMLInputElement
         const countNewLine = input.innerText.match(/\n*$/g)[0].length // count number of new line at the end of text
         if (input.innerText.endsWith("\n\n") && countNewLine === 2) {
             e.preventDefault()
             setTitleArray(titleParser(e.currentTarget.innerHTML.replace("\n\n", "")))
-            setTitle(e.currentTarget.innerHTML.replace("\n\n", ""))
         }
     }
 
@@ -139,7 +126,6 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
         switch (e.key) {
             case "/": {
                 setCommandOverlayOpen(true)
-                setTitleArrayBackup(titleArray)
                 break
             }
             case "ArrowLeft": {
@@ -173,7 +159,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             case "ArrowUp": {
                 // if caret is on top of block, move caret to same x of previous block
                 // else do default behaviour
-                if (isCaretOnTop()) {
+                if (isCaretOnTop() && !isCommandOverlayOpen.current) {
                     console.log("Top")
                     e.preventDefault()
                     const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
@@ -191,7 +177,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
             case "ArrowDown": {
                 // if caret is on bottom of block, move caret to same x of next block
                 // else do default behaviour
-                if (isCaretOnBottom()) {
+                if (isCaretOnBottom() && !isCommandOverlayOpen.current) {
                     console.log("Bottom")
                     e.preventDefault()
                     const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
@@ -206,8 +192,7 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
                 break
             }
             case "Enter": {
-                console.log(commandOverlayOpen)
-                if (!e.shiftKey && !commandOverlayOpen) {
+                if (!e.shiftKey && !isCommandOverlayOpen.current) {
                     e.preventDefault()
                     addNextBlock({
                         id: block.id,
@@ -257,21 +242,14 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
 
     // update when block is changed
     useEffect(() => {
-        // console.log("USEEFFECT: Set Title",  `[${dataPosition}]`,block.id)
-        if (block.type !== "Code") {
-            setTitle(titleConcatenate(block.properties.title))
-        } else {
-            setTitle(block.properties.title[0][0])
-        }
         setTitleArray(block.properties.title)
-        // setTag(typeMapTag[block.type])
     }, [block.properties.title])
 
     useEffect(() => {
         setCodeLanguage(block.properties.language)
     }, [block.properties.language])
 
-    // update blocks in parent
+   // update blocks in parent
     useEffect(() => {
         console.log("USEEFFECT 2: UpdatePage", `[${dataPosition}], [${block.id}]`)
         updatePage({
@@ -289,199 +267,209 @@ const EditableBlock = ({ block, updatePage, addNextBlock, deleteBlock, setCurren
     // set caret to start after block type change
     useEffect(() => {
         const currentBlock = document.querySelector(`[data-position="${dataPosition}"]`) as HTMLElement
+
+        // to be improved
         if (block.type !== "Code") {
             setCaretToStart(currentBlock)
         }
     }, [block.type])
+
+    useEffect(() => {
+        isCommandOverlayOpen.current = commandOverlayOpen
+        if (commandOverlayOpen) {
+            setTitleArrayBackup(titleArray)
+        }
+    }, [commandOverlayOpen])
 
     // Close menu when clicking outside
     useClickAway(menuRef, () =>
         setMenuOpen(false)
     )
 
+    // Close command overlay when clicking outside
     useClickAway(commandOverlayRef, () =>
         setCommandOverlayOpen(false)
     )
 
     return (
       <>
-      <div
-        data-block-id={block.id}
-        className={`relative
-        ${block.type === "Heading 1" && "mb-1 mt-8"}
-        ${block.type === "Heading 2" && "mb-px mt-6"}
-        ${block.type === "Heading 3" && "mb-px mt-4"}
-        `}
-        >
-        {commandOverlayOpen && (
-            <CommandsOverlay
-                text={contentEditableRef.current.innerText.slice(caretCommandOffset)}
-                coordinate={commandOverlayCoordinate}
-                setCommandOverlayOpen={setCommandOverlayOpen}
-                setTag={setTag}
-                ref={commandOverlayRef}
-            />
-        )}
-        {menuOpen && (
-          <MenuOverlay
-            activeBlockType={block.type}
-            setTag={setTag}
-            setMenuOpen={setMenuOpen}
-            deleteBlock={() => deleteBlock({ id: block.id, contentEditableRef: contentEditableRef.current })}
-            ref={menuRef}
-          />
-        )}
-        <div className="group/button mb-1 flex w-full">
-          <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 group-hover/button:opacity-100">
-            <FontAwesomeIcon
-              icon={faPlus}
-              className="cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
-              onClick={(e) => {
-                e.altKey ?
-                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, {actionSrc: "MenuAltClick"}) :
-                addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, {actionSrc: "MenuClick"})
-            }}
-              data-tooltip-id="tooltip-add-block"
-              data-tooltip-delay-show={200}
-            />
-            <FontAwesomeIcon
-              icon={faGripVertical}
-              className="handle cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
-              data-tooltip-id="tooltip-menu"
-              data-tooltip-delay-show={200}
-              onClick={() => setMenuOpen((prev) => !prev)}
-            />
-            <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
-              <div className="text-center text-xs font-bold text-neutral-400">
-                <p>
-                    <span className="text-neutral-100">Click</span> to add a block below
-                </p>
-                <p>
-                    <span className="text-neutral-100">Alt-click</span> to add a block above
-                </p>
-              </div>
-            </Tooltip>
-            <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>
-              <div className="text-center text-xs font-bold text-neutral-400">
-                <p>
-                  <span className="text-neutral-100">Drag</span> to move
-                </p>
-                <p>
-                  <span className="text-neutral-100">Click</span> to open menu
-                </p>
-              </div>
-            </Tooltip>
-          </div>
-
-          {["Text", "Heading 1", "Heading 2", "Heading 3"].includes(block.type)  &&
-            <div className="p-1 bg-neutral-100 w-full min-w-0">
-                <ContentEditable
-                    key={dataPosition}
-                    innerRef={contentEditableRef}
-                    html={title}
-                    tagName={tag}
-                    className="whitespace-pre-wrap break-words outline-none"
-                    style={{wordBreak: "break-word"}}
-                    onChange={onChangeHandler}
-                    onKeyDown={onKeyDownHandler}
-                    onFocus={onSelectHandler}
-                    data-position={dataPosition}
+        <div
+            data-block-id={block.id}
+            className={`relative
+            ${block.type === "Heading 1" && "mb-1 mt-8"}
+            ${block.type === "Heading 2" && "mb-px mt-6"}
+            ${block.type === "Heading 3" && "mb-px mt-4"}
+            `}
+            >
+            {commandOverlayOpen && (
+                <CommandsOverlay
+                    coordinate={commandOverlayCoordinate}
+                    setCommandOverlayOpen={setCommandOverlayOpen}
+                    handleTagSelection={onSelectCommandHandler}
+                    ref={commandOverlayRef}
                 />
+            )}
+            {menuOpen && (
+            <MenuOverlay
+                activeBlockType={block.type}
+                setTag={setTag}
+                setMenuOpen={setMenuOpen}
+                deleteBlock={() => deleteBlock({ id: block.id, contentEditableRef: contentEditableRef.current })}
+                ref={menuRef}
+            />
+            )}
+            <div className="group/button mb-1 flex w-full">
+            <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 group-hover/button:opacity-100">
+                <FontAwesomeIcon
+                icon={faPlus}
+                className="cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+                onClick={(e) => {
+                    e.altKey ?
+                    addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, {actionSrc: "MenuAltClick"}) :
+                    addNextBlock({ id: block.id, contentEditableRef: contentEditableRef.current }, {actionSrc: "MenuClick"})
+                }}
+                data-tooltip-id="tooltip-add-block"
+                data-tooltip-delay-show={200}
+                />
+                <FontAwesomeIcon
+                icon={faGripVertical}
+                className="handle cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+                data-tooltip-id="tooltip-menu"
+                data-tooltip-delay-show={200}
+                onClick={() => setMenuOpen((prev) => !prev)}
+                />
+                <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
+                <div className="text-center text-xs font-bold text-neutral-400">
+                    <p>
+                        <span className="text-neutral-100">Click</span> to add a block below
+                    </p>
+                    <p>
+                        <span className="text-neutral-100">Alt-click</span> to add a block above
+                    </p>
+                </div>
+                </Tooltip>
+                <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>
+                <div className="text-center text-xs font-bold text-neutral-400">
+                    <p>
+                    <span className="text-neutral-100">Drag</span> to move
+                    </p>
+                    <p>
+                    <span className="text-neutral-100">Click</span> to open menu
+                    </p>
+                </div>
+                </Tooltip>
             </div>
-            }
-            {block.type === "Bulleted List" &&
-                <div className="flex w-full p-1 bg-neutral-100 min-w-0">
-                    <span className="mx-2 before:content-['•'] text-[1.5rem] leading-6 "></span>
-                    <ContentEditable
-                        key={dataPosition}
-                        innerRef={contentEditableRef}
-                        html={title}
-                        tagName={"div"}
-                        className="w-full whitespace-pre-wrap break-words outline-none"
-                        style={{wordBreak: "break-word"}}
-                        onChange={onChangeHandler}
-                        onKeyDown={onKeyDownHandler}
-                        onFocus={onSelectHandler}
-                        data-position={dataPosition}
-                    />
-                </div>
-            }
-            {block.type === "Numbered List" &&
-                <div className="flex w-full p-1 bg-neutral-100 min-w-0">
-                    <span data-numbered-list-order={numberedListOrder + '.'} className="mx-2 before:content-[attr(data-numbered-list-order)]"></span>
-                    <ContentEditable
-                        key={dataPosition}
-                        innerRef={contentEditableRef}
-                        html={title}
-                        tagName={"div"}
-                        className="w-full whitespace-pre-wrap break-words outline-none"
-                        style={{wordBreak: "break-word"}}
-                        onChange={onChangeHandler}
-                        onKeyDown={onKeyDownHandler}
-                        onFocus={onSelectHandler}
-                        data-position={dataPosition}
-                    />
-                </div>
-            }
-            {block.type === "Code" &&
-                <div className="relative w-full min-w-0">
-                    <select
-                        className="absolute m-2 px-1 text-sm text-neutral-500 bg-transparent hover:bg-neutral-200 rounded-md outline-none"
-                        value={codeLanguage ?? "plaintext"}
-                        onChange={(e) => setCodeLanguage(e.target.value as LanguageName)}
-                    >
-                        <option value="plaintext">plaintext</option>
-                        {langNames.map((langName, index) => (
-                            <option key={index} value={langName}>{langName}</option>
-                            ))
-                        }
-                    </select>
 
-                    <div className="w-full p-8 pr-4 bg-neutral-100 ">
-                        <ReactCodeMirror
-                            value={title}
-                            theme={githubLightInit({
-                                settings: {
-                                    background: "var(--bg-neutral-100)"
-                                }
-                            })}
-                            basicSetup={{
-                                lineNumbers: false,
-                                highlightActiveLine: false,
-                                foldGutter: false,
-                            }}
-                            extensions={codeExtension}
-                            onChange={onCodeChangeHandler}
+            {["Text", "Heading 1", "Heading 2", "Heading 3"].includes(block.type)  &&
+                <div className="p-1 bg-neutral-100 w-full min-w-0">
+                    <ContentEditable
+                        key={dataPosition}
+                        innerRef={contentEditableRef}
+                        html={title}
+                        tagName={tag}
+                        className="whitespace-pre-wrap break-words outline-none"
+                        style={{wordBreak: "break-word"}}
+                        onChange={onChangeHandler}
+                        onKeyDown={onKeyDownHandler}
+                        onFocus={onSelectHandler}
+                        data-position={dataPosition}
+                    />
+                </div>
+                }
+                {block.type === "Bulleted List" &&
+                    <div className="flex w-full p-1 bg-neutral-100 min-w-0">
+                        <span className="mx-2 before:content-['•'] text-[1.5rem] leading-6 "></span>
+                        <ContentEditable
+                            key={dataPosition}
+                            innerRef={contentEditableRef}
+                            html={title}
+                            tagName={"div"}
+                            className="w-full whitespace-pre-wrap break-words outline-none"
+                            style={{wordBreak: "break-word"}}
+                            onChange={onChangeHandler}
+                            onKeyDown={onKeyDownHandler}
+                            onFocus={onSelectHandler}
+                            data-position={dataPosition}
                         />
                     </div>
-                </div>
-            }
-            {block.type === "To-do List" &&
-            <div className="flex w-full p-1 bg-neutral-100 min-w-0">
-                <input
-                    type="checkbox"
-                    className="ml-1 mr-2 accent-blue-500 w-5 cursor-pointer"
-                    checked={toDoChecked ?? false}
-                    onChange={(e) => setToDoChecked(e.target.checked)}
-                />
-                <ContentEditable
-                    key={dataPosition}
-                    innerRef={contentEditableRef}
-                    html={title}
-                    tagName={"div"}
-                    className={`w-full whitespace-pre-wrap break-words outline-none
-                        ${toDoChecked ? "line-through text-neutral-400" : ""}
-                    `}
-                    style={{wordBreak: "break-word"}}
-                    onChange={onChangeHandler}
-                    onKeyDown={onKeyDownHandler}
-                    onFocus={onSelectHandler}
-                    data-position={dataPosition}
-                />
+                }
+                {block.type === "Numbered List" &&
+                    <div className="flex w-full p-1 bg-neutral-100 min-w-0">
+                        <span data-numbered-list-order={numberedListOrder + '.'} className="mx-2 before:content-[attr(data-numbered-list-order)]"></span>
+                        <ContentEditable
+                            key={dataPosition}
+                            innerRef={contentEditableRef}
+                            html={title}
+                            tagName={"div"}
+                            className="w-full whitespace-pre-wrap break-words outline-none"
+                            style={{wordBreak: "break-word"}}
+                            onChange={onChangeHandler}
+                            onKeyDown={onKeyDownHandler}
+                            onFocus={onSelectHandler}
+                            data-position={dataPosition}
+                        />
+                    </div>
+                }
+                {block.type === "Code" &&
+                    <div className="relative w-full min-w-0">
+                        <select
+                            className="absolute m-2 px-1 text-sm text-neutral-500 bg-transparent hover:bg-neutral-200 rounded-md outline-none"
+                            value={codeLanguage ?? "plaintext"}
+                            onChange={(e) => setCodeLanguage(e.target.value as LanguageName)}
+                        >
+                            <option value="plaintext">plaintext</option>
+                            {langNames.sort().map((langName, index) => (
+                                <option key={index} value={langName}>{langName}</option>
+                                ))
+                            }
+                        </select>
+
+                        <div className="w-full p-8 pr-4 bg-neutral-100 ">
+                            <ReactCodeMirror
+                                value={title}
+                                theme={githubLightInit({
+                                    settings: {
+                                        background: "var(--bg-neutral-100)"
+                                    }
+                                })}
+                                basicSetup={{
+                                    lineNumbers: false,
+                                    highlightActiveLine: false,
+                                    foldGutter: false,
+                                }}
+                                extensions={codeExtension}
+                                onChange={onCodeChangeHandler}
+                                // data-position={dataPosition}
+                            />
+                        </div>
+                    </div>
+                }
+                {block.type === "To-do List" &&
+                    <div className="flex w-full p-1 bg-neutral-100 min-w-0">
+                        <input
+                            type="checkbox"
+                            className="ml-1 mr-2 accent-blue-500 w-5 h-6 cursor-pointer"
+                            checked={toDoChecked ?? false}
+                            onChange={(e) => setToDoChecked(e.target.checked)}
+                        />
+                        <ContentEditable
+                            key={dataPosition}
+                            innerRef={contentEditableRef}
+                            html={title}
+                            tagName={"div"}
+                            className={`w-full whitespace-pre-wrap break-words outline-none
+                                ${toDoChecked ? "line-through text-neutral-400" : ""}
+                            `}
+                            style={{wordBreak: "break-word"}}
+                            onChange={onChangeHandler}
+                            onKeyDown={onKeyDownHandler}
+                            onFocus={onSelectHandler}
+                            data-position={dataPosition}
+                        />
+                    </div>
+                }
             </div>
-            }
         </div>
-      </div>
       </>
     );
 }

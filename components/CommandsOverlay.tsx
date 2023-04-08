@@ -1,28 +1,25 @@
-import { Dispatch, SetStateAction, forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { basicBlocks, typeMapTag } from "../shared/blockType"
+import { Dispatch, SetStateAction, forwardRef, useCallback, useEffect, useMemo, useState } from "react"
+import { basicBlocks } from "../shared/blockType"
 import Image from "next/image"
 
 interface ICommandsOverlayProps {
-  text: string
   coordinate: { x: number, y: number }
-  setTag: Dispatch<SetStateAction<string>>
+  // eslint-disable-next-line no-unused-vars
+  handleTagSelection: (type: string) => void
   setCommandOverlayOpen: Dispatch<SetStateAction<boolean>>
 }
 
 const notFoundLimit: number = 3
 
 const CommandsOverlay = forwardRef<HTMLDivElement, ICommandsOverlayProps>(function CommandsOverlay({
-  text,
   coordinate,
-  setTag,
+  handleTagSelection,
   setCommandOverlayOpen
 }, ref) {
   // activeIndex is the index of the command that is currently being hovered over
   const [activeIndex, setActiveIndex] = useState<number>(0)
-  const [userCommand, setUserCommand] = useState<string>("/")
-  const [countCharCommand, setCountCharCommand] = useState(0)
-  const [notFoundCount, setNotFoundCount] = useState(0)
-  const prevCharLength = useRef(text.length)
+  const [userCommand, setUserCommand] = useState<string>("")
+  const [notFoundCount, setNotFoundCount] = useState<number>(0)
 
   // filter when userCommand changes only
   const filteredCommandsByName = useMemo(() => basicBlocks.filter((command) =>
@@ -45,76 +42,52 @@ const CommandsOverlay = forwardRef<HTMLDivElement, ICommandsOverlayProps>(functi
       case "ArrowUp":
         e.preventDefault()
         setActiveIndex(prev => Math.max(0, prev - 1))
-        document.getElementsByClassName("command-active")[0].scrollIntoView({ block: "center"})
+        document.getElementsByClassName("command-active")[0]?.scrollIntoView({ block: "center"}) // optional just in case nothing is active
         break
       case "ArrowDown":
         e.preventDefault()
         setActiveIndex(prev => Math.min(prev + 1, filteredCommands.length - 1))
-        document.getElementsByClassName("command-active")[0].scrollIntoView({ block: "center"})
+        document.getElementsByClassName("command-active")[0]?.scrollIntoView({ block: "center"})
+        break
+      case "Backspace":
+        if (userCommand.length > 1) {
+          setUserCommand(prev => prev.slice(0, -1))
+        } else {
+          setCommandOverlayOpen(false)
+        }
         break
       case "Enter":
         e.preventDefault()
-        console.log(filteredCommands)
-        setTag(typeMapTag[filteredCommands[activeIndex].name])
-        // setCommandOverlayOpen(false)
+        handleTagSelection(filteredCommands[activeIndex]?.name)
         break
       case "Escape":
         e.preventDefault()
         setCommandOverlayOpen(false)
         break
       default:
-        break
+        // add key to userCommand
+        setUserCommand(prev => prev + e.key)
+        // always set activeIndex to 0 when user type
+        setActiveIndex(0)
+        if (filteredCommands.length === 0) {
+          setNotFoundCount(prev => prev + 1)
+        } else {
+          setNotFoundCount(0)
+        }
     }
-  }, [filteredCommands, setTag, activeIndex, setCommandOverlayOpen])
+  }, [userCommand, handleTagSelection, filteredCommands, activeIndex, setCommandOverlayOpen])
 
-  useEffect(() => {
-    // count char for slice userCommand
-    if (text.length > prevCharLength.current) {
-      setCountCharCommand(prev => prev + 1)
-    } else if (text.length < prevCharLength.current) {
-      setCountCharCommand(prev => prev - 1)
-    }
-
-    // auto close when not found command over limit
-    if (filteredCommands.length === 0) {
-      if (text.length < prevCharLength.current) {
-        setNotFoundCount((prev) => prev - 1);
-      } else {
-        setNotFoundCount((prev) => prev + 1);
-      }
-    } else {
-      setNotFoundCount(0);
-    }
-
-    prevCharLength.current = text.length
-  }, [text])
-
-  useEffect(() => {
-    setUserCommand(text.slice(0, countCharCommand))
-  }, [countCharCommand])
-
-  useEffect(() => {
-    setUserCommand("/")
-  }, [])
-
-  useEffect(() => {
-    console.log("userCommand", userCommand)
-    if (userCommand === "") {
-      setCommandOverlayOpen(false)
-    } else {
-      setCommandOverlayOpen(true)
-    }
-  }, [userCommand])
-
-  useEffect(() => {
+   useEffect(() => {
     if (notFoundCount > notFoundLimit) {
       setCommandOverlayOpen(false)
     }
-  }, [notFoundCount])
+  }, [notFoundCount, setCommandOverlayOpen])
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+    }
   }, [handleKeyDown])
 
   return (
@@ -131,7 +104,7 @@ const CommandsOverlay = forwardRef<HTMLDivElement, ICommandsOverlayProps>(functi
           }`}
           key={command.name}
           onMouseOver={() => setActiveIndex(index)}
-          onClick={() => setTag(typeMapTag[command.name])}
+          onClick={() => handleTagSelection(command.name)}
         >
           <div className="relative h-9 w-9 rounded-md border-[1px]">
             <Image
