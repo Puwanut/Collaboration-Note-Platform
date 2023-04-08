@@ -313,7 +313,7 @@ const Workspace = () => {
       id: uuidv4(),
       type: "Code",
       properties: {
-        title: [["const a = 1\nconst b = 2 ; ; ; ; ; ;  ;;d fsd;ds fsdfsddsdfdf sdfsd sd fsdf sdf sdf sdf d\nconsole.log(a+b)"]],
+        title: [["const a = 1\nconst b = 2\nconsole.log(a+b)"]],
         language: "javascript"
       },
       children: [],
