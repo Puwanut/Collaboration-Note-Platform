@@ -6,6 +6,7 @@ import { getCaretStart, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import Head from "next/head"
 import usePrevious from "../hooks/usePrevious"
 import { LanguageName } from "@uiw/codemirror-extensions-langs"
+import { titleSlice } from "../lib/manageTitle"
 
 
 export interface IEditableBlock {
@@ -25,79 +26,16 @@ interface ICurrentBlock {
   contentEditableRef: HTMLElement
 }
 
-// titleSlice function
-// input
-// titleArray: [["normal"], ["testbold", "b"], ["testitalic", "i"]]
-// start: 10
-// end: null
-// output
-// [["bold", "b"], ["testitalic", "i"]]
-
-// input
-// titleArray: [["normal"], ["testbold", "b"], ["testitalic", "i"]]
-// start: 0
-// end: 10
-// output
-// [["normal"], ["test", "b"]]
-
-
-const titleSlice = (titleArray: string[][], start: number, end?: number) => {
-  let currentLength = 0
-  const titleUpdatedArray = [...titleArray]
-  for (let index = 0; index < titleArray.length; index++) {
-    const textArray = titleArray[index] // ['456']
-    const textLength = textArray[0].length
-    // Slice title for new block
-    if (currentLength + textLength > start && end === undefined) { // 3 >= 10
-      const format = textArray?.[1]
-      if (format) {
-        titleUpdatedArray[index] = [textArray[0].substring(start - currentLength), format]
-      } else {
-        titleUpdatedArray[index] = [textArray[0].substring(start - currentLength)]
-      }
-      return titleUpdatedArray.slice(index)
-    }
-    // Slice title for current block
-    else if (currentLength + textLength >= end && end !== undefined) {
-      const format = textArray?.[1]
-      if (format) {
-        titleUpdatedArray[index] = [textArray[0].substring(0, end - currentLength), format]
-      } else {
-        titleUpdatedArray[index] = [textArray[0].substring(0, end - currentLength)]
-      }
-      return titleUpdatedArray.slice(0, index + 1)
-    }
-    currentLength += textLength
-  }
-  return []
-}
-
 const Workspace = () => {
-  // const [markdown, setMarkdown] = useState<any>("")
   const [isTop, setIsTop] = useState<boolean>(true)
-  // const [commandText, setCommandText] = useState<string>("")
   const [blocks, setBlocks] = useState<IEditableBlock[]>([])
-  // const [showCommands, setShowCommands] = useState(false)
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
-  // const currentSelectedBlock = useRef<HTMLElement>(null) // useRef for unnessary re-render
   const [key, setKey] = useState<KeyboardEvent>(null)
   const [previousBlocks, titlesLength] = usePrevious(blocks)
 
-  // const handleEdit = (e: FormEvent) => {
-  //   const target = e.target as HTMLInputElement
-  //   setMarkdown(target.innerText)
-  //   setCommandText(target.innerText)
-  //   // set cursor position next to the user's input
-  //   if (target.innerText.startsWith("/")) {
-  //     setShowCommands(true)
-  //   } else {
-  //     setShowCommands(false)
-  //   }
-  // }
-
   // Send update function to EditableBlock
-  const updatePageHandler = (updatedBlock: IEditableBlock) => {
-
+  const updateBlocksHandler = (updatedBlock: IEditableBlock) => {
+    console.log("update page")
     setBlocks(prevState => {
       const updatedBlocks = prevState.map(block => {
         if (block.id === updatedBlock.id) {
@@ -122,7 +60,6 @@ const Workspace = () => {
           id: uuidv4(),
           type: options.blockType,
           properties: {
-            ...prevState[currentBlockIndex].properties,
             title: titleSlice(prevState[currentBlockIndex].properties.title, currentCaretPosition)
           },
           children: [],
@@ -322,9 +259,9 @@ const Workspace = () => {
 
     const initialBlock5: IEditableBlock = {
       id: uuidv4(),
-      type: "To-do List",
+      type: "Text",
       properties: {
-        title: [["do homework"]],
+        title: [[""]],
       },
       children: [],
       parent: null
@@ -346,7 +283,7 @@ const Workspace = () => {
           e.currentTarget.scrollTop == 0 ? setIsTop(true) : setIsTop(false)
         }
       >
-        <div className="mx-auto mb-16 px-4 pt-8 pb-4 max-w-screen-md">
+        <div className="mx-auto mb-16 px-4 pt-8 pb-24 max-w-screen-md">
           <h1 id="page-title" className="ml-14 mb-5 text-5xl font-bold">Home Page</h1>
           <br />
           <div className="revert-global">
@@ -368,17 +305,17 @@ const Workspace = () => {
               {blocks.map((block, index) => {
                 const numberedListOrder = getNumberedListOrder(index)
                 return (
-                <EditableBlock
-                  key={block.id}
-                  block={block}
-                  updatePage={updatePageHandler}
-                  addNextBlock={addBlockHandler}
-                  deleteBlock={deleteBlockHandler}
-                  setCurrentSelectedBlock={setCurrentSelectedBlock}
-                  numberedListOrder={numberedListOrder}
-                  dataPosition={index}
-                  setKey={setKey}
-                />
+                  <EditableBlock
+                    key={block.id}
+                    block={block}
+                    updateBlocks={updateBlocksHandler}
+                    addNextBlock={addBlockHandler}
+                    deleteBlock={deleteBlockHandler}
+                    setCurrentSelectedBlock={setCurrentSelectedBlock}
+                    numberedListOrder={numberedListOrder}
+                    dataPosition={index}
+                    setKey={setKey}
+                  />
               )})}
             </ReactSortable>
           </div>

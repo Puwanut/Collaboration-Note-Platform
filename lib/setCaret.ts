@@ -226,6 +226,7 @@ export const getCaretCoordinates = () => {
       return { caretLeft, caretTop }
     } else {
       const rect = range.getClientRects()
+      console.log(rect)
       const rectIndex = rect.length - 1
       return { caretLeft: rect[rectIndex].left, caretTop: rect[rectIndex].top }
     }
