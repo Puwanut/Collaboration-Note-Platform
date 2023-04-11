@@ -13,8 +13,6 @@ It's might not be ready for production use.
 
 ## Features
 
----
-
 - [x] **Slash Commands** (Type `/` to turn or add a block into various types)
 - [x] **HTML Support** (Can use HTML tags like `<img>` in the editor)
 - [x] **Drag And Drop** (Can drag and drop blocks to reorder them)
@@ -22,8 +20,6 @@ It's might not be ready for production use.
 - [ ] **Collaborative Realtime Editing** (Edit notes with other people in real time)
 
 ## Tech Stack
-
----
 
 ### Frontend
 
@@ -47,15 +43,11 @@ It's might not be ready for production use.
 
 ## Hosting
 
----
-
 - Vercel (Frontend)
 - xxx (Backend)
 - Supabase (Database)
 
 
 ## Contact
-
----
 
 Puwanut Janmee - puwanut.jm@gmail.com
