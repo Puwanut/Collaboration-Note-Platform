@@ -1,34 +1,61 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Notion Clone
 
-## Getting Started
+Create and Edit Notes like in Notion!
 
-First, run the development server:
+This project is a clone of the popular note-taking app [Notion](https://www.notion.so/).
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+Visit Here: <https://pepponz.codes>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Disclaimer
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+This project is not affiliated with Notion in any way. This is just a clone of the app for educational purposes.
+It's might not be ready for production use.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+## Features
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+---
 
-## Learn More
+- [x] **Slash Commands** (Type `/` to turn or add a block into various types)
+- [x] **HTML Support** (Can use HTML tags like `<img>` in the editor)
+- [x] **Drag And Drop** (Can drag and drop blocks to reorder them)
+- [ ] **Private and Public Notes** (Share notes with other people)
+- [ ] **Collaborative Realtime Editing** (Edit notes with other people in real time)
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Frontend
 
-## Deploy on Vercel
+- Next.js
+- React
+- Tailwind CSS
+- TypeScript
+- React-ContentEditable
+- @uiw/react-codemirror
+- react-sortablejs
+- fontawesome
+- htmlparser2
+- next-auth
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Backend
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Node.js
+- Express.js
+- Supabase (PostgreSQL) with Prisma
+- TypeScript
+
+## Hosting
+
+---
+
+- Vercel (Frontend)
+- xxx (Backend)
+- Supabase (Database)
+
+
+## Contact
+
+---
+
+Puwanut Janmee - puwanut.jm@gmail.com
