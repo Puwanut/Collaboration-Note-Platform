@@ -383,7 +383,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                         className="whitespace-pre-wrap break-words outline-none
                                    empty:before:content-[attr(data-placeholder)] before:text-neutral-400 before:cursor-text
                                    empty:before:focus:content-[attr(data-placeholder-onfocus)]"
-                        style={{wordBreak: "break-word"}}
                         onChange={onChangeHandler}
                         onKeyDown={onKeyDownHandler}
                         onFocus={onSelectHandler}
@@ -405,7 +404,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                             className="w-full whitespace-pre-wrap break-words outline-none
                                 empty:before:content-[attr(data-placeholder)] empty:before:focus:content-[attr(data-placeholder-onfocus)]
                                 before:text-neutral-400 before:cursor-text"
-                            style={{wordBreak: "break-word"}}
                             onChange={onChangeHandler}
                             onKeyDown={onKeyDownHandler}
                             onFocus={onSelectHandler}
@@ -428,7 +426,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                             className="w-full whitespace-pre-wrap break-words outline-none
                                 empty:before:content-[attr(data-placeholder)] empty:before:focus:content-[attr(data-placeholder-onfocus)]
                                 before:text-neutral-400 before:cursor-text"
-                            style={{wordBreak: "break-word"}}
                             onChange={onChangeHandler}
                             onKeyDown={onKeyDownHandler}
                             onFocus={onSelectHandler}
@@ -489,7 +486,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                                 before:text-neutral-400 before:cursor-text
                                 ${toDoChecked ? "line-through text-neutral-400" : ""}
                             `}
-                            style={{wordBreak: "break-word"}}
                             onChange={onChangeHandler}
                             onKeyDown={onKeyDownHandler}
                             onFocus={onSelectHandler}

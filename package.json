@@ -21,6 +21,7 @@
     "entities": "^4.4.0",
     "htmlparser2": "^8.0.2",
     "next": "^13.2.4",
+    "next-auth": "^4.22.0",
     "react": "^18.2.0",
     "react-contenteditable": "^3.3.7",
     "react-dom": "^18.2.0",

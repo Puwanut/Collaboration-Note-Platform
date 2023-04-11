@@ -123,7 +123,7 @@ const Sidebar = () => {
     }, [resize, stopResizing])
 
     return (
-        <div className={`xs:block fixed xs:relative xs:max-w-fit flex-none h-screen bg-neutral-50 z-20 overflow-x-hidden whitespace-nowrap
+        <div className={`xs:block fixed left-0 xs:relative xs:max-w-fit flex-none h-screen bg-neutral-50 z-20 overflow-x-hidden whitespace-nowrap
             ${!sidebarLoaded && `hidden`}
             ${sidebarOpenDone && `xs:min-w-[10rem]`}
             ${!isResizing && `duration-${transitionDuration}`}

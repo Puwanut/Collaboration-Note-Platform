@@ -277,13 +277,14 @@ const Workspace = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div
-        className={`mt-12 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
+        // height = 100vh - 3rem (topbar height)
+        className={`pt-20 pb-24 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
                 ${isTop ? "overscroll-auto" : "overscroll-none"}`}
         onScroll={(e) =>
           e.currentTarget.scrollTop == 0 ? setIsTop(true) : setIsTop(false)
         }
       >
-        <div className="mx-auto mb-16 px-4 pt-8 pb-24 max-w-screen-md">
+        <div className="mx-auto pl-2 pr-8 max-w-screen-md">
           <h1 id="page-title" className="ml-14 mb-5 text-5xl font-bold">Home Page</h1>
           <br />
           <div className="revert-global">
