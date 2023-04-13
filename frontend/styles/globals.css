@@ -9,7 +9,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   height: 100%;
-  /* overflow: hidden */
+  overflow: hidden
 }
 
 a {
@@ -56,4 +56,12 @@ a {
 
 .editable {
   @apply empty:before:content-[attr(placeholder)] empty:before:italic empty:before:text-neutral-400 cursor-text
+}
+
+.auth-input-label {
+  @apply block text-gray-400 text-sm mb-1
+}
+
+.auth-input {
+  @apply w-full bg-neutral-100 border-[1px] px-2 py-1 rounded-md placeholder:text-neutral-400 focus:outline-blue-400
 }
