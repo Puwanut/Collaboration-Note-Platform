@@ -1,18 +1,13 @@
 import type { GetServerSidePropsContext, InferGetServerSidePropsType } from "next"
-import { getCsrfToken, signIn } from "next-auth/react"
+import { getCsrfToken } from "next-auth/react"
 import Image from "next/image";
 import Link from "next/link";
 
 
 export default function SignIn({ csrfToken }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-
-  async function handleGoogleSignin() {
-    signIn("google", { callbackUrl: "http://localhost:3000" })
-  }
-
   return (
     <>
-      <div className="max-w-screen-lg mx-auto mt-4">
+      <div className="max-w-screen-lg mx-auto h-screen mt-4">
 
         {/* Topbar Section */}
         <nav className="flex items-center mx-4">
@@ -30,26 +25,25 @@ export default function SignIn({ csrfToken }: InferGetServerSidePropsType<typeof
         </nav>
 
         {/* Center Section */}
-        <div className="max-w-xs mx-auto mt-40 flex flex-col items-center">
+        <div className="max-w-xs mx-auto pb-20 h-full flex flex-col items-center justify-center">
           <h1 className="mb-8 text-5xl font-bold">
-            Log in
+            Register
           </h1>
-          <button
-            type="button"
-            onClick={handleGoogleSignin}
-            className="flex justify-center items-center w-full border-[1px] rounded-md py-1.5 gap-x-1 font-medium hover:bg-neutral-200 hover:border-neutral-300"
-          >
-            <Image src={"/icons/google_icon.svg"} alt="Google Logo" width={20} height={20} />
-            Continue with Google
-          </button>
-
-          <div role="separator" className="my-5 h-[1px] bg-neutral-200 w-full"></div>
-
           <div className="w-full mb-2">
-            <label htmlFor="email" className="auth-input-label">Email</label>
+            <label htmlFor="username" className="auth-input-label">Username</label>
             <input
-              name="email"
-              id="email"
+              name="username"
+              id="username"
+              type="text"
+              placeholder="Enter your username..."
+              className="auth-input"
+            />
+          </div>
+          <div className="w-full mb-2">
+            <label htmlFor="username" className="auth-input-label">Email</label>
+            <input
+              name="username"
+              id="username"
               type="email"
               placeholder="Enter your email address..."
               className="auth-input"
@@ -65,14 +59,24 @@ export default function SignIn({ csrfToken }: InferGetServerSidePropsType<typeof
               className="auth-input"
             />
           </div>
+          <div className="w-full mb-2">
+            <label htmlFor="confirm-password" className="auth-input-label">Confirm Password</label>
+            <input
+              name="confirm-password"
+              id="confirm-password"
+              type="password"
+              placeholder="Confirm your password..."
+              className="auth-input"
+            />
+          </div>
           <button type="button" className="w-full bg-red-50 text-red-500 font-medium border-[1px] border-red-200 rounded-md py-2 mt-4 hover:bg-red-100 hover:border-red-300">
-            Continue with email
+            Sign up
           </button>
 
           <p className="mt-8 text-gray-400">
-            don&apos;t have an account yet?&nbsp;
-            <Link href={"/auth/register"} className="text-blue-500 font-medium hover:text-blue-600">
-              Sign up
+            Already have an account?&nbsp;
+            <Link href={"/login"} className="text-blue-500 font-medium hover:text-blue-600">
+              Sign in
             </Link>
           </p>
 
