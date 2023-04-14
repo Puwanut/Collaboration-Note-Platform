@@ -1,16 +1,11 @@
-// import { useSession } from "next-auth/react";
-import { getSession, useSession } from "next-auth/react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import Workspace from "../components/Workspace";
-// import { authOptions } from "./api/auth/[...nextauth]";
-// import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]";
+import { getServerSession } from "next-auth/next";
 
 export default function App() {
 
-  const { data: session } = useSession()
-
-  if (session)
   return (
     <div className="flex">
       <Sidebar />
@@ -23,8 +18,8 @@ export default function App() {
 
 }
 
-export async function getServerSideProps({ req }){
-  const session = await getSession({ req })
+export async function getServerSideProps(context){
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if(!session){
     return {

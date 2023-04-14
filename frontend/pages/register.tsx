@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useFormik } from "formik";
 import * as Yup from "yup"
+// import { useRouter } from "next/router";
+import { ToastContainer, toast } from "react-toastify"
 
 export interface IRegisterFormValues {
   username: string;
@@ -33,6 +35,8 @@ const validationSchema = Yup.object().shape({
 
 export default function Register() {
 
+  // const router = useRouter()
+
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -45,7 +49,23 @@ export default function Register() {
   })
 
   async function handleOnSubmit(values: IRegisterFormValues) {
-    console.log(values)
+      const options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
+      }
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/register`, options)
+        .then(res => res.json())
+        .then((data) => {
+          if (data.status === 'ok') {
+            toast(data.message, { type: "success" })
+            // router.push(process.env.NEXT_PUBLIC_BASE_URL)
+          } else {
+            toast(data.message, { type: "error" })
+            formik.resetForm()
+          }
+        })
+
   }
 
   return (
@@ -53,6 +73,10 @@ export default function Register() {
       <Head>
         <title>Notion Clone - Register</title>
       </Head>
+      <ToastContainer
+        autoClose={3000}
+        hideProgressBar={true}
+      />
       <div className="max-w-screen-lg mx-auto h-screen mt-4">
 
         {/* Topbar Section */}

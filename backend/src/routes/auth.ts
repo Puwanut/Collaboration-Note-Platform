@@ -35,7 +35,7 @@ router.post("/register", async (req: TypedRequestBody<User>, res: Response) => {
                 if (e.code === "P2002") { // Unique constraint
                     res.status(400).json({
                         status: "error",
-                        message: "This user is already exists."
+                        message: "This Email is already used."
                     })
                 }
             }

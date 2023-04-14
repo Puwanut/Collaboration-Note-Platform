@@ -36,17 +36,22 @@ export const authOptions: NextAuthOptions = {
                 // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
                 // You can also use the `req` object to obtain additional parameters
                 // (i.e., the request IP address)
-                const res = await fetch(`${process.env.BACKEND_API_URL}/auth/login`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(credentials)
                 })
-                const data = await res.json() 
+                const data = await res.json()
 
                 if (data.status === 'ok') {
-                    return data.user
+                    return {
+                        id: data.user.id,
+                        name: data.user.username,
+                        email: data.user.email,
+                        image: null
+                    }
                 }
                 throw new Error(data.message)
             }

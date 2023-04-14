@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useFormik } from "formik"
 import * as Yup from "yup"
 import { useRouter } from "next/router"
+import { ToastContainer, toast } from "react-toastify"
 
 export interface ILoginFormValues {
   email: string;
@@ -30,7 +31,7 @@ export default function Login() {
       password: "",
     },
     validationSchema: validationSchema, // validate and return formik.errors
-    onSubmit: handleOnSubmit
+    onSubmit: handleOnSubmit,
   })
 
   async function handleOnSubmit(values: ILoginFormValues) {
@@ -41,8 +42,10 @@ export default function Login() {
       callbackUrl: "/"
     })
     if (status.ok) {
-      console.log(status)
       router.push(status.url)
+    } else {
+      toast(status.error, { type: "error" })
+      formik.resetForm()
     }
   }
 
@@ -55,6 +58,10 @@ export default function Login() {
       <Head>
         <title>Notion Clone - Login</title>
       </Head>
+      <ToastContainer
+        autoClose={3000}
+        hideProgressBar={true}
+      />
       <div className="max-w-screen-lg mx-auto h-screen mt-4">
 
         {/* Topbar Section */}
