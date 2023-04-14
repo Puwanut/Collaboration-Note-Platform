@@ -1,13 +1,16 @@
 // import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import Workspace from "../components/Workspace";
-import { authOptions } from "./api/auth/[...nextauth]";
-import { getServerSession } from "next-auth";
-// import { redirect } from "next/dist/server/api-utils";
+// import { authOptions } from "./api/auth/[...nextauth]";
+// import { getServerSession } from "next-auth";
 
 export default function App() {
 
+  const { data: session } = useSession()
+
+  if (session)
   return (
     <div className="flex">
       <Sidebar />
@@ -20,28 +23,36 @@ export default function App() {
 
 }
 
-export async function getServerSideProps(context) {
-  const session = await getServerSession(context.req, context.res, authOptions)
-  if (!session) {
+export async function getServerSideProps({ req }){
+  const session = await getSession({ req })
+
+  if(!session){
     return {
-      redirect: {
+      redirect : {
         destination: '/login',
-        permanent: false,
+        permanent: false
       }
     }
   }
+
   return {
-    props: {
-      session
-    }
+    props: { session }
   }
-  // return {
-  //   props: {
-  //     session: await getServerSession(
-  //       context.req,
-  //       context.res,
-  //       authOptions
-  //     ),
-  //   },
-  // }
 }
+
+// export async function getServerSideProps(context) {
+//   const session = await getServerSession(context.req, context.res, authOptions)
+//   if (!session) {
+//     return {
+//       redirect: {
+//         destination: '/login',
+//         permanent: false,
+//       }
+//     }
+//   }
+//   return {
+//     props: {
+//       session
+//     }
+//   }
+// }

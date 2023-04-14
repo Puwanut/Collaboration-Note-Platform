@@ -1,10 +1,50 @@
-import type { GetServerSidePropsContext, InferGetServerSidePropsType } from "next"
-import { getCsrfToken, signIn } from "next-auth/react"
-import Image from "next/image";
-import Link from "next/link";
+import { signIn } from "next-auth/react"
+import Head from "next/head"
+import Image from "next/image"
+import Link from "next/link"
+import { useFormik } from "formik"
+import * as Yup from "yup"
+import { useRouter } from "next/router"
 
+export interface ILoginFormValues {
+  email: string;
+  password: string;
+}
 
-export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+const validationSchema = Yup.object().shape({
+  email: Yup.string()
+    .email("Invalid email")
+    .required("Email is required"),
+  password: Yup.string()
+    .required("Password is required"),
+})
+
+export default function Login() {
+
+  const router = useRouter()
+
+  // formik hook
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: validationSchema, // validate and return formik.errors
+    onSubmit: handleOnSubmit
+  })
+
+  async function handleOnSubmit(values: ILoginFormValues) {
+    const status = await signIn("credentials", {
+      redirect: false,
+      email: values.email,
+      password: values.password,
+      callbackUrl: "/"
+    })
+    if (status.ok) {
+      console.log(status)
+      router.push(status.url)
+    }
+  }
 
   async function handleGoogleSignin() {
     signIn("google", { callbackUrl: process.env.NEXT_PUBLIC_BASE_URL })
@@ -12,6 +52,9 @@ export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof 
 
   return (
     <>
+      <Head>
+        <title>Notion Clone - Login</title>
+      </Head>
       <div className="max-w-screen-lg mx-auto h-screen mt-4">
 
         {/* Topbar Section */}
@@ -30,7 +73,10 @@ export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof 
         </nav>
 
         {/* Center Section */}
-        <div className="max-w-xs mx-auto pb-20 h-full flex flex-col items-center justify-center">
+        <form
+          onSubmit={formik.handleSubmit}
+          className="max-w-xs mx-auto pb-20 h-full flex flex-col items-center justify-center"
+        >
           <h1 className="mb-8 text-5xl font-bold">
             Log in
           </h1>
@@ -39,7 +85,7 @@ export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof 
             onClick={handleGoogleSignin}
             className="flex justify-center items-center w-full border-[1px] rounded-md py-1.5 gap-x-1 font-medium hover:bg-neutral-200 hover:border-neutral-300"
           >
-            <Image src={"/icons/google_icon.svg"} alt="Google Logo" width={20} height={20} />
+            <Image src={"/icons/google_icon48x48.png"} alt="Google Logo" width={20} height={20} />
             Continue with Google
           </button>
 
@@ -52,8 +98,12 @@ export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof 
               id="email"
               type="email"
               placeholder="Enter your email address..."
-              className="auth-input"
+              className={`auth-input ${(formik.errors.email && formik.touched.email) ? "border-red-500" : ""}`}
+              {...formik.getFieldProps("email")} // return -> onChange={formik.handleChange} value={formik.values.email}
             />
+          {(formik.errors.email && formik.touched.email) &&
+            <p className="text-red-500 text-sm mt-1">{formik.errors.email}</p>
+          }
           </div>
           <div className="w-full mb-2">
             <label htmlFor="password" className="auth-input-label">Password</label>
@@ -62,10 +112,14 @@ export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof 
               id="password"
               type="password"
               placeholder="Enter your password..."
-              className="auth-input"
+              className={`auth-input ${(formik.errors.password && formik.touched.password) ? "border-red-500" : ""}`}
+              {...formik.getFieldProps("password")} // return -> onChange={formik.handleChange} value={formik.values.password}
             />
+          {(formik.errors.password && formik.touched.password) &&
+            <p className="text-red-500 text-sm mt-1">{formik.errors.password}</p>
+          }
           </div>
-          <button type="button" className="w-full bg-red-50 text-red-500 font-medium border-[1px] border-red-200 rounded-md py-2 mt-4 hover:bg-red-100 hover:border-red-300">
+          <button type="submit" className="w-full bg-red-50 text-red-500 font-medium border-[1px] border-red-200 rounded-md py-2 mt-4 hover:bg-red-100 hover:border-red-300">
             Continue with email
           </button>
 
@@ -76,10 +130,10 @@ export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof 
             </Link>
           </p>
 
-        </div>
+        </form>
       </div>
-      <form method="post" action="/api/auth/callback/credentials">
-        <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+      {/* <form method="post" action="/api/auth/callback/credentials">
+        <input name="csrfToken" type="hidden" defaultValue={csrfToken} /> */}
         {/* <label>
           Username
           <input name="username" type="text" />
@@ -89,16 +143,16 @@ export default function Login({ csrfToken }: InferGetServerSidePropsType<typeof 
           <input name="password" type="password" />
         </label>
         <button type="submit">Sign in</button> */}
-      </form>
+      {/* </form> */}
     </>
-  );
+  )
 }
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  return {
-    props: {
-      // providers: await providers(context),
-      csrfToken: await getCsrfToken(context),
-    },
-  }
-}
+// export async function getServerSideProps(context: GetServerSidePropsContext) {
+//   return {
+//     props: {
+//       // providers: await providers(context),
+//       csrfToken: await getCsrfToken(context),
+//     },
+//   }
+// }

@@ -3,6 +3,16 @@ import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials"
 
+export interface LoginResponse {
+    status: string
+    message: string
+    user?: {
+        id: string
+        email: string
+        username: string
+    }
+}
+
 export const authOptions: NextAuthOptions = {
     providers: [
         GoogleProvider({
@@ -11,15 +21,12 @@ export const authOptions: NextAuthOptions = {
         }),
         CredentialsProvider({
             // The name to display on the sign in form (e.g. 'Sign in with...')
-            name: 'Continue with email',
+            name: 'Credentials',
             // The credentials is used to generate a suitable form on the sign in page.
             // You can specify whatever fields you are expecting to be submitted.
             // e.g. domain, username, password, 2FA token, etc.
             // You can pass any HTML attribute to the <input> tag through the object.
-            credentials: {
-                username: { label: "Email", type: "text", placeholder: "example@gmail.com" },
-                password: { label: "Password", type: "password" }
-            },
+            credentials: {},
             async authorize(credentials) {
                 // You need to provide your own logic here that takes the credentials
 
@@ -36,13 +43,14 @@ export const authOptions: NextAuthOptions = {
                     },
                     body: JSON.stringify(credentials)
                 })
-                const data = await res.json()
+                const data = await res.json() 
 
                 if (data.status === 'ok') {
                     return data.user
                 }
-                return null
+                throw new Error(data.message)
             }
+
         })
     ],
     secret: process.env.NEXTAUTH_SECRET,
@@ -62,7 +70,10 @@ export const authOptions: NextAuthOptions = {
     // },
     pages: {
         signIn: '/login',
-    }
+    },
+    // session: {
+    //     strategy: 'jwt', // 'jwt' or 'database' (default = jwt if no adapter is specified)
+    // }
 
 }
 

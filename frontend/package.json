@@ -19,6 +19,7 @@
     "@uiw/codemirror-themes-all": "^4.19.11",
     "@uiw/react-codemirror": "^4.19.11",
     "entities": "^4.4.0",
+    "formik": "^2.2.9",
     "htmlparser2": "^8.0.2",
     "next": "^13.2.4",
     "next-auth": "^4.22.0",
@@ -30,7 +31,8 @@
     "react-tooltip": "5.8.3",
     "react-use": "^17.4.0",
     "sortablejs": "^1.15.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "yup": "^1.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.6",
