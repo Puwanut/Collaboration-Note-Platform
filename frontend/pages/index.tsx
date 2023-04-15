@@ -1,3 +1,4 @@
+import { GetServerSidePropsContext } from "next";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import Workspace from "../components/Workspace";
@@ -18,7 +19,7 @@ export default function App() {
 
 }
 
-export async function getServerSideProps(context){
+export async function getServerSideProps(context: GetServerSidePropsContext){
   const session = await getServerSession(context.req, context.res, authOptions)
 
   if(!session){

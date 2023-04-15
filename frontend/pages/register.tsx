@@ -52,7 +52,11 @@ export default function Register() {
       const options = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
+        body: JSON.stringify({
+          username: values.username,
+          email: values.email,
+          password: values.password
+        })
       }
       await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/register`, options)
         .then(res => res.json())
