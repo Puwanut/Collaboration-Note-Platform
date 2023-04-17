@@ -7,7 +7,10 @@ import authRouter from './routes/auth'
 const app: Application = express()
 const port = parseInt(process.env.PORT as string) || 8000
 
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}))
 app.use(express.json())
 
 

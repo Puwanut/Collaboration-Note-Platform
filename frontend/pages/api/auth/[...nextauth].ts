@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
                 // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
                 // You can also use the `req` object to obtain additional parameters
                 // (i.e., the request IP address)
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/login`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -60,25 +60,20 @@ export const authOptions: NextAuthOptions = {
     ],
     secret: process.env.NEXTAUTH_SECRET,
     // callbacks: {
-    //     async jwt({token, user, account}) {
-    //         if (account) {
-    //             token.accessToken = account.accessToken
-    //             token.user = user
-    //         }
-    //         return token
+    //     async jwt({token, user,}) {
+    //         return { ...token, ...user}
     //     },
     //     async session({ session, token, user }) {
-    //         session.accessToken = token.accessToken
-    //         session.user = token.user
+    //         session.user = token
     //         return session
     //     }
     // },
     pages: {
         signIn: '/login',
     },
-    // session: {
-    //     strategy: 'jwt', // 'jwt' or 'database' (default = jwt if no adapter is specified)
-    // }
+    session: {
+        strategy: 'jwt', // 'jwt' or 'database' (default = jwt if no adapter is specified)
+    }
 
 }
 

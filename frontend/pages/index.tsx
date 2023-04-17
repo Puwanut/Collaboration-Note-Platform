@@ -21,6 +21,7 @@ export default function App() {
 
 export async function getServerSideProps(context: GetServerSidePropsContext){
   const session = await getServerSession(context.req, context.res, authOptions)
+  console.log(session)
 
   if(!session){
     return {
@@ -32,23 +33,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext){
   }
 
   return {
-    props: { session }
+    props: {
+      session
+    }
   }
 }
-
-// export async function getServerSideProps(context) {
-//   const session = await getServerSession(context.req, context.res, authOptions)
-//   if (!session) {
-//     return {
-//       redirect: {
-//         destination: '/login',
-//         permanent: false,
-//       }
-//     }
-//   }
-//   return {
-//     props: {
-//       session
-//     }
-//   }
-// }

@@ -10,25 +10,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id
-  email     String   @unique
-  username  String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // workspaces Workspace[] @relation(fields: [workspaceId], references: [id])
+enum WorkspaceRole {
+  owner
+  member
 }
 
-// model Workspace {
-//   id    Int    @default(autoincrement()) @id
-//   name  String
-//   users User[] @relation(fields: [userId], references: [id])
-//   pages Page[] @relation(fields: [pageId], references: [id])
-// }
+model User {
+  id         Int              @id
+  email      String           @unique
+  username   String
+  password   String
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+  workspaces UserWorkspaces[]
+}
+
+model UserWorkspaces {
+  userId      Int           @map("user_id")
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+  workspaceId String        @map("workspace_id")
+  role        WorkspaceRole
+  user        User          @relation(fields: [userId], references: [id])
+
+  @@id([userId, workspaceId]) // composite primary key
+}
+
+model Workspace {
+  id    String           @id @default(uuid())
+  name  String
+  pages Page[]
+  users UserWorkspaces[]
+}
 
 model Page {
-  id   String @id
-  name String
+  id          String    @id @default(uuid())
+  title       String
+  icon        String?
+  cover       String?
+  blocks      Json[]
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String    @map("workspace_id")
 }
+
+// model Block {
+//   id         String   @id @default(uuid())
+//   properties Json
+//   children   String[]
+//   parent     String?
+//   page       Page     @relation(fields: [pageId], references: [id])
+//   pageId     String
+// }

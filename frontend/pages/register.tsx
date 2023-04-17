@@ -58,7 +58,7 @@ export default function Register() {
           password: values.password
         })
       }
-      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/register`, options)
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, options)
         .then(res => res.json())
         .then((data) => {
           if (data.status === 'ok') {

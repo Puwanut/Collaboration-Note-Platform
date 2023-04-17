@@ -88,9 +88,12 @@ export default function Login() {
             Log in
           </h1>
           <button
+            disabled
             type="button"
             onClick={handleGoogleSignin}
-            className="flex justify-center items-center w-full border-[1px] rounded-md py-1.5 gap-x-1 font-medium hover:bg-neutral-200 hover:border-neutral-300"
+            className="flex justify-center items-center w-full border-[1px] rounded-md py-1.5 gap-x-1 font-medium
+            hover:enabled:bg-neutral-200 hover:enabled:border-neutral-300
+            hover:disabled:cursor-not-allowed"
           >
             <Image src={"/icons/google_icon48x48.png"} alt="Google Logo" width={20} height={20} />
             Continue with Google
@@ -131,7 +134,7 @@ export default function Login() {
           </button>
 
           <p className="mt-8 text-gray-400">
-            don&apos;t have an account yet?&nbsp;
+            Don&apos;t have an account yet?&nbsp;
             <Link href={"/register"} className="text-blue-500 font-medium hover:text-blue-600">
               Sign up
             </Link>

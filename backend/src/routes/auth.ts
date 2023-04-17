@@ -3,6 +3,7 @@ import { TypedRequestBody, TypedRequestQuery } from "../types/request.type"
 import { User } from "../types/user.type"
 import { Prisma, PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
+import { initialPage } from "../constants/initialPage"
 
 const router = Router()
 const prisma: PrismaClient = new PrismaClient()
@@ -25,6 +26,28 @@ router.post("/register", async (req: TypedRequestBody<User>, res: Response) => {
                 }
             })
             if (user) {
+                // create initial workspace and initial page in same workspace
+                // with nested create, Page will be created with workspaceId automatically
+                try {
+                    await prisma.workspace.create({
+                        data: {
+                            name: `${username}'s Workspace`,
+                            pages: {
+                                create: [initialPage]
+                            },
+                            users: {
+                                create: [
+                                    {
+                                        userId: user.id,
+                                        role: "owner"
+                                    }
+                                ]
+                            }
+                        }
+                    })
+                } catch (e) {
+                    console.log(e)
+                }
                 res.status(200).json({
                     status: "ok",
                     message: "Register Successfully"
