@@ -6,6 +6,7 @@ import { useFormik } from "formik"
 import * as Yup from "yup"
 import { useRouter } from "next/router"
 import { ToastContainer, toast } from "react-toastify"
+import { poster } from "../lib/fetcher"
 
 export interface ILoginFormValues {
   email: string;
@@ -35,16 +36,24 @@ export default function Login() {
   })
 
   async function handleOnSubmit(values: ILoginFormValues) {
-    const status = await signIn("credentials", {
-      redirect: false,
-      email: values.email,
-      password: values.password,
-      callbackUrl: "/"
-    })
-    if (status.ok) {
-      router.push(status.url)
+    // const status = await signIn("credentials", {
+    //   redirect: false,
+    //   email: values.email,
+    //   password: values.password,
+    //   callbackUrl: "/"
+    // })
+    const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    }).then((res) => res.json())
+    if (data.status === "ok") {
+      router.push("/")
     } else {
-      toast(status.error, { type: "error" })
+      toast(data.message, { type: "error" })
       formik.resetForm()
     }
   }
@@ -88,6 +97,7 @@ export default function Login() {
             Log in
           </h1>
           <button
+            disabled
             type="button"
             onClick={handleGoogleSignin}
             className="flex justify-center items-center w-full border-[1px] rounded-md py-1.5 gap-x-1 font-medium hover:bg-neutral-200 hover:border-neutral-300"
