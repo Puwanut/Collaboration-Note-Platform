@@ -2,6 +2,7 @@ import { faAngleDoubleLeft, faClock, faGear, faSearch } from "@fortawesome/free-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
+import { useOverlayContext } from "../context/OverlayContext"
 
 const Sidebar = () => {
 
@@ -16,46 +17,13 @@ const Sidebar = () => {
     const [sidebarLoaded, setSidebarLoaded] = useState<boolean>(false)
     const transitionDuration = 300 // ms
 
+    const { setOverlayName } = useOverlayContext()
+
     const menus = [
         { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
         { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
         { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
-        // { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        // { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        // { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
     ]
-
-    // const [favNotes, setFavNotes] = useState<ItemType[]>([
-    //     { id: 1, name: "Workbook 1"},
-    //     { id: 2, name: "Workbook 2"},
-    //     { id: 3, name: "Workbook 3"},
-    //     { id: 4, name: "Workbook 4"},
-    //     { id: 5, name: "Workbook 5"}
-    // ])
 
     const handleAutoResize = useCallback(() => {
         if (isMobileView) {
@@ -75,6 +43,13 @@ const Sidebar = () => {
             setSidebarOpenDone(false)
         }
     }, [leftSidebarOpen])
+
+    const workspaceClickHandler = useCallback((e: MouseEvent) => {
+        const target = e.target as HTMLElement
+        if (target.id !== "toggle-sidebar") {
+            setOverlayName("workspace")
+        }
+    }, [setOverlayName])
 
     /* Function Group for Handle Drag Sidebar Slider */
     const startResizing = useCallback(() => {
@@ -134,7 +109,7 @@ const Sidebar = () => {
             >
 
             {/* Workspace Title */}
-            <div className={`flex gap-x-3 px-3 py-3 hover:bg-stone-200`}>
+            <div className={`flex gap-x-3 px-3 py-3 hover:cursor-pointer hover:bg-stone-200`} onClick={(e) => workspaceClickHandler(e)}>
 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -151,6 +126,7 @@ const Sidebar = () => {
                 </h1>
 
                 <FontAwesomeIcon icon={faAngleDoubleLeft}
+                    id="toggle-sidebar"
                     className={`text-stone-400 cursor-pointer p-1 hover:bg-stone-300 duration-300
                     ${!leftSidebarOpen && "rotate-180"}`}
                     onClick={handleToggleSidebar}

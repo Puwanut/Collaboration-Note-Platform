@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'; // import react-toastify CSS
 import { config } from "@fortawesome/fontawesome-svg-core"
 import { AppProvider } from "../context/AppContext"
 import { SessionProvider } from "next-auth/react"
+import { OverlayProvider } from "../context/OverlayContext";
 config.autoAddCss = false // Tell Font Awesome to skip adding the CSS automatically since it's being imported above
 
 function MyApp({
@@ -13,9 +14,11 @@ function MyApp({
 }) {
   return (
     <SessionProvider session={session}>
-      <AppProvider>
-        <Component {...pageProps} />
-      </AppProvider>
+      <OverlayProvider>
+        <AppProvider>
+          <Component {...pageProps} />
+        </AppProvider>
+      </OverlayProvider>
     </SessionProvider>
   )
 }

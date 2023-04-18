@@ -5,9 +5,9 @@ import { Prisma, PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { initialPage } from "../constants/initialPage"
 import { generateAccessToken } from "../libs/token-utils"
+import { prisma } from ".."
 
 const router = Router()
-const prisma: PrismaClient = new PrismaClient()
 
 // if post /auth/login, check if user exists in db
 router.post("/register", async (req: TypedRequestBody<User>, res: Response) => {
@@ -34,7 +34,7 @@ router.post("/register", async (req: TypedRequestBody<User>, res: Response) => {
                         data: {
                             name: `${username}'s Workspace`,
                             pages: {
-                                create: [initialPage]
+                                create: [initialPage()]
                             },
                             users: {
                                 create: [

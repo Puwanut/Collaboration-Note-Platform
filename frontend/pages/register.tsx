@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useFormik } from "formik";
 import * as Yup from "yup"
-// import { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { ToastContainer, toast } from "react-toastify"
 
 export interface IRegisterFormValues {
@@ -35,7 +35,7 @@ const validationSchema = Yup.object().shape({
 
 export default function Register() {
 
-  // const router = useRouter()
+  const router = useRouter()
 
   const formik = useFormik({
     initialValues: {
@@ -63,7 +63,7 @@ export default function Register() {
         .then((data) => {
           if (data.status === 'ok') {
             toast(data.message, { type: "success" })
-            // router.push(process.env.NEXT_PUBLIC_BASE_URL)
+            router.push(process.env.NEXT_PUBLIC_BASE_URL)
           } else {
             toast(data.message, { type: "error" })
             formik.resetForm()
