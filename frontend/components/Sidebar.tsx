@@ -1,6 +1,6 @@
 import { faAngleDoubleLeft, faClock, faGear, faSearch } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
+import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 import { useOverlayContext } from "../context/OverlayContext"
 
@@ -44,7 +44,7 @@ const Sidebar = () => {
         }
     }, [leftSidebarOpen])
 
-    const workspaceClickHandler = useCallback((e: MouseEvent) => {
+    const workspaceClickHandler = useCallback((e: React.MouseEvent) => {
         const target = e.target as HTMLElement
         if (target.id !== "toggle-sidebar") {
             setOverlayName("workspace")
