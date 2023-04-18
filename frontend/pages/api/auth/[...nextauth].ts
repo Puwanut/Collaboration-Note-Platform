@@ -50,7 +50,8 @@ export const authOptions: NextAuthOptions = {
                         id: data.user.id,
                         name: data.user.username,
                         email: data.user.email,
-                        image: null
+                        accessToken: data.user.accessToken,
+                        image: null,
                     }
                 }
                 throw new Error(data.message)
@@ -59,15 +60,16 @@ export const authOptions: NextAuthOptions = {
         })
     ],
     secret: process.env.NEXTAUTH_SECRET,
-    // callbacks: {
-    //     async jwt({token, user,}) {
-    //         return { ...token, ...user}
-    //     },
-    //     async session({ session, token, user }) {
-    //         session.user = token
-    //         return session
-    //     }
-    // },
+    callbacks: {
+        async jwt({ token, user }) {
+            return { ...token, ...user}
+        },
+        async session({ session, token }) {
+            // token is from jwt callback above
+            session.user = token as any
+            return session
+        }
+    },
     pages: {
         signIn: '/login',
     },

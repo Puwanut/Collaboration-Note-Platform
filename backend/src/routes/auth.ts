@@ -4,6 +4,7 @@ import { User } from "../types/user.type"
 import { Prisma, PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { initialPage } from "../constants/initialPage"
+import { generateAccessToken } from "../libs/token-utils"
 
 const router = Router()
 const prisma: PrismaClient = new PrismaClient()
@@ -82,13 +83,15 @@ router.post("/login", async (req: TypedRequestBody<User>, res: Response) => {
         if (user) {
             const isMatchedPassword = await bcrypt.compare(password, user.password)
             if (isMatchedPassword) {
+                const accessToken = generateAccessToken({userId: user.id})
                 res.status(200).json({
                     status: "ok",
                     message: "Login Successfully",
                     user: {
                         id: user.id,
                         username: user.username,
-                        email: user.email
+                        email: user.email,
+                        accessToken: accessToken
                     }
                 })
             } else {
