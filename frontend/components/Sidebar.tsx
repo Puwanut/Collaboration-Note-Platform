@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 import { useOverlayContext } from "../context/OverlayContext"
+import { useSession } from "next-auth/react"
 
 const Sidebar = () => {
 
@@ -18,6 +19,8 @@ const Sidebar = () => {
     const transitionDuration = 300 // ms
 
     const { setOverlayName } = useOverlayContext()
+    const { workspaces } = appcontext
+    // const { data: session } = useSession()
 
     const menus = [
         { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
@@ -122,7 +125,7 @@ const Sidebar = () => {
                     text-ellipsis overflow-hidden
                  ${!leftSidebarOpen && "scale-0"}
                  `}>
-                    Puwanut Janmee&apos;s Workspace {/* $apos; = ' (single quote) */}
+                    {workspaces[0]?.name}
                 </h1>
 
                 <FontAwesomeIcon icon={faAngleDoubleLeft}

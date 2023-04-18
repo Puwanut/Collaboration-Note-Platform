@@ -9,12 +9,15 @@ export const mobileViewWidth = 576
 const AppContext = createContext(undefined)
 
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
+    // Sidebar state
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
     const [sidebarWidth, setSidebarWidth] = useState<any>("15rem")
     const [isMobileView, setIsMobileView] = useState<boolean>(false)
     let sidebarWidthMemo = useRef(sidebarWidth) // Memo previous sidebarWidth
-
     const [isDragging, setIsDragging] = useState<boolean>(false)
+
+    // workspace state
+    const [workspaces, setWorkspaces] = useState<any>([])
 
     // Use Context to pass down functions to sidebar and topbar components
     const handleToggleSidebar = useCallback(() => {
@@ -67,8 +70,10 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           isMobileView,
           isDragging,
           setIsDragging,
+          workspaces,
+          setWorkspaces
         }),
-        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging],
+        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging, workspaces],
       )
 
     return (

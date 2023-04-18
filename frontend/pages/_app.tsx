@@ -14,11 +14,11 @@ function MyApp({
 }) {
   return (
     <SessionProvider session={session}>
-      <OverlayProvider>
-        <AppProvider>
+      <AppProvider>
+        <OverlayProvider>
           <Component {...pageProps} />
-        </AppProvider>
-      </OverlayProvider>
+        </OverlayProvider>
+      </AppProvider>
     </SessionProvider>
   )
 }

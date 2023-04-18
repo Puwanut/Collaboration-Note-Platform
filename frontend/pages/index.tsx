@@ -5,8 +5,16 @@ import Workspace from "../components/Workspace";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { getServerSession } from "next-auth/next";
 import OverlayContainer from "../components/OverlayContainer";
+import { useAppContext } from "../context/AppContext";
+import { useEffect } from "react";
 
-export default function App() {
+export default function App({ workspaces }) {
+
+  const { setWorkspaces } = useAppContext()
+  
+  useEffect(() => {
+    setWorkspaces(workspaces)
+  }, [])
 
   return (
     <>
@@ -26,7 +34,6 @@ export default function App() {
 export async function getServerSideProps(context: GetServerSidePropsContext){
   const session = await getServerSession(context.req, context.res, authOptions)
 
-
   if(!session){
     return {
       redirect : {
@@ -44,7 +51,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext){
   })
 
   const workspaces = await res.json()
-  console.log(workspaces)
+
 
   return {
     props: {
