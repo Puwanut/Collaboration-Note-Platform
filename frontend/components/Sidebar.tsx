@@ -1,8 +1,10 @@
-import { faAngleDoubleLeft, faClock, faFileLines, faGear, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
+import { faAngleDoubleLeft, faClock, faFileLines, faGear, faPlus, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 import { useOverlayContext } from "../context/OverlayContext"
+import { Tooltip } from "react-tooltip"
+import Link from "next/link"
 
 const Sidebar = () => {
 
@@ -18,7 +20,7 @@ const Sidebar = () => {
     const transitionDuration = 300 // ms
 
     const { setOverlayName } = useOverlayContext()
-    const { workspaces, currentWorkspaceData } = appcontext
+    const { workspaces, currentWorkspaceData, currentPage } = appcontext
 
     const menus = [
         { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="min-w-4"/> },
@@ -92,7 +94,7 @@ const Sidebar = () => {
     }, [resize, stopResizing])
 
     return (
-        <div className={`xs:block fixed left-0 xs:relative xs:max-w-fit flex-none h-screen bg-neutral-50 z-20 overflow-hidden whitespace-nowrap
+        <div className={`xs:block fixed left-0 xs:relative xs:max-w-fit flex-none h-screen bg-neutral-50 z-20 overflow-hidden whitespace-nowrap group/sidebar
             ${!sidebarLoaded && `hidden`}
             ${sidebarOpenDone && `xs:min-w-[10rem]`}
             ${!isResizing && `duration-${transitionDuration}`}
@@ -172,21 +174,33 @@ const Sidebar = () => {
 
                     {/* Private Pages */}
                     <div className="mt-6">
-                        <h3 className={`text-neutral-400 text-sm px-3 mb-1`} >
-                            Private
-                        </h3>
+                        <div className="flex justify-between mr-2">
+                            <h3 className={`text-neutral-400 text-sm px-3 mb-1`} >
+                                Private
+                            </h3>
+                            <FontAwesomeIcon
+                                icon={faPlus}
+                                className="opacity-0 group-hover/sidebar:opacity-100 transition text-neutral-400 p-1 text-sm rounded-md hover:bg-neutral-200 hover:cursor-pointer"
+                                onClick={() => console.log("add page")}
+                                data-tooltip-id="tooltip-sidebar-add-page"
+                            />
+                            <Tooltip id="tooltip-sidebar-add-page" noArrow className="z-20">
+                                <span>Add a Page</span>
+                            </Tooltip>
+                        </div>
                         <ul>
                             {currentWorkspaceData?.pages?.map((page) => (
-                            <li key={page.id} className={`flex text-neutral-400 items-center gap-x-3 cursor-pointer duration-200
+                            <Link key={page.id} href={page.id} className={`flex text-neutral-400 items-center gap-x-3 cursor-pointer duration-200
                                 px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left
                                 ${!leftSidebarOpen && 'scale-0'}
                                 ${isMobileView ? 'text-base' : 'text-sm'}
-                                `}>
+                                ${page.id === currentPage?.id && 'bg-neutral-200/70'}
+                                `} >
                                 <FontAwesomeIcon icon={faFileLines} className="min-w-4" />
                                 <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
-                                    Getting Started
+                                    {page.title}
                                 </span>
-                            </li>
+                            </Link>
                             ))}
                         </ul>
                     </div>

@@ -1,5 +1,7 @@
 import { Request, Response, Router } from "express";
 import { prisma } from ".."
+import { Prisma } from "@prisma/client";
+
 
 const router = Router()
 
@@ -52,8 +54,13 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
             }
         })
         res.json(workspace)
-    } catch (error) {
-        res.status(404).json({ message: "Workspace not found or You don't have permission to access this workspace." })
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            if (e.name === "NotFoundError") {
+                res.status(404).json({ message: "Workspace not found or You don't have permission to access this workspace." })
+            }
+        }
+        res.status(400).json({ message: "Unkonwn error" })
     }
 })
 

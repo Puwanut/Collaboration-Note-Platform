@@ -7,6 +7,7 @@ import Head from "next/head"
 import usePrevious from "../hooks/usePrevious"
 import { LanguageName } from "@uiw/codemirror-extensions-langs"
 import { titleSlice } from "../lib/manageTitle"
+import { useAppContext } from "../context/AppContext"
 
 
 export interface IEditableBlock {
@@ -27,8 +28,9 @@ interface ICurrentBlock {
 }
 
 const Workspace = () => {
+  const { currentPage } = useAppContext()
   const [isTop, setIsTop] = useState<boolean>(true)
-  const [blocks, setBlocks] = useState<IEditableBlock[]>([])
+  const [blocks, setBlocks] = useState<IEditableBlock[]>(currentPage?.blocks ?? [])
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
   const [key, setKey] = useState<KeyboardEvent>(null)
   const [previousBlocks, titlesLength] = usePrevious(blocks)
@@ -184,7 +186,7 @@ const Workspace = () => {
     // console.log(previousBlocks, previousBlocks?.length, blocks?.length)
     const currentBlockPosition = currentSelectedBlock?.getAttribute("data-position")
     // when user press enter, focus to next block
-    if (previousBlocks && previousBlocks.length + 1 === blocks.length) {
+    if (previousBlocks && previousBlocks.length + 1 === blocks?.length) {
       const nextBlock = document.querySelector(`[data-position="${parseInt(currentBlockPosition) + 1}"]`) as HTMLElement
       if (nextBlock) {
         setCurrentSelectedBlock(nextBlock)
@@ -192,7 +194,7 @@ const Workspace = () => {
         nextBlock.scrollIntoView({ behavior: "smooth", block: "center" })
       }
     }
-    else if (previousBlocks && previousBlocks.length - 1 === blocks.length){
+    else if (previousBlocks && previousBlocks.length - 1 === blocks?.length){
       if (key?.key === "Backspace") {
         const previousBlockIndex = parseInt(currentBlockPosition) - 1
         const previousBlock = document.querySelector(`[data-position="${previousBlockIndex}"]`) as HTMLElement
@@ -213,62 +215,65 @@ const Workspace = () => {
 
 
   // Mockup initial blocks
+  // useEffect(() => {
+  //   const initialBlock: IEditableBlock = {
+  //     id: uuidv4(),
+  //     type: "Text",
+  //     properties: {
+  //       title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic very long long long long long long long long text", "i"]
+  //       , ["testitalic very long long long long long long long long text", "i"]
+  //     ]
+  //     },
+  //     children: [],
+  //     parent: null
+  //   }
+
+  //   const initialBlock2: IEditableBlock = {
+  //     id: uuidv4(),
+  //     type: "Numbered List",
+  //     properties: {
+  //       title: [["stronger", "b"], ["aeeng", "i"]]
+  //     },
+  //     children: [],
+  //     parent: null
+  //   }
+
+  //   const initialBlock3: IEditableBlock = {
+  //     id: uuidv4(),
+  //     type: "Numbered List",
+  //     properties: {
+  //       title: [["simpleText"]]
+  //     },
+  //     children: [],
+  //     parent: null
+  //   }
+
+  //   const initialBlock4: IEditableBlock = {
+  //     id: uuidv4(),
+  //     type: "Code",
+  //     properties: {
+  //       title: [["const a = 1\nconst b = 2\nconsole.log(a+b)"]],
+  //       language: "javascript"
+  //     },
+  //     children: [],
+  //     parent: null
+  //   }
+
+  //   const initialBlock5: IEditableBlock = {
+  //     id: uuidv4(),
+  //     type: "Text",
+  //     properties: {
+  //       title: [[""]],
+  //     },
+  //     children: [],
+  //     parent: null
+  //   }
+  //   setBlocks([initialBlock, initialBlock2, initialBlock3, initialBlock4, initialBlock5])
+  // }, [])
+
   useEffect(() => {
-    const initialBlock: IEditableBlock = {
-      id: uuidv4(),
-      type: "Text",
-      properties: {
-        title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic very long long long long long long long long text", "i"]
-        , ["testitalic very long long long long long long long long text", "i"]
-      ]
-      },
-      children: [],
-      parent: null
-    }
-
-    const initialBlock2: IEditableBlock = {
-      id: uuidv4(),
-      type: "Numbered List",
-      properties: {
-        title: [["stronger", "b"], ["aeeng", "i"]]
-      },
-      children: [],
-      parent: null
-    }
-
-    const initialBlock3: IEditableBlock = {
-      id: uuidv4(),
-      type: "Numbered List",
-      properties: {
-        title: [["simpleText"]]
-      },
-      children: [],
-      parent: null
-    }
-
-    const initialBlock4: IEditableBlock = {
-      id: uuidv4(),
-      type: "Code",
-      properties: {
-        title: [["const a = 1\nconst b = 2\nconsole.log(a+b)"]],
-        language: "javascript"
-      },
-      children: [],
-      parent: null
-    }
-
-    const initialBlock5: IEditableBlock = {
-      id: uuidv4(),
-      type: "Text",
-      properties: {
-        title: [[""]],
-      },
-      children: [],
-      parent: null
-    }
-    setBlocks([initialBlock, initialBlock2, initialBlock3, initialBlock4, initialBlock5])
-  }, [])
-
+    setBlocks(currentPage?.blocks)
+  }, [currentPage])
 
   return (
     <>
@@ -285,8 +290,10 @@ const Workspace = () => {
         }
       >
         <div className="mx-auto pl-2 pr-8 max-w-screen-md">
-          <h1 id="page-title" className="ml-14 mb-5 text-5xl font-bold">Home Page</h1>
-          <br />
+          <h1 id="page-title" className="ml-16 mb-5 text-5xl font-bold">
+            {currentPage?.title}
+            <hr className="mt-5" />
+          </h1>
           <div className="revert-global">
             <ReactSortable
               list={blocks}
@@ -303,7 +310,8 @@ const Workspace = () => {
               id="SortableList"
               // onEnd={handleDragEnd}
             >
-              {blocks.map((block, index) => {
+              {
+              blocks?.map((block, index) => {
                 const numberedListOrder = getNumberedListOrder(index)
                 return (
                   <EditableBlock

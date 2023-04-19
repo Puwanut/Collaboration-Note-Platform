@@ -5,7 +5,7 @@ const usePrevious = (blocks: IEditableBlock[]) => {
     const ref = useRef<IEditableBlock[]>()
     const titlesLength = useRef<number[]>([])
     useEffect(() => {
-        titlesLength.current = blocks.map(block => {
+        titlesLength.current = blocks?.map(block => {
             return block.properties.title?.reduce((count, text) => count + text[0].length, 0)
         })
         ref.current = blocks
