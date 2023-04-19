@@ -80,7 +80,6 @@ const Sidebar = () => {
         }
     }, [isMobileView])
 
-
     // Handle Resizeable Sidebar
     useEffect(() => {
         window.addEventListener("mousemove", resize)

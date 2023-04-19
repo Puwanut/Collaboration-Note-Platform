@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { ScriptProps } from "next/script";
 import React, { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
@@ -20,9 +21,11 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
 
     // workspace state
     const { data: session } = useSession()
+    const router = useRouter()
     const [workspaces, setWorkspaces] = useState<any>([])
     const [currentWorkspace, setCurrentWorkspace] = useState<any>(null)
     const [currentWorkspaceData, setCurrentWorkspaceData] = useState<any>(null)
+    const [currentPage, setCurrentPage] = useState<any>(null)
 
     // Use Context to pass down functions to sidebar and topbar components
     const handleToggleSidebar = useCallback((e: React.MouseEvent) => {
@@ -78,6 +81,8 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           })
           const data = await res.json()
           setCurrentWorkspaceData(data)
+          // if same route, shallow routing (won't fetch data again)
+          router.push(`/${data.pages[0].id}`, undefined, { shallow: true })
         }
         fetchWorkspace()
       }
@@ -96,10 +101,12 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           workspaces,
           setWorkspaces,
           currentWorkspace,
-          currentWorkspaceData,
           setCurrentWorkspace,
+          currentWorkspaceData,
+          currentPage,
+          setCurrentPage
         }),
-        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging, workspaces, currentWorkspace, currentWorkspaceData],
+        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging, workspaces, currentWorkspace, currentWorkspaceData, currentPage],
       )
 
     return (

@@ -3,7 +3,7 @@ import { prisma } from ".."
 
 const router = Router()
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (_req: Request, res: Response) => {
     const userId = res.locals.user.userId
     const workspaces = await prisma.workspace.findMany({
         select: {
@@ -39,10 +39,15 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
                     some: {
                         userId: userId
                     }
-                }
+                },
             },
             include: {
-                pages: true,
+                pages: {
+                    select: {
+                        id: true,
+                        title: true
+                    }
+                },
                 users: true
             }
         })

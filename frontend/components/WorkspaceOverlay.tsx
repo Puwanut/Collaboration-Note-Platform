@@ -1,4 +1,4 @@
-import { faCheck, faCircleXmark, faEllipsis, faGripVertical, faPlusSquare } from "@fortawesome/free-solid-svg-icons"
+import { faCheck, faCircleXmark, faEllipsis, faPlusSquare } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { signOut, useSession } from "next-auth/react"
 import Image from "next/image"
@@ -51,10 +51,11 @@ const WorkspaceOverlay = forwardRef<HTMLDivElement>(function WorkspaceOverlay(_,
             <div className="mb-2">
             {workspaces.map(workspace => (
                 <button key={workspace.id} className="flex px-3 py-1 w-full items-center hover:bg-neutral-200/60">
-                    <FontAwesomeIcon
+                    {/* to be update */}
+                    {/* <FontAwesomeIcon
                         icon={faGripVertical}
                         className="handle text-neutral-400 cursor-grab mr-2"
-                    />
+                    /> */}
                     <div className="relative w-7 h-7">
                         <Image
                             src="/icons/notion_clone_logo.png"

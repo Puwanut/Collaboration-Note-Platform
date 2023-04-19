@@ -1,43 +1,24 @@
 import { GetServerSidePropsContext } from "next";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
-import Workspace from "../components/Workspace";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { getServerSession } from "next-auth/next";
-import OverlayContainer from "../components/OverlayContainer";
 import { useAppContext } from "../context/AppContext";
 import { useEffect } from "react";
-import { signOut, useSession } from "next-auth/react";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function App({ workspaces }) {
 
   const { setWorkspaces, setCurrentWorkspace } = useAppContext()
-  const { data: session } = useSession()
 
   useEffect(() => {
     setWorkspaces(workspaces)
     setCurrentWorkspace(workspaces[0])
   }, [])
 
-  // Auto signout when another tab signout
-  useEffect(() => {
-    if (!session?.user) {
-        signOut()
-    }
-  }, [session])
-
   return (
     <>
-      <OverlayContainer />
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 min-w-0">
-          <Topbar />
-          <Workspace />
-        </div>
-      </div>
+      <LoadingSpinner />
     </>
-  )
+  );
 
 }
 
