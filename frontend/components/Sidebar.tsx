@@ -1,9 +1,8 @@
-import { faAngleDoubleLeft, faClock, faGear, faSearch } from "@fortawesome/free-solid-svg-icons"
+import { faAngleDoubleLeft, faClock, faFileLines, faGear, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 import { useOverlayContext } from "../context/OverlayContext"
-import { useSession } from "next-auth/react"
 
 const Sidebar = () => {
 
@@ -19,13 +18,13 @@ const Sidebar = () => {
     const transitionDuration = 300 // ms
 
     const { setOverlayName } = useOverlayContext()
-    const { workspaces } = appcontext
-    // const { data: session } = useSession()
+    const { workspaces, currentWorkspaceData } = appcontext
 
     const menus = [
-        { title: "Quick Find", icon: <FontAwesomeIcon icon={faSearch}/> },
-        { title: "All Updates", icon: <FontAwesomeIcon icon={faClock}/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear}/> },
+        { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="min-w-4"/> },
+        { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="min-w-4"/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="min-w-4"/> },
+        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="min-w-4"/>, className: "text-neutral-600" },
     ]
 
     const handleAutoResize = useCallback(() => {
@@ -46,13 +45,6 @@ const Sidebar = () => {
             setSidebarOpenDone(false)
         }
     }, [leftSidebarOpen])
-
-    const workspaceClickHandler = useCallback((e: React.MouseEvent) => {
-        const target = e.target as HTMLElement
-        if (target.id !== "toggle-sidebar") {
-            setOverlayName("workspace")
-        }
-    }, [setOverlayName])
 
     /* Function Group for Handle Drag Sidebar Slider */
     const startResizing = useCallback(() => {
@@ -101,7 +93,7 @@ const Sidebar = () => {
     }, [resize, stopResizing])
 
     return (
-        <div className={`xs:block fixed left-0 xs:relative xs:max-w-fit flex-none h-screen bg-neutral-50 z-20 overflow-x-hidden whitespace-nowrap
+        <div className={`xs:block fixed left-0 xs:relative xs:max-w-fit flex-none h-screen bg-neutral-50 z-20 overflow-hidden whitespace-nowrap
             ${!sidebarLoaded && `hidden`}
             ${sidebarOpenDone && `xs:min-w-[10rem]`}
             ${!isResizing && `duration-${transitionDuration}`}
@@ -112,7 +104,11 @@ const Sidebar = () => {
             >
 
             {/* Workspace Title */}
-            <div className={`flex gap-x-3 px-3 py-3 hover:cursor-pointer hover:bg-stone-200`} onClick={(e) => workspaceClickHandler(e)}>
+            <div
+                id="workspace-title"
+                className={`flex gap-x-3 px-3 py-3 hover:cursor-pointer hover:bg-stone-200`}
+                onClick={() => setOverlayName("workspace")}
+            >
 
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -122,7 +118,7 @@ const Sidebar = () => {
                 />
 
                 <h1 className={`text-slate-700 origin-left font-medium duration-300 grow
-                    text-ellipsis overflow-hidden
+                    text-ellipsis overflow-hidden select-none
                  ${!leftSidebarOpen && "scale-0"}
                  `}>
                     {workspaces[0]?.name}
@@ -132,29 +128,75 @@ const Sidebar = () => {
                     id="toggle-sidebar"
                     className={`text-stone-400 cursor-pointer p-1 hover:bg-stone-300 duration-300
                     ${!leftSidebarOpen && "rotate-180"}`}
-                    onClick={handleToggleSidebar}
+                    onClick={e => handleToggleSidebar(e)}
                 />
             </div>
 
-            {/* Menu */}
-            <ul className="mb-5" id='items'>
-                {menus.map((menu, index) => (
-                    <li key={index}
-                        className={`
-                        text-stone-400 flex items-center gap-x-4 cursor-pointer duration-300
-                        px-4 py-1 font-medium hover:bg-stone-200 origin-left
-                        ${!leftSidebarOpen && 'scale-0'}
-                        ${isMobileView ? 'text-base' : 'text-sm'}
-                        `}>
-                        <span>{menu.icon}</span>
-                        <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
-                            {menu.title}
-                        </span>
-                    </li>
-                ))}
-            </ul>
+            <div className="p-1">
+                {/* Menu */}
+                <ul className="mb-5">
+                    {menus.map((menu, index) => (
+                        <li key={index}
+                            className={`
+                            flex text-neutral-400 rounded-md items-center gap-x-3 cursor-pointer duration-200
+                            px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left ${menu.className}
+                            ${!leftSidebarOpen && 'scale-0'}
+                            ${isMobileView ? 'text-base' : 'text-sm'}
+                            `}>
+                            {menu.icon}
+                            <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
+                                {menu.title}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
 
-            {/* Favorite Notes */}
+                <div className="overflow-y-auto mt-6">
+                    {/* Favorite Pages */}
+                    <div className="">
+                        <h3 className={`text-neutral-400 text-sm px-3 mb-1`} >
+                            Favorites
+                        </h3>
+                        <ul>
+                            <li className={`flex text-neutral-400 items-center gap-x-3 cursor-pointer duration-200
+                                px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left
+                                ${!leftSidebarOpen && 'scale-0'}
+                                ${isMobileView ? 'text-base' : 'text-sm'}
+                                `}>
+                                <FontAwesomeIcon icon={faStar} className="min-w-4" />
+                                <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
+                                    Note 1
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Private Pages */}
+                    <div className="mt-6">
+                        <h3 className={`text-neutral-400 text-sm px-3 mb-1`} >
+                            Private
+                        </h3>
+                        <ul>
+                            {currentWorkspaceData?.pages?.map((page) => (
+                            <li key={page.id} className={`flex text-neutral-400 items-center gap-x-3 cursor-pointer duration-200
+                                px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left
+                                ${!leftSidebarOpen && 'scale-0'}
+                                ${isMobileView ? 'text-base' : 'text-sm'}
+                                `}>
+                                <FontAwesomeIcon icon={faFileLines} className="min-w-4" />
+                                <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
+                                    Getting Started
+                                </span>
+                            </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+
 
 
             {/* Slider */}

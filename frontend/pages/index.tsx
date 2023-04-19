@@ -7,14 +7,24 @@ import { getServerSession } from "next-auth/next";
 import OverlayContainer from "../components/OverlayContainer";
 import { useAppContext } from "../context/AppContext";
 import { useEffect } from "react";
+import { signOut, useSession } from "next-auth/react";
 
 export default function App({ workspaces }) {
 
-  const { setWorkspaces } = useAppContext()
-  
+  const { setWorkspaces, setCurrentWorkspace } = useAppContext()
+  const { data: session } = useSession()
+
   useEffect(() => {
     setWorkspaces(workspaces)
+    setCurrentWorkspace(workspaces[0])
   }, [])
+
+  // Auto signout when another tab signout
+  useEffect(() => {
+    if (!session?.user) {
+        signOut()
+    }
+  }, [session])
 
   return (
     <>
@@ -51,7 +61,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext){
   })
 
   const workspaces = await res.json()
-
 
   return {
     props: {

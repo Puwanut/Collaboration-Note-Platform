@@ -15,9 +15,10 @@ export interface Coordinate {
 
 export const OverlayProvider: FC<ScriptProps> = ({ children }: IOverlayContextProviderProps) => {
     const [overlayName, setOverlayName] = useState<string>("")
+    const [overlayProperties, setOverlayProperties] = useState<any>(null)
 
     return (
-        <OverlayContext.Provider value={{overlayName, setOverlayName}}>
+        <OverlayContext.Provider value={{overlayName, setOverlayName, overlayProperties, setOverlayProperties}}>
             {children}
         </OverlayContext.Provider>
     )

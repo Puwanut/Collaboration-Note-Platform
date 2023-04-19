@@ -1,5 +1,7 @@
+import { useSession } from "next-auth/react";
 import { ScriptProps } from "next/script";
-import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+
 export interface IAppContextProviderProps {
     children: ReactNode
 }
@@ -17,10 +19,14 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     const [isDragging, setIsDragging] = useState<boolean>(false)
 
     // workspace state
+    const { data: session } = useSession()
     const [workspaces, setWorkspaces] = useState<any>([])
+    const [currentWorkspace, setCurrentWorkspace] = useState<any>(null)
+    const [currentWorkspaceData, setCurrentWorkspaceData] = useState<any>(null)
 
     // Use Context to pass down functions to sidebar and topbar components
-    const handleToggleSidebar = useCallback(() => {
+    const handleToggleSidebar = useCallback((e: React.MouseEvent) => {
+      e.stopPropagation()
         if (leftSidebarOpen) { // Close sidebar
           sidebarWidthMemo.current = sidebarWidth // Memo previous sidebarWidth
           setSidebarWidth(0)
@@ -60,6 +66,23 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
       }
     }, [handleWindowViewport])
 
+    // fetch current workspace data
+    useEffect(() => {
+      if (currentWorkspace) {
+        const fetchWorkspace = async () => {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspace?.id}`, {
+              method: 'GET',
+              headers: {
+                authorization: `Bearer ${session?.user.accessToken}`
+              }
+          })
+          const data = await res.json()
+          setCurrentWorkspaceData(data)
+        }
+        fetchWorkspace()
+      }
+    }, [currentWorkspace])
+
     const value = useMemo(
         () => ({
           leftSidebarOpen,
@@ -71,9 +94,12 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           isDragging,
           setIsDragging,
           workspaces,
-          setWorkspaces
+          setWorkspaces,
+          currentWorkspace,
+          currentWorkspaceData,
+          setCurrentWorkspace,
         }),
-        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging, workspaces],
+        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging, workspaces, currentWorkspace, currentWorkspaceData],
       )
 
     return (

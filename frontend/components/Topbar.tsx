@@ -1,10 +1,8 @@
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAppContext } from "../context/AppContext";
-import { useSession, signIn, signOut } from "next-auth/react"
 
 const Topbar = () => {
-  const { data: session } = useSession();
   const { leftSidebarOpen, handleToggleSidebar } = useAppContext();
 
   return (
@@ -17,20 +15,6 @@ const Topbar = () => {
         } cursor-pointer hover:bg-slate-200`}
         onClick={handleToggleSidebar}
       />
-      {
-        session ? (
-          <button
-            className="ml-auto"
-            onClick={() => signOut()}>{session.user.email}
-          </button>
-        )
-        : (
-          <button
-            className="ml-auto"
-            onClick={() => signIn()}>Sign in
-          </button>
-        )
-      }
     </div>
   )
 }
