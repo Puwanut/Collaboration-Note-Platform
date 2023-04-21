@@ -15,6 +15,17 @@ enum WorkspaceRole {
   member
 }
 
+// enum BlockType {
+//   Text
+//   Heading_1 @map("Heading 1")
+//   Heading_2 @map("Heading 2")
+//   Heading_3 @map("Heading 3")
+//   Bulleted_List @map("Bulleted List")
+//   Numbered_List @map("Numbered List")
+//   Code
+//   To_do_List @map("To-do List")
+// }
+
 model User {
   id         Int              @id
   email      String           @unique
@@ -54,6 +65,7 @@ model Page {
 
 // model Block {
 //   id         String   @id @default(uuid())
+//   type       String
 //   properties Json
 //   children   String[]
 //   parent     String?

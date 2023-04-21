@@ -65,3 +65,16 @@ a {
 .auth-input {
   @apply w-full bg-neutral-100 border-[1px] px-2 py-1 rounded-md placeholder:text-neutral-400 focus:outline-blue-400
 }
+
+.text-overflow-ellipsis {
+  @apply overflow-hidden whitespace-nowrap overflow-ellipsis
+}
+
+.menu-sidebar {
+  @apply flex rounded-md items-center gap-x-2.5 cursor-pointer duration-200
+  px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left
+}
+
+.menu-sidebar-icon {
+  @apply flex-none w-4
+}

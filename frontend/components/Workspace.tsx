@@ -8,7 +8,9 @@ import usePrevious from "../hooks/usePrevious"
 import { LanguageName } from "@uiw/codemirror-extensions-langs"
 import { titleSlice } from "../lib/manageTitle"
 import { useAppContext } from "../context/AppContext"
-
+import ContentEditable from "react-contenteditable"
+import { useDebounce } from "react-use"
+import { useSession } from "next-auth/react"
 
 export interface IEditableBlock {
   id: string
@@ -28,7 +30,9 @@ interface ICurrentBlock {
 }
 
 const Workspace = () => {
-  const { currentPage } = useAppContext()
+  const { currentPage, setCurrentPage } = useAppContext()
+  const { data: session } = useSession()
+  const [pageTitle, setPageTitle] = useState(currentPage?.title ?? "")
   const [isTop, setIsTop] = useState<boolean>(true)
   const [blocks, setBlocks] = useState<IEditableBlock[]>(currentPage?.blocks ?? [])
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
@@ -272,13 +276,33 @@ const Workspace = () => {
   // }, [])
 
   useEffect(() => {
-    setBlocks(currentPage?.blocks)
+    if (currentPage) {
+      setBlocks(currentPage.blocks)
+      setPageTitle(currentPage.title)
+    }
   }, [currentPage])
+
+  useDebounce(async () => {
+    setCurrentPage(prevState => {
+      return { ...prevState, title: pageTitle, blocks: blocks }
+    })
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${currentPage.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${session?.user.accessToken}`,
+      },
+      body: JSON.stringify({
+        title: pageTitle,
+        blocks: blocks,
+      }),
+    })
+  }, 500, [pageTitle, blocks])
 
   return (
     <>
       <Head>
-        <title>{currentPage?.title}</title>
+        <title>{pageTitle}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div
@@ -290,10 +314,13 @@ const Workspace = () => {
         }
       >
         <div className="mx-auto pl-2 pr-8 max-w-screen-md">
-          <h1 id="page-title" className="ml-16 mb-5 text-5xl font-bold">
-            {currentPage?.title}
-            <hr className="mt-5" />
-          </h1>
+          <ContentEditable
+            html={pageTitle}
+            onChange={(e) => setPageTitle(e.target.value)}
+            className="ml-16 mb-5 text-5xl font-bold leading-tight outline-none"
+            placeholder="Untitled"
+            tagName="h1"
+          />
           <div className="revert-global">
             <ReactSortable
               list={blocks}

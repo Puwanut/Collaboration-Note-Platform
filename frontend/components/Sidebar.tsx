@@ -5,6 +5,8 @@ import { useAppContext } from "../context/AppContext"
 import { useOverlayContext } from "../context/OverlayContext"
 import { Tooltip } from "react-tooltip"
 import Link from "next/link"
+import { decode } from "entities"
+import Image from "next/image"
 
 const Sidebar = () => {
 
@@ -20,13 +22,13 @@ const Sidebar = () => {
     const transitionDuration = 300 // ms
 
     const { setOverlayName } = useOverlayContext()
-    const { workspaces, currentWorkspaceData, currentPage } = appcontext
+    const { currentWorkspace, currentWorkspaceData, currentPage } = appcontext
 
     const menus = [
-        { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="min-w-4"/> },
-        { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="min-w-4"/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="min-w-4"/> },
-        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="min-w-4"/>, className: "text-neutral-600" },
+        { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="menu-sidebar-icon"/> },
+        { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="menu-sidebar-icon"/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="menu-sidebar-icon"/> },
+        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="menu-sidebar-icon"/> },
     ]
 
     const handleAutoResize = useCallback(() => {
@@ -96,7 +98,7 @@ const Sidebar = () => {
     return (
         <div className={`xs:block fixed left-0 xs:relative xs:max-w-fit flex-none h-screen bg-neutral-50 z-20 overflow-hidden whitespace-nowrap group/sidebar
             ${!sidebarLoaded && `hidden`}
-            ${sidebarOpenDone && `xs:min-w-[10rem]`}
+            ${sidebarOpenDone && `xs:min-w-[12rem]`}
             ${!isResizing && `duration-${transitionDuration}`}
             `}
             ref={sidebarRef}
@@ -105,67 +107,78 @@ const Sidebar = () => {
             >
 
             {/* Workspace Title */}
-            <div
+            <section
                 id="workspace-title"
-                className={`flex gap-x-3 px-3 py-3 hover:cursor-pointer hover:bg-stone-200`}
+                className={`flex gap-x-2 px-3 py-3 hover:cursor-pointer hover:bg-neutral-200`}
                 onClick={() => setOverlayName("workspace")}
             >
 
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src="/square.svg"
-                    className={`cursor-pointer w-5 duration-500 ${!leftSidebarOpen && "rotate-[-360deg] scale-0"}`}
-                    alt="Logo"
-                />
+                <div className="relative flex-none w-6 h-6">
+                    <Image
+                        src="/icons/notion_clone_logo.png"
+                        className={`cursor-pointer w-5 duration-500 ${!leftSidebarOpen && "rotate-[-360deg] scale-0"}`}
+                        alt="Logo"
+                        fill
+                        sizes="100%"
+                    />
+                </div>
 
-                <h1 className={`text-slate-700 origin-left font-medium duration-300 grow
-                    text-ellipsis overflow-hidden select-none
-                 ${!leftSidebarOpen && "scale-0"}
-                 `}>
-                    {workspaces[0]?.name}
+                <h1 className={`text-slate-700 origin-left font-medium duration-300 grow text-overflow-ellipsis select-none
+                    ${!leftSidebarOpen && "scale-0"}
+                `}>
+                    {currentWorkspace?.name}
                 </h1>
 
-                <FontAwesomeIcon icon={faAngleDoubleLeft}
+                <FontAwesomeIcon
                     id="toggle-sidebar"
-                    className={`text-stone-400 cursor-pointer p-1 hover:bg-stone-300 duration-300
+                    icon={faAngleDoubleLeft}
+                    className={`text-neutral-400 cursor-pointer p-1 hover:bg-neutral-300 duration-300
                     ${!leftSidebarOpen && "rotate-180"}`}
                     onClick={e => handleToggleSidebar(e)}
+                    data-tooltip-id="tooltip-sidebar-toggle"
                 />
-            </div>
+                <Tooltip id="tooltip-sidebar-toggle">
+                    <span className="text-sm font-medium">
+                        Close sidebar
+                    </span>
+                </Tooltip>
+            </section>
 
-            <div className="p-1">
+            <section className="p-1">
                 {/* Menu */}
                 <ul className="mb-5">
                     {menus.map((menu, index) => (
                         <li key={index}
-                            className={`
-                            flex text-neutral-400 rounded-md items-center gap-x-3 cursor-pointer duration-200
-                            px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left ${menu.className}
+                            className={`menu-sidebar
+                            ${menu.title === "New page" ? "text-neutral-600" : "text-neutral-400" }
                             ${!leftSidebarOpen && 'scale-0'}
                             ${isMobileView ? 'text-base' : 'text-sm'}
-                            `}>
+                            `}
+                        >
                             {menu.icon}
-                            <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
+                            <span className="text-overflow-ellipsis">
                                 {menu.title}
                             </span>
                         </li>
                     ))}
                 </ul>
 
-                <div className="overflow-y-auto mt-6">
+                <div className="overflow-y-auto overflow-x-hidden mt-6">
                     {/* Favorite Pages */}
-                    <div className="">
-                        <h3 className={`text-neutral-400 text-sm px-3 mb-1`} >
+                    <div>
+                        <h3 className={`text-neutral-400 px-3 mb-1 origin-left duration-200
+                            ${!leftSidebarOpen && 'scale-0'}
+                            ${isMobileView ? 'text-base' : 'text-sm'}
+                        `} >
                             Favorites
                         </h3>
                         <ul>
-                            <li className={`flex text-neutral-400 items-center gap-x-3 cursor-pointer duration-200
-                                px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left
+                            <li className={`menu-sidebar text-neutral-400
                                 ${!leftSidebarOpen && 'scale-0'}
                                 ${isMobileView ? 'text-base' : 'text-sm'}
                                 `}>
-                                <FontAwesomeIcon icon={faStar} className="min-w-4" />
-                                <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
+                                <FontAwesomeIcon icon={faStar} className="menu-sidebar-icon" />
+                                <span className="text-overflow-ellipsis">
                                     Note 1
                                 </span>
                             </li>
@@ -174,8 +187,12 @@ const Sidebar = () => {
 
                     {/* Private Pages */}
                     <div className="mt-6">
-                        <div className="flex justify-between mr-2">
-                            <h3 className={`text-neutral-400 text-sm px-3 mb-1`} >
+                        <div className={`flex justify-between mr-2 origin-left duration-200
+                             ${!leftSidebarOpen && 'scale-0'}
+                             ${isMobileView ? 'text-base' : 'text-sm'}
+                            `}
+                        >
+                            <h3 className="text-neutral-400 px-3 mb-1">
                                 Private
                             </h3>
                             <FontAwesomeIcon
@@ -190,15 +207,16 @@ const Sidebar = () => {
                         </div>
                         <ul>
                             {currentWorkspaceData?.pages?.map((page) => (
-                            <Link key={page.id} href={page.id} className={`flex text-neutral-400 items-center gap-x-3 cursor-pointer duration-200
-                                px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left
+                            <Link key={page.id} href={page.id} className={`menu-sidebar text-neutral-400
                                 ${!leftSidebarOpen && 'scale-0'}
                                 ${isMobileView ? 'text-base' : 'text-sm'}
                                 ${page.id === currentPage?.id && 'bg-neutral-200/70'}
-                                `} >
-                                <FontAwesomeIcon icon={faFileLines} className="min-w-4" />
-                                <span className="overflow-hidden whitespace-nowrap overflow-ellipsis">
-                                    {page.title}
+                                `}
+                            >
+                                <FontAwesomeIcon icon={faFileLines} className="menu-sidebar-icon" />
+                                <span className="text-overflow-ellipsis">
+                                    {/* Sync page title name when user edited */}
+                                    {currentPage?.id === page.id ? decode(currentPage.title) : decode(page.title)}
                                 </span>
                             </Link>
                             ))}
@@ -207,17 +225,17 @@ const Sidebar = () => {
 
                 </div>
 
-            </div>
+            </section>
 
 
 
 
             {/* Slider */}
             <div className={`top-0 w-1 right-0 absolute h-screen
-            cursor-col-resize resize-x border-2 border-transparent bg-neutral-50
-            hover:border-neutral-200 ${(!leftSidebarOpen || isMobileView) && 'hidden'}`}
-                onMouseDown={startResizing}>
-            </div>
+                cursor-col-resize border-2 border-transparent bg-neutral-50
+                hover:border-neutral-200 ${(!leftSidebarOpen || isMobileView) && 'hidden'}`}
+                onMouseDown={startResizing}
+            ></div>
         </div>
     )
 }

@@ -69,7 +69,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
       }
     }, [handleWindowViewport])
 
-    // fetch current workspace data
+    // fetch current workspace data and set current page
     useEffect(() => {
       if (currentWorkspace) {
         const fetchWorkspace = async () => {
