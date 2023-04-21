@@ -13,13 +13,6 @@ export const initialPage = () => {
             },
             {
                 id: uuidv4(),
-                type: "Text",
-                properties: {
-                    title: [[""]],
-                }
-            },
-            {
-                id: uuidv4(),
                 type: "Heading 1",
                 properties: {
                     title: [["Write down some text"]],
@@ -190,8 +183,8 @@ export const initialPage = () => {
                 type: "Text",
                 properties: {
                     title: [
-                        ["The following snippet will format a date in"],
-                        ["DD-MM-YYYY HH:MM format:", "b"]
+                        ["The following snippet will format a date in format: "],
+                        ["DD-MM-YYYY HH:MM", "b"]
                     ],
                 }
             },
@@ -199,13 +192,22 @@ export const initialPage = () => {
                 id: uuidv4(),
                 type: "Code",
                 properties: {
-                    title: [[`const date = new Date();
-                    const dateString = date.getDate()  + '-' + (date.getMonth()+1) + '-' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
-                    console.log(dateString); // Output: 26-1-2022 16:50`
+                    title: [[`
+const date = new Date();
+const dateString = date.getDate()  + '-' + (date.getMonth()+1) + '-' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
+console.log(dateString); // Output: 26-1-2022 16:50`
                     ]],
                     language: "javascript"
                 }
-            }
+            },
+            {
+                id: uuidv4(),
+                type: "Text",
+                properties: {
+                    title: [["Note: due to the instability of the codeblock, you can try to remove it for better performance. (This will be fixed later)", "i"]]
+                }
+            },
+
         ]
     })
 }

@@ -278,7 +278,7 @@ const Workspace = () => {
   return (
     <>
       <Head>
-        <title>Notion Clone By Puwanut</title>
+        <title>{currentPage?.title}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div

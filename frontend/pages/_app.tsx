@@ -6,6 +6,7 @@ import { config } from "@fortawesome/fontawesome-svg-core"
 import { AppProvider } from "../context/AppContext"
 import { SessionProvider } from "next-auth/react"
 import { OverlayProvider } from "../context/OverlayContext";
+import { ToastContainer } from "react-toastify";
 config.autoAddCss = false // Tell Font Awesome to skip adding the CSS automatically since it's being imported above
 
 function MyApp({
@@ -13,13 +14,19 @@ function MyApp({
   pageProps: { session, ...pageProps }
 }) {
   return (
-    <SessionProvider session={session}>
-      <AppProvider>
-        <OverlayProvider>
-          <Component {...pageProps} />
-        </OverlayProvider>
-      </AppProvider>
-    </SessionProvider>
+    <>
+      <ToastContainer
+        autoClose={3000}
+        hideProgressBar={true}
+      />
+      <SessionProvider session={session}>
+        <AppProvider>
+          <OverlayProvider>
+            <Component {...pageProps} />
+          </OverlayProvider>
+        </AppProvider>
+      </SessionProvider>
+    </>
   )
 }
 

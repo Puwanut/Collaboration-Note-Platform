@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require('tailwindcss/defaultTheme')
+
+
 module.exports = {
-  mode: 'jit', // just-in-time
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
@@ -12,18 +14,8 @@ module.exports = {
     },
     screens: {
       'xs': '576px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
+      ...defaultTheme.screens,
     }
   },
-  // variants: {
-  //   extend: {
-  //       display: ["group-hover"],
-  //       opacity: ["group-hover"],
-  //   },
-  // },
   plugins: [],
 }

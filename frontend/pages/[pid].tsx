@@ -80,6 +80,16 @@ export async function getServerSideProps(context: GetServerSidePropsContext){
     }
   })
 
+  // access token expired (tobe improved with refresh token)
+  if (res.status === 403) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    }
+  }
+
   const workspaces = await res.json()
 
   return {

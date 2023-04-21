@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useFormik } from "formik";
 import * as Yup from "yup"
-import { useRouter } from "next/router";
-import { ToastContainer, toast } from "react-toastify"
+import { toast } from "react-toastify"
+import { signIn } from "next-auth/react";
 
 export interface IRegisterFormValues {
   username: string;
@@ -35,8 +35,6 @@ const validationSchema = Yup.object().shape({
 
 export default function Register() {
 
-  const router = useRouter()
-
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -58,17 +56,22 @@ export default function Register() {
           password: values.password
         })
       }
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, options)
-        .then(res => res.json())
-        .then((data) => {
-          if (data.status === 'ok') {
-            toast(data.message, { type: "success" })
-            router.push(process.env.NEXT_PUBLIC_BASE_URL)
-          } else {
-            toast(data.message, { type: "error" })
-            formik.resetForm()
-          }
-        })
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, options).then(res => res.json())
+      if (res.status === "ok") {
+        toast(res.message, { type: "success" })
+        // auto sign in after register
+        setTimeout(async () => {
+          await signIn("credentials", {
+            email: values.email,
+            password: values.password,
+            callbackUrl: "/"
+          })
+        }, 2000)
+      } else {
+        toast(res.message, { type: "error" })
+        formik.resetForm()
+      }
+
 
   }
 
@@ -77,10 +80,6 @@ export default function Register() {
       <Head>
         <title>Notion Clone - Register</title>
       </Head>
-      <ToastContainer
-        autoClose={3000}
-        hideProgressBar={true}
-      />
       <div className="max-w-screen-lg mx-auto h-screen mt-4">
 
         {/* Topbar Section */}

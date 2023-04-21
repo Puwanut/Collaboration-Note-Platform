@@ -64,6 +64,7 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
             const caretCoordinates = getCaretCoordinates()
             const contentEditableRect = contentEditableRef.current?.getBoundingClientRect()
             const windowHeight = window.innerHeight
+            // to be improved (flip overlay if caret too close to bottom of window)
             // if caret Coordinates too close to bottom of window, move overlay to top of caret
             if (caretCoordinates.caretTop > windowHeight / 2) {
                 return {
@@ -77,6 +78,25 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
             }
         }
     }, [commandOverlayOpen])
+
+
+    const blockMarginY = useMemo(() => {
+        switch (block.type) {
+            case "Heading 1": return "mb-1 mt-8"
+            case "Heading 2": return "mb-0.5 mt-6"
+            case "Heading 3": return "mb-0.5 mt-4"
+            default: return ""
+        }
+    }, [block.type])
+
+    const actionButtonMaxHeight = useMemo(() => {
+        switch (block.type) {
+            case "Heading 1": return "max-h-14"
+            case "Heading 2": return "max-h-12"
+            case "Heading 3": return "max-h-10"
+            default: return "max-h-8"
+        }
+    }, [block.type])
 
     const onPlusClickHandler = (e: MouseEvent) => {
       if (e.altKey) {
@@ -298,6 +318,7 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
         }
     }, [commandOverlayOpen])
 
+    // to be moved in overlay container
     // Close menu when clicking outside
     useClickAway(menuRef, () =>
         setMenuOpen(false)
@@ -312,12 +333,8 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
       <>
         <div
             data-block-id={block.id}
-            className={`relative
-            ${block.type === "Heading 1" && "mb-1 mt-8"}
-            ${block.type === "Heading 2" && "mb-px mt-6"}
-            ${block.type === "Heading 3" && "mb-px mt-4"}
-            `}
-            >
+            className={`relative ${blockMarginY}`}
+        >
             {commandOverlayOpen && (
                 <CommandsOverlay
                     coordinate={commandOverlayCoordinate}
@@ -336,42 +353,42 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
             />
             )}
             <div className="group/button mb-1 flex w-full">
-            <div className="mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 group-hover/button:opacity-100">
-                <FontAwesomeIcon
-                    icon={faPlus}
-                    className="cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
-                    onClick={(e) => onPlusClickHandler(e)}
-                    data-tooltip-id="tooltip-add-block"
-                    data-tooltip-delay-show={200}
-                />
-                <FontAwesomeIcon
-                    icon={faGripVertical}
-                    className="handle cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
-                    data-tooltip-id="tooltip-menu"
-                    data-tooltip-delay-show={200}
-                    onClick={() => setMenuOpen((prev) => !prev)}
-                />
-                <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
-                <div className="text-center text-xs font-bold text-neutral-400">
-                    <p>
-                        <span className="text-neutral-100">Click</span> to add a block below
-                    </p>
-                    <p>
-                        <span className="text-neutral-100">Alt-click</span> to add a block above
-                    </p>
+                <div className={`mr-2 flex space-x-1 text-neutral-400 opacity-0 duration-150 group-hover/button:opacity-100 items-center ${actionButtonMaxHeight}`}>
+                    <FontAwesomeIcon
+                        icon={faPlus}
+                        className="cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+                        onClick={(e) => onPlusClickHandler(e)}
+                        data-tooltip-id="tooltip-add-block"
+                        data-tooltip-delay-show={200}
+                    />
+                    <FontAwesomeIcon
+                        icon={faGripVertical}
+                        className="handle cursor-grab p-1.5 outline-none duration-150 hover:bg-slate-100" // group-hover is active when the parent is hovered
+                        onClick={() => setMenuOpen((prev) => !prev)}
+                        data-tooltip-id="tooltip-menu"
+                        data-tooltip-delay-show={200}
+                    />
+                    <Tooltip id="tooltip-add-block" className="z-20" place="bottom" noArrow>
+                    <div className="text-center text-xs font-bold text-neutral-400">
+                        <p>
+                            <span className="text-neutral-100">Click</span> to add a block below
+                        </p>
+                        <p>
+                            <span className="text-neutral-100">Alt-click</span> to add a block above
+                        </p>
+                    </div>
+                    </Tooltip>
+                    <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>
+                    <div className="text-center text-xs font-bold text-neutral-400">
+                        <p>
+                        <span className="text-neutral-100">Drag</span> to move
+                        </p>
+                        <p>
+                        <span className="text-neutral-100">Click</span> to open menu
+                        </p>
+                    </div>
+                    </Tooltip>
                 </div>
-                </Tooltip>
-                <Tooltip id="tooltip-menu" className="z-20" place="bottom" noArrow>
-                <div className="text-center text-xs font-bold text-neutral-400">
-                    <p>
-                    <span className="text-neutral-100">Drag</span> to move
-                    </p>
-                    <p>
-                    <span className="text-neutral-100">Click</span> to open menu
-                    </p>
-                </div>
-                </Tooltip>
-            </div>
 
             {["Text", "Heading 1", "Heading 2", "Heading 3"].includes(block.type)  &&
                 <div className="p-1 w-full min-w-0">

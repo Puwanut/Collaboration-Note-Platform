@@ -1,9 +1,9 @@
 import { Response, Router } from "express"
 import { TypedRequestBody, TypedRequestQuery } from "../types/request.type"
 import { User } from "../types/user.type"
-import { Prisma, PrismaClient } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 import bcrypt from "bcrypt"
-import { initialPage } from "../constants/initialPage"
+import { initialPage } from "../libs/initialPage"
 import { generateAccessToken } from "../libs/token-utils"
 import { prisma } from ".."
 
