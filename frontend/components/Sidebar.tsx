@@ -7,9 +7,21 @@ import { Tooltip } from "react-tooltip"
 import Link from "next/link"
 import { decode } from "entities"
 import Image from "next/image"
+import { v4 as uuidv4 } from "uuid"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/router"
+
+const menus = [
+        { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="menu-sidebar-icon"/> },
+        { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="menu-sidebar-icon"/> },
+        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="menu-sidebar-icon"/> },
+        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="menu-sidebar-icon"/> },
+    ]
 
 const Sidebar = () => {
 
+    const { data: session } = useSession()
+    const router = useRouter()
     const appcontext = useAppContext()
     const {leftSidebarOpen, setLeftSidebarOpen} = appcontext
     const {sidebarWidth, setSidebarWidth} = appcontext
@@ -23,13 +35,6 @@ const Sidebar = () => {
 
     const { setOverlayName } = useOverlayContext()
     const { currentWorkspace, currentWorkspaceData, currentPage } = appcontext
-
-    const menus = [
-        { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="menu-sidebar-icon"/> },
-        { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="menu-sidebar-icon"/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="menu-sidebar-icon"/> },
-        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="menu-sidebar-icon"/> },
-    ]
 
     const handleAutoResize = useCallback(() => {
         if (isMobileView) {
@@ -66,6 +71,32 @@ const Sidebar = () => {
         }
     },[isResizing, setSidebarWidth])
     /* Function Group for Handle Drag Sidebar Slider */
+
+    const newPageHandler = async () => {
+        // create new page
+        const newPage = {
+            id: uuidv4(),
+            title: "",
+            blocks: [{
+                id: uuidv4(),
+                type: "Text",
+                properties: {
+                    title: [[""]]
+                }
+            }]
+        }
+        const createNewpage = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session?.user.accessToken}`
+            },
+            body: JSON.stringify(newPage)
+        }).then(res => res.json())
+
+        router.push(`/${newPage.id}`)
+        console.log(createNewpage)
+    }
 
     // Handle Toggle Sidebar between mobile as desktop
     useEffect(() => {
@@ -198,7 +229,7 @@ const Sidebar = () => {
                             <FontAwesomeIcon
                                 icon={faPlus}
                                 className="opacity-0 group-hover/sidebar:opacity-100 transition text-neutral-400 p-1 text-sm rounded-md hover:bg-neutral-200 hover:cursor-pointer"
-                                onClick={() => console.log("add page")}
+                                onClick={newPageHandler}
                                 data-tooltip-id="tooltip-sidebar-add-page"
                             />
                             <Tooltip id="tooltip-sidebar-add-page" noArrow className="z-20">
@@ -214,7 +245,7 @@ const Sidebar = () => {
                                 `}
                             >
                                 <FontAwesomeIcon icon={faFileLines} className="menu-sidebar-icon" />
-                                <span className="text-overflow-ellipsis">
+                                <span className="text-overflow-ellipsis empty:before:content-[attr(data-placeholder)]" data-placeholder="Untitled">
                                     {/* Sync page title name when user edited */}
                                     {currentPage?.id === page.id ? decode(currentPage.title) : decode(page.title)}
                                 </span>

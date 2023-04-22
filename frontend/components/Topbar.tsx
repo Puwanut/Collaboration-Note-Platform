@@ -14,7 +14,9 @@ const Topbar = () => {
         className={`${leftSidebarOpen && "!hidden"} mr-4 cursor-pointer hover:bg-slate-200`}
         onClick={handleToggleSidebar}
       />
-      <h1 className="text-overflow-ellipsis">{currentPage?.title ? decode(currentPage.title) : ""}</h1>
+      <h1 className="text-overflow-ellipsis empty:before:content-[attr(data-placeholder)]" data-placeholder="Untitled">
+        {currentPage?.title ? decode(currentPage.title) : ""}
+      </h1>
     </div>
   )
 }

@@ -434,7 +434,7 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                 }
                 {block.type === "Numbered List" &&
                     <div className="flex w-full p-1 min-w-0">
-                        <span data-numbered-list-order={numberedListOrder + '.'} className="mx-2 before:content-[attr(data-numbered-list-order)]"></span>
+                        <span data-numbered-list-order={numberedListOrder + '.'} className="mx-2 before:content-[attr(data-numbered-list-order)] w-6 text-center"></span>
                         <ContentEditable
                             key={dataPosition}
                             innerRef={contentEditableRef}

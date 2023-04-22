@@ -48,6 +48,9 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
                     select: {
                         id: true,
                         title: true
+                    },
+                    orderBy: {
+                        createdAt: "asc"
                     }
                 },
                 users: true
@@ -61,6 +64,60 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
             }
         }
         res.status(400).json({ message: "Unkonwn error" })
+    }
+})
+
+router.post("/:workspaceId/pages", async (req: Request, res: Response) => {
+    const userId = res.locals.user.userId
+    const { workspaceId } = req.params
+    const { id: pageId, title, blocks } = req.body
+    try {
+        const page = await prisma.page.create({
+            data: {
+                id: pageId,
+                title: title,
+                blocks: blocks,
+                workspace: {
+                    connect: {
+                        id: workspaceId
+                    }
+                }
+            },
+        })
+        res.json(page)
+    } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError) {
+            if (e.code === "P2002") {
+                res.status(400).json({ message: "Page already exists in this workspace." })
+            }
+        } else {
+            console.log(e)
+            res.status(404).json({ message: "Workspace not found or You don't have permission to create a page in this workspace." })
+        }
+    }
+})
+
+router.delete("/:workspaceId/pages/:pageId", async (req: Request, res: Response) => {
+    const userId = res.locals.user.userId
+    const { workspaceId, pageId } = req.params
+    try {
+        const page = await prisma.page.deleteMany({
+            where: {
+                id: pageId,
+                workspace: {
+                    id: workspaceId,
+                    users: {
+                        some: {
+                            userId: userId
+                        }
+                    }
+                }
+            }
+        })
+        res.json(page)
+    } catch (e) {
+        console.log(e)
+        res.status(404).json({ message: "Page not found or You don't have permission to delete this page." })
     }
 })
 

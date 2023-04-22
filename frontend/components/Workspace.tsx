@@ -317,8 +317,8 @@ const Workspace = () => {
           <ContentEditable
             html={pageTitle}
             onChange={(e) => setPageTitle(e.target.value)}
-            className="ml-16 mb-5 text-5xl font-bold leading-tight outline-none"
-            placeholder="Untitled"
+            className="ml-16 mb-5 text-5xl font-bold leading-tight outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
+            data-placeholder="Untitled"
             tagName="h1"
           />
           <div className="revert-global">

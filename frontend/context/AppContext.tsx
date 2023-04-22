@@ -16,7 +16,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
     const [sidebarWidth, setSidebarWidth] = useState<any>("15rem")
     const [isMobileView, setIsMobileView] = useState<boolean>(false)
-    let sidebarWidthMemo = useRef(sidebarWidth) // Memo previous sidebarWidth
+    const sidebarWidthMemo = useRef(sidebarWidth) // Memo previous sidebarWidth
     const [isDragging, setIsDragging] = useState<boolean>(false)
 
     // workspace state
@@ -87,6 +87,18 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
         fetchWorkspace()
       }
     }, [currentWorkspace])
+
+    useEffect(() => {
+      if (currentWorkspaceData) {
+        setCurrentWorkspaceData(prev => {
+           const foundCurrentPage = prev.pages.find(page => page.id === currentPage.id)
+           if (foundCurrentPage) {
+              return prev
+           }
+           return { ...prev, pages: [...prev.pages, {id: currentPage.id, title: currentPage.title}]}
+        })
+      }
+    }, [currentPage])
 
     const value = useMemo(
         () => ({
