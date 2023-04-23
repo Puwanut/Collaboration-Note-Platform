@@ -1,8 +1,9 @@
-import { faAngleDoubleLeft, faClock, faFileLines, faGear, faPlus, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
+import { faAngleDoubleLeft, faEllipsis, faGear, faPlus, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
+import { faClock, faFileLines } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
-import { useOverlayContext } from "../context/OverlayContext"
+import { OverlayType, useOverlayContext } from "../context/OverlayContext"
 import { Tooltip } from "react-tooltip"
 import Link from "next/link"
 import { decode } from "entities"
@@ -15,26 +16,30 @@ const menus = [
         { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="menu-sidebar-icon"/> },
         { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="menu-sidebar-icon"/> },
         { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="menu-sidebar-icon"/> },
-        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="menu-sidebar-icon"/> },
+        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="menu-sidebar-icon"/>},
     ]
 
 const Sidebar = () => {
 
     const { data: session } = useSession()
     const router = useRouter()
+
     const appcontext = useAppContext()
-    const {leftSidebarOpen, setLeftSidebarOpen} = appcontext
-    const {sidebarWidth, setSidebarWidth} = appcontext
-    const {handleToggleSidebar} = appcontext
+    const { leftSidebarOpen, setLeftSidebarOpen } = appcontext
+    const { sidebarWidth, setSidebarWidth } = appcontext
+    const { handleToggleSidebar } = appcontext
     const sidebarRef: MutableRefObject<HTMLDivElement> = useRef(null);
     const [isResizing, setIsResizing] = useState<boolean>(false)
-    const {isMobileView} = appcontext
+    const { isMobileView } = appcontext
     const [sidebarOpenDone, setSidebarOpenDone] = useState<boolean>(false)
     const [sidebarLoaded, setSidebarLoaded] = useState<boolean>(false)
     const transitionDuration = 300 // ms
 
-    const { setOverlayName } = useOverlayContext()
+    const { setOverlay } = useOverlayContext()
     const { currentWorkspace, currentWorkspaceData, currentPage } = appcontext
+
+    const [isFavorieHidden, setIsFavoriteHidden] = useState<boolean>(false)
+    const [isPrivateHidden, setIsPrivateHidden] = useState<boolean>(false)
 
     const handleAutoResize = useCallback(() => {
         if (isMobileView) {
@@ -79,7 +84,8 @@ const Sidebar = () => {
             title: "",
             blocks: []
         }
-        const createNewpage = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
+        // add new page to database
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -89,7 +95,22 @@ const Sidebar = () => {
         }).then(res => res.json())
 
         router.push(`/${newPage.id}`)
-        console.log(createNewpage)
+    }
+
+    const onClickEllipsisHandler = (e: React.MouseEvent, pageId: string) => {
+        // on next/link, prevent default = prevent change page url
+        e.preventDefault()
+        setOverlay({
+            name: OverlayType.pageMenu,
+            coordinate: {
+                x: e.clientX,
+                y: e.clientY
+            },
+            properties: {
+                pageId: pageId,
+            }
+        })
+
     }
 
     // Handle Toggle Sidebar between mobile as desktop
@@ -129,13 +150,13 @@ const Sidebar = () => {
             ref={sidebarRef}
             onMouseDown={(e) => e.preventDefault()}
             style={{ width:  sidebarWidth }}
-            >
+        >
 
             {/* Workspace Title */}
             <section
                 id="workspace-title"
                 className={`flex gap-x-2 px-3 py-3 hover:cursor-pointer hover:bg-neutral-200`}
-                onClick={() => setOverlayName("workspace")}
+                onClick={() => setOverlay({ name: OverlayType.workspaceSelector })}
             >
 
                 <div className="relative flex-none w-6 h-6">
@@ -179,6 +200,7 @@ const Sidebar = () => {
                             ${!leftSidebarOpen && 'scale-0'}
                             ${isMobileView ? 'text-base' : 'text-sm'}
                             `}
+                            onClick={() => menu.title === "New page" && newPageHandler()}
                         >
                             {menu.icon}
                             <span className="text-overflow-ellipsis">
@@ -188,16 +210,21 @@ const Sidebar = () => {
                     ))}
                 </ul>
 
-                <div className="overflow-y-auto overflow-x-hidden mt-6">
+                <div className="h-[calc(100vh-190px)] overflow-y-auto overflow-x-hidden mt-6 pb-6">
                     {/* Favorite Pages */}
                     <div>
-                        <h3 className={`text-neutral-400 px-3 mb-1 origin-left duration-200
+                        <h3 className={`inline-block text-neutral-400 mx-2 mb-1 px-1 rounded origin-left duration-200 hover:bg-neutral-200/60 cursor-pointer
                             ${!leftSidebarOpen && 'scale-0'}
-                            ${isMobileView ? 'text-base' : 'text-sm'}
-                        `} >
+                            ${isMobileView ? 'text-base' : 'text-sm'}`}
+                            onClick={() => setIsFavoriteHidden(prev => !prev)}
+                            data-tooltip-id="tooltip-sidebar-favorite-label"
+                        >
                             Favorites
                         </h3>
-                        <ul>
+                        <Tooltip id="tooltip-sidebar-favorite-label" noArrow className="z-20">
+                            <span className="font-medium">Click to {isFavorieHidden ? "show" : "hide"} Favorite Section</span>
+                        </Tooltip>
+                        <ul className={`${isFavorieHidden ? "hidden" : ""}`}>
                             <li className={`menu-sidebar text-neutral-400
                                 ${!leftSidebarOpen && 'scale-0'}
                                 ${isMobileView ? 'text-base' : 'text-sm'}
@@ -214,12 +241,19 @@ const Sidebar = () => {
                     <div className="mt-6">
                         <div className={`flex justify-between mr-2 origin-left duration-200
                              ${!leftSidebarOpen && 'scale-0'}
-                             ${isMobileView ? 'text-base' : 'text-sm'}
-                            `}
+                             ${isMobileView ? 'text-base' : 'text-sm'}`}
+
                         >
-                            <h3 className="text-neutral-400 px-3 mb-1">
+                            <h3
+                                className="text-neutral-400 mx-2 mb-1 px-1 hover:bg-neutral-200/60 cursor-pointer"
+                                onClick={() => setIsPrivateHidden(prev => !prev)}
+                                data-tooltip-id="tooltip-sidebar-private-label"
+                            >
                                 Private
                             </h3>
+                            <Tooltip id="tooltip-sidebar-private-label" noArrow className="z-20">
+                                <span className="font-medium">Click to {isPrivateHidden ? "show" : "hide"} Private Section</span>
+                            </Tooltip>
                             <FontAwesomeIcon
                                 icon={faPlus}
                                 className="opacity-0 group-hover/sidebar:opacity-100 transition text-neutral-400 p-1 text-sm rounded-md hover:bg-neutral-200 hover:cursor-pointer"
@@ -230,19 +264,25 @@ const Sidebar = () => {
                                 <span>Add a Page</span>
                             </Tooltip>
                         </div>
-                        <ul>
+                        <ul className={`${isPrivateHidden ? "hidden" : ""}`}>
                             {currentWorkspaceData?.pages?.map((page) => (
-                            <Link key={page.id} href={page.id} className={`menu-sidebar text-neutral-400
+                            <Link key={page.id} href={page.id} className={`menu-sidebar text-neutral-400 group/sidebar-page
                                 ${!leftSidebarOpen && 'scale-0'}
                                 ${isMobileView ? 'text-base' : 'text-sm'}
                                 ${page.id === currentPage?.id && 'bg-neutral-200/70'}
                                 `}
                             >
-                                <FontAwesomeIcon icon={faFileLines} className="menu-sidebar-icon" />
-                                <span className="text-overflow-ellipsis empty:before:content-[attr(data-placeholder)]" data-placeholder="Untitled">
+                                <FontAwesomeIcon icon={faFileLines} className="menu-sidebar-icon" size="lg" />
+                                <span className="flex-1 text-overflow-ellipsis empty:before:content-[attr(data-placeholder)]" data-placeholder="Untitled">
                                     {/* Sync page title name when user edited */}
                                     {currentPage?.id === page.id ? decode(currentPage.title) : decode(page.title)}
                                 </span>
+                                <div
+                                    className="hidden group-hover/sidebar-page:block text-neutral-600 px-0.5 text-sm rounded-sm hover:bg-neutral-300/60 hover:cursor-pointer"
+                                    onClick={(e) => onClickEllipsisHandler(e, page.id)}
+                                >
+                                    <FontAwesomeIcon icon={faEllipsis} size="lg" />
+                                </div>
                             </Link>
                             ))}
                         </ul>

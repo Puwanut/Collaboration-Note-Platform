@@ -71,11 +71,10 @@ a {
 }
 
 .menu-sidebar {
-  @apply flex rounded-md items-center gap-x-2.5 cursor-pointer duration-200
-  px-3 py-1 font-medium hover:bg-neutral-200/70 origin-left
+  @apply flex rounded-md items-center gap-x-2.5 cursor-pointer duration-200 h-7
+  px-3 py-1 mb-px font-medium hover:bg-neutral-200/70 origin-left
 }
 
 .menu-sidebar-icon {
   @apply flex-none w-4
 }
-

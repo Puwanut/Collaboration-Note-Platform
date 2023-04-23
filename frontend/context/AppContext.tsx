@@ -115,6 +115,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           currentWorkspace,
           setCurrentWorkspace,
           currentWorkspaceData,
+          setCurrentWorkspaceData,
           currentPage,
           setCurrentPage
         }),

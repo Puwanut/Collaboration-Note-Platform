@@ -31,7 +31,7 @@ interface ICurrentBlock {
 }
 
 const Workspace = () => {
-  const { currentPage, setCurrentPage } = useAppContext()
+  const { currentPage, setCurrentPage, setCurrentWorkspaceData } = useAppContext()
   const { data: session } = useSession()
   const [pageTitle, setPageTitle] = useState<string>(currentPage?.title ?? "")
   const [isTop, setIsTop] = useState<boolean>(true)
@@ -322,9 +322,16 @@ const Workspace = () => {
   }, [currentPage])
 
   useDebounce(async () => {
+    // to Update Page Title among components
     setCurrentPage(prevState => {
       return { ...prevState, title: pageTitle, blocks: blocks }
     })
+    // to Update Page Title in sidebar (after change page)
+    setCurrentWorkspaceData(prev => ({
+      ...prev,
+      pages: prev.pages.map(page => page.id === currentPage.id ? { ...page, title: pageTitle } : page)
+    }))
+    // to Update Page in database
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${currentPage.id}`, {
       method: "PUT",
       headers: {
@@ -346,6 +353,7 @@ const Workspace = () => {
       </Head>
       <div
         // height = 100vh - 3rem (topbar height)
+        id="page-workspace"
         className={`pt-20 pb-24 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
                 ${isTop ? "overscroll-auto" : "overscroll-none"}`}
         onScroll={(e) =>
@@ -359,7 +367,7 @@ const Workspace = () => {
             html={pageTitle}
             onChange={(e) => setPageTitle(e.target.value)}
             onKeyDown={(e) => titleKeyDownHandler(e)}
-            className="ml-16 mb-5 text-5xl font-bold leading-tight outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
+            className="ml-16 mb-5 text-5xl font-bold leading-tight whitespace-pre-wrap outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
             data-placeholder="Untitled"
           />
           <div className="revert-global">
