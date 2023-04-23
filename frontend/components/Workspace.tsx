@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react"
+import { KeyboardEvent, useEffect, useState } from "react"
 import { ReactSortable } from "react-sortablejs"
 import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
-import { getCaretStart, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
+import { getCaretStart, isCaretOnBottomOfTitle, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import Head from "next/head"
 import usePrevious from "../hooks/usePrevious"
 import { LanguageName } from "@uiw/codemirror-extensions-langs"
@@ -11,6 +11,7 @@ import { useAppContext } from "../context/AppContext"
 import ContentEditable from "react-contenteditable"
 import { useDebounce } from "react-use"
 import { useSession } from "next-auth/react"
+import { moveCaret } from "../lib/setCaret"
 
 export interface IEditableBlock {
   id: string
@@ -32,12 +33,50 @@ interface ICurrentBlock {
 const Workspace = () => {
   const { currentPage, setCurrentPage } = useAppContext()
   const { data: session } = useSession()
-  const [pageTitle, setPageTitle] = useState(currentPage?.title ?? "")
+  const [pageTitle, setPageTitle] = useState<string>(currentPage?.title ?? "")
   const [isTop, setIsTop] = useState<boolean>(true)
   const [blocks, setBlocks] = useState<IEditableBlock[]>(currentPage?.blocks ?? [])
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
   const [key, setKey] = useState<KeyboardEvent>(null)
   const [previousBlocks, titlesLength] = usePrevious(blocks)
+
+  const titleKeyDownHandler = (e: KeyboardEvent) => {
+    switch (e.key) {
+      case "Enter": {
+        e.preventDefault()
+        setBlocks((prevState) => {
+          const newBlock = {
+            id: uuidv4(),
+            type: "Text",
+            properties: {
+              title: [],
+            },
+          };
+          return [newBlock, ...prevState]
+        });
+        break
+      }
+      case "ArrowDown": {
+        if (isCaretOnBottomOfTitle()) {
+          e.preventDefault()
+          const firstBlock = (document.querySelector(`[data-position="0"]`) as HTMLElement).getBoundingClientRect()
+          const currentCaretPosition = document.getSelection().getRangeAt(0).getBoundingClientRect()
+          moveCaret(currentCaretPosition.x, firstBlock.y)
+        }
+        break
+      }
+      case "ArrowRight": {
+        const titleDiv = document.getElementById("page-title-workspace")
+        if (titleDiv.innerText.length === getCaretStart(titleDiv)) {
+          e.preventDefault()
+          const firstBlock = (document.querySelector(`[data-position="0"]`) as HTMLElement).getBoundingClientRect()
+          moveCaret(firstBlock.x, firstBlock.y)
+        }
+        break
+      }
+    }
+  }
+
 
   // Send update function to EditableBlock
   const updateBlocksHandler = (updatedBlock: IEditableBlock) => {
@@ -315,11 +354,13 @@ const Workspace = () => {
       >
         <div className="mx-auto pl-2 pr-8 max-w-screen-md">
           <ContentEditable
+            id="page-title-workspace"
+            tagName="h1"
             html={pageTitle}
             onChange={(e) => setPageTitle(e.target.value)}
+            onKeyDown={(e) => titleKeyDownHandler(e)}
             className="ml-16 mb-5 text-5xl font-bold leading-tight outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
             data-placeholder="Untitled"
-            tagName="h1"
           />
           <div className="revert-global">
             <ReactSortable

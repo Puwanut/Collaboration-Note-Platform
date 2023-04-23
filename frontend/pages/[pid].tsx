@@ -35,6 +35,10 @@ export default function Page({ workspaces }) {
         })
         const page = await res.json()
         setCurrentPage(page)
+        if (page.blocks.length === 0) {
+          const titleDiv = document.getElementById("page-title-workspace")
+          titleDiv.focus()
+        }
     }
     fetchPage()
   }, [pid])

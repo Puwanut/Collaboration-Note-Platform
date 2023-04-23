@@ -77,13 +77,7 @@ const Sidebar = () => {
         const newPage = {
             id: uuidv4(),
             title: "",
-            blocks: [{
-                id: uuidv4(),
-                type: "Text",
-                properties: {
-                    title: [[""]]
-                }
-            }]
+            blocks: []
         }
         const createNewpage = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
             method: "POST",

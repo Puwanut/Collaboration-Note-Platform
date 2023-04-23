@@ -177,6 +177,9 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                     if (previousBlock) {
                         setCaretToEnd(previousBlock)
                         console.log("[Move to end]")
+                    } else {
+                        const titleDiv = document.getElementById("page-title-workspace")
+                        setCaretToEnd(titleDiv)
                     }
                 }
                 break
@@ -209,6 +212,10 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                         const possibleCaretLeft = caretLeft < previousBlockLeft ? previousBlockLeft : caretLeft
                         moveCaret(possibleCaretLeft, lastLinePreviousBlockOffsetTop)
                         console.log("[Move to]", possibleCaretLeft, lastLinePreviousBlockOffsetTop)
+                    } else if (contentEditableRef.current.getAttribute("data-position") === "0") {
+                        const { caretLeft } = getCaretCoordinates()
+                        const titleDiv = (document.getElementById("page-title-workspace") as HTMLElement).getBoundingClientRect()
+                        moveCaret(caretLeft, titleDiv.bottom)
                     }
                 }
                 break

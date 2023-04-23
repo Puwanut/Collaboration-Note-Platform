@@ -213,6 +213,7 @@ export const getCaretInfo = (): Record<string, number> => {
 
 }
 
+// for now only works for block (not title)
 export const getCaretCoordinates = () => {
     const selection = document.getSelection()
     const range = selection.getRangeAt(0)
@@ -270,6 +271,14 @@ export const isCaretOnTop = (): boolean => {
 export const isCaretOnBottom = (): boolean => {
     const { caretOffsetTop, lineHeight, parentOffsetHeight } = getCaretInfo()
     return 2 * lineHeight + caretOffsetTop > parentOffsetHeight + 4 // 4 is padding p-1
+}
+
+export const isCaretOnBottomOfTitle = (): boolean => {
+    const title = document.getElementById("page-title-workspace") as HTMLElement
+    const titleRect = title.getBoundingClientRect()
+    const titleLineHeight = parseInt(window.getComputedStyle(title).getPropertyValue("line-height").slice(0, -2))
+    const currentCaretPosition = document.getSelection().getRangeAt(0).getBoundingClientRect()
+    return currentCaretPosition.top + titleLineHeight + 20 > titleRect.bottom
 }
 
 export const moveCaret = (x: number, y: number): void => {
