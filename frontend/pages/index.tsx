@@ -6,8 +6,13 @@ import { useEffect } from "react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { Workspace } from "../types/workspace";
 
-export default function App({ workspaces }) {
+interface IAppProps {
+  workspaces: Workspace[]
+}
+
+export default function App({ workspaces }: IAppProps) {
 
   const { data: session } = useSession()
   const router = useRouter()

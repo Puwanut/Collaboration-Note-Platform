@@ -1,7 +1,7 @@
 import { GetServerSidePropsContext } from "next";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
-import Workspace from "../components/Workspace";
+import Frame from "../components/Frame";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { getServerSession } from "next-auth/next";
 import OverlayContainer from "../components/OverlayContainer";
@@ -10,8 +10,13 @@ import { useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { usePrevious } from "react-use";
+import { Workspace } from "../types/workspace";
 
-export default function Page({ workspaces }) {
+interface IPageProps {
+  workspaces: Workspace[]
+}
+
+export default function Page({ workspaces }: IPageProps) {
 
   const { data: session } = useSession()
   const router = useRouter()
@@ -96,7 +101,7 @@ export default function Page({ workspaces }) {
         <Sidebar />
         <div className="flex-1 min-w-0">
           <Topbar />
-          <Workspace />
+          <Frame />
         </div>
       </div>
     </>

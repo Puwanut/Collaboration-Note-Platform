@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { IEditableBlock } from "../components/Workspace";
+import { IEditableBlock } from "../components/Frame";
 
 const usePrevious = (blocks: IEditableBlock[]) => {
     const ref = useRef<IEditableBlock[]>()

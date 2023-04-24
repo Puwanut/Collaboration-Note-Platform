@@ -13,7 +13,7 @@ import { useSession } from "next-auth/react"
 import { moveCaret } from "../lib/setCaret"
 import { Block, CurrentBlock } from "../types/block"
 
-const Workspace = () => {
+const Frame = () => {
   const { currentPage, setCurrentPage, setCurrentWorkspaceData } = useAppContext()
   const { data: session } = useSession()
   const [pageTitle, setPageTitle] = useState<string>(currentPage?.title ?? "")
@@ -394,4 +394,4 @@ const Workspace = () => {
   );
 }
 
-export default Workspace
+export default Frame

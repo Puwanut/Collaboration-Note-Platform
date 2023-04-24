@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { Coordinate, OverlayType, useOverlayContext } from '../../context/OverlayContext'
+import { OverlayType, useOverlayContext } from '../../context/OverlayContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClone, faStar, faTrashCan, faEdit } from '@fortawesome/free-regular-svg-icons'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
@@ -9,6 +9,7 @@ import { useAppContext } from '../../context/AppContext'
 import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'react-toastify'
 import { PageWithBlocks, PageWithOutBlocks } from '../../types/page'
+import { Coordinate } from '../../types/coordinate'
 
 interface IPageMenuOverlayProps {
     coordinate: Coordinate

@@ -5,7 +5,7 @@ export interface PageWithOutBlocks {
     title: string
     icon?: string
     cover?: string
-    isFavorite: boolean
+    isFavorite?: boolean
 }
 
 export interface PageWithBlocks extends PageWithOutBlocks {

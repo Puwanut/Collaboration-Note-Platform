@@ -1,11 +1,12 @@
 import { forwardRef, useState, useEffect, useMemo, KeyboardEvent } from 'react'
 import { useAppContext } from '../../context/AppContext'
 import ContentEditable from 'react-contenteditable'
-import { Coordinate, useOverlayContext } from '../../context/OverlayContext'
+import { useOverlayContext } from '../../context/OverlayContext'
 import { setCaretToEnd } from '../../lib/setCaret'
 import { PageWithOutBlocks } from '../../types/page'
 import { useSession } from 'next-auth/react'
 import { useDebounce } from 'react-use'
+import { Coordinate } from '../../types/coordinate'
 
 interface IPageTitleOverlayProps {
     coordinate: Coordinate,
@@ -43,11 +44,12 @@ const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(func
         if (selectedPage.id === currentPage?.id) {
             setCurrentPage(prev => ({ ...prev, title: title }))
         }
-
-        setCurrentWorkspaceData(prev => ({
-            ...prev,
-            pages: prev.pages.map(page => page.id === selectedPage.id ? { ...page, title: title } : page)
-        }))
+        else {
+            setCurrentWorkspaceData(prev => ({
+                ...prev,
+                pages: prev.pages.map(page => page.id === selectedPage.id ? { ...page, title: title } : page)
+            }))
+        }
     }
 
     useEffect(() => {
