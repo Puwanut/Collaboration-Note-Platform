@@ -1,5 +1,3 @@
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { ScriptProps } from "next/script";
 import React, { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
@@ -12,6 +10,7 @@ export const mobileViewWidth = 576
 const AppContext = createContext(undefined)
 
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
+
     // Sidebar state
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
     const [sidebarWidth, setSidebarWidth] = useState<any>("15rem")
@@ -20,10 +19,8 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     const [isDragging, setIsDragging] = useState<boolean>(false)
 
     // workspace state
-    const { data: session } = useSession()
-    const router = useRouter()
     const [workspaces, setWorkspaces] = useState<any>([])
-    const [currentWorkspace, setCurrentWorkspace] = useState<any>(null)
+    const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string>("")
     const [currentWorkspaceData, setCurrentWorkspaceData] = useState<any>(null)
     const [currentPage, setCurrentPage] = useState<any>(null)
 
@@ -69,36 +66,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
       }
     }, [handleWindowViewport])
 
-    // fetch current workspace data and set current page
-    useEffect(() => {
-      if (currentWorkspace) {
-        const fetchWorkspace = async () => {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspace?.id}`, {
-              method: 'GET',
-              headers: {
-                authorization: `Bearer ${session?.user.accessToken}`
-              }
-          })
-          const data = await res.json()
-          setCurrentWorkspaceData(data)
-          // if same route, shallow routing (won't fetch data again)
-          router.push(`/${data.pages[0].id}`, undefined, { shallow: true })
-        }
-        fetchWorkspace()
-      }
-    }, [currentWorkspace])
 
-    useEffect(() => {
-      if (currentWorkspaceData) {
-        setCurrentWorkspaceData(prev => {
-           const foundCurrentPage = prev.pages.find(page => page.id === currentPage.id)
-           if (foundCurrentPage) {
-              return prev
-           }
-           return { ...prev, pages: [...prev.pages, {id: currentPage.id, title: currentPage.title}]}
-        })
-      }
-    }, [currentPage])
 
     const value = useMemo(
         () => ({
@@ -112,14 +80,14 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
           setIsDragging,
           workspaces,
           setWorkspaces,
-          currentWorkspace,
-          setCurrentWorkspace,
+          currentWorkspaceId,
+          setCurrentWorkspaceId,
           currentWorkspaceData,
           setCurrentWorkspaceData,
           currentPage,
           setCurrentPage
         }),
-        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging, workspaces, currentWorkspace, currentWorkspaceData, currentPage],
+        [leftSidebarOpen, sidebarWidth, handleToggleSidebar, isMobileView, isDragging, workspaces, currentWorkspaceId, currentWorkspaceData, currentPage],
       )
 
     return (

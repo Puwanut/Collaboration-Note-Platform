@@ -36,7 +36,7 @@ const Sidebar = () => {
     const transitionDuration = 300 // ms
 
     const { setOverlay } = useOverlayContext()
-    const { currentWorkspace, currentWorkspaceData, currentPage } = appcontext
+    const { currentWorkspaceData, currentPage } = appcontext
 
     const [isFavorieHidden, setIsFavoriteHidden] = useState<boolean>(false)
     const [isPrivateHidden, setIsPrivateHidden] = useState<boolean>(false)
@@ -172,7 +172,7 @@ const Sidebar = () => {
                 <h1 className={`text-slate-700 origin-left font-medium duration-300 grow text-overflow-ellipsis select-none
                     ${!leftSidebarOpen && "scale-0"}
                 `}>
-                    {currentWorkspace?.name}
+                    {currentWorkspaceData?.name}
                 </h1>
 
                 <FontAwesomeIcon

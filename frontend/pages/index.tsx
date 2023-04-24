@@ -4,15 +4,37 @@ import { getServerSession } from "next-auth/next";
 import { useAppContext } from "../context/AppContext";
 import { useEffect } from "react";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 export default function App({ workspaces }) {
 
-  const { setWorkspaces, setCurrentWorkspace } = useAppContext()
+  const { data: session } = useSession()
+  const router = useRouter()
+  const { setWorkspaces, setCurrentWorkspaceId, currentWorkspaceId, setCurrentWorkspaceData } = useAppContext()
 
   useEffect(() => {
     setWorkspaces(workspaces)
-    setCurrentWorkspace(workspaces[0])
+    setCurrentWorkspaceId(workspaces[0].id)
   }, [])
+
+  // fetch current workspace data and set current page
+  useEffect(() => {
+    if (currentWorkspaceId) {
+      const fetchWorkspaceData = async () => {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceId}`, {
+            method: 'GET',
+            headers: {
+              authorization: `Bearer ${session?.user.accessToken}`
+            }
+        })
+        const data = await res.json()
+        setCurrentWorkspaceData(data)
+        router.push(`/${data.pages[0].id}`)
+      }
+      fetchWorkspaceData()
+    }
+  }, [currentWorkspaceId])
 
   return (
     <>
