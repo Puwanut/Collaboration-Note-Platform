@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import { Coordinate, useOverlayContext } from '../context/OverlayContext'
+import { Coordinate, OverlayType, useOverlayContext } from '../context/OverlayContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClone, faStar, faTrashCan, faEdit } from '@fortawesome/free-regular-svg-icons'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useAppContext } from '../context/AppContext'
 import { v4 as uuidv4 } from 'uuid'
+import { toast } from 'react-toastify'
 
 interface IPageMenuOverlayProps {
     coordinate: Coordinate
@@ -35,7 +36,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
             // if current page is first page and deleted, redirect to second page
             // if current page is deleted, redirect to first page
             // else no redirect
-            if (currentWorkspaceData.pages[0].id === pageId) {
+            if (currentWorkspaceData.pages[0].id === pageId && currentPage.id === pageId) {
                 router.push(`/${currentWorkspaceData.pages[1].id}`)
             } else if (pageId === currentPage.id) {
                 router.push(`/${currentWorkspaceData.pages[0].id}`)
@@ -67,12 +68,32 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
 
     }
 
+    const onCopyLinkHandler = () => {
+        setOverlay(null)
+        navigator.clipboard.writeText(`${window.location.origin}/${pageId}`)
+        toast("Link copied to clipboard", { type: "success" })
+    }
+
+    const onRenameHandler = () => {
+        setOverlay({
+            name: OverlayType.pageTitleEditor,
+            properties: {
+                pageId: pageId,
+                referer: "sidebar"
+            },
+            coordinate: {
+                x: coordinate.x,
+                y: coordinate.y
+            }
+        })
+    }
+
     const pageMenus = [
         { name: "Delete", icon: <FontAwesomeIcon icon={faTrashCan} className="w-4" />, onClickHandler: onDeleteHandler },
         { name: "Add to Favorites", icon: <FontAwesomeIcon icon={faStar} className="w-4" /> },
         { name: "Duplicate", icon: <FontAwesomeIcon icon={faClone} className="w-4" />},
-        { name: "Copy link", icon: <FontAwesomeIcon icon={faLink} className="w-4" /> },
-        { name: "Rename", icon: <FontAwesomeIcon icon={faEdit} className="w-4" /> }
+        { name: "Copy link", icon: <FontAwesomeIcon icon={faLink} className="w-4" />, onClickHandler: onCopyLinkHandler },
+        { name: "Rename", icon: <FontAwesomeIcon icon={faEdit} className="w-4" />, onClickHandler: onRenameHandler }
     ]
 
     return (

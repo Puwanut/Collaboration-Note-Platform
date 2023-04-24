@@ -24,7 +24,7 @@ const OverlayContainer = () => {
                   <WorkspaceOverlay ref={overlayRef} />
                 }
                 {overlay.name === OverlayType.pageTitleEditor &&
-                  <PageTitleOverlay pageId={overlay.properties.pageId} ref={overlayRef} />
+                  <PageTitleOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} referer={overlay.properties.referer} ref={overlayRef} />
                 }
                 {overlay.name === OverlayType.pageMenu &&
                   <PageMenuOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} ref={overlayRef} />
