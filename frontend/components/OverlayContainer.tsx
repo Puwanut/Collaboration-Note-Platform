@@ -1,9 +1,9 @@
 import { useClickAway } from "react-use"
 import { OverlayType, useOverlayContext } from "../context/OverlayContext"
-import WorkspaceOverlay from "./WorkspaceOverlay"
+import WorkspaceOverlay from "./overlay/WorkspaceOverlay"
 import { useRef } from "react"
-import PageTitleOverlay from "./PageTitleOverlay"
-import PageMenuOverlay from "./PageMenuOverlay"
+import PageTitleOverlay from "./overlay/PageTitleOverlay"
+import PageMenuOverlay from "./overlay/PageMenuOverlay"
 
 // overlay container will disabled all actions outside of overlay
 
@@ -24,10 +24,10 @@ const OverlayContainer = () => {
                   <WorkspaceOverlay ref={overlayRef} />
                 }
                 {overlay.name === OverlayType.pageTitleEditor &&
-                  <PageTitleOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} pageTitle={overlay.properties.pageTitle} referer={overlay.properties.referer} ref={overlayRef} />
+                  <PageTitleOverlay coordinate={overlay.coordinate} selectedPage={overlay.properties.page} referer={overlay.properties.referer} ref={overlayRef} />
                 }
                 {overlay.name === OverlayType.pageMenu &&
-                  <PageMenuOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} pageTitle={overlay.properties.pageTitle} ref={overlayRef} />
+                  <PageMenuOverlay coordinate={overlay.coordinate} selectedPage={overlay.properties.page} ref={overlayRef} />
                 }
             </div>
             }

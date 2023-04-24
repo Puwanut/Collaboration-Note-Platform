@@ -1,4 +1,4 @@
-import { faAngleDoubleLeft, faGear, faPlus, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
+import { faAngleDoubleLeft, faGear, faPlus, faPlusCircle, faSearch } from "@fortawesome/free-solid-svg-icons"
 import { faClock } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
@@ -12,11 +12,11 @@ import { useRouter } from "next/router"
 import SidebarPageLink from "./SidebarPageLink"
 
 const menus = [
-        { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="menu-sidebar-icon"/> },
-        { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="menu-sidebar-icon"/> },
-        { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="menu-sidebar-icon"/> },
-        { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="menu-sidebar-icon"/>},
-    ]
+    { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="menu-sidebar-icon"/> },
+    { title: "Updates", icon: <FontAwesomeIcon icon={faClock} className="menu-sidebar-icon"/> },
+    { title: "Settings & Members", icon: <FontAwesomeIcon icon={faGear} className="menu-sidebar-icon"/> },
+    { title: "New page", icon: <FontAwesomeIcon icon={faPlusCircle} className="menu-sidebar-icon"/>},
+]
 
 const Sidebar = () => {
 
@@ -95,23 +95,6 @@ const Sidebar = () => {
 
         router.push(`/${newPage.id}`)
     }
-
-    // const onClickEllipsisHandler = (e: React.MouseEvent, pageId: string, pageTitle: string) => {
-    //     // on next/link, prevent default = prevent change page url
-    //     e.preventDefault()
-    //     setOverlay({
-    //         name: OverlayType.pageMenu,
-    //         coordinate: {
-    //             x: e.clientX,
-    //             y: e.clientY
-    //         },
-    //         properties: {
-    //             pageId: pageId,
-    //             pageTitle: pageTitle
-    //         }
-    //     })
-
-    // }
 
     // Handle Toggle Sidebar between mobile as desktop
     useEffect(() => {
@@ -225,15 +208,9 @@ const Sidebar = () => {
                             <span className="font-medium">Click to {isFavorieHidden ? "show" : "hide"} Favorite Section</span>
                         </Tooltip>
                         <ul className={`${isFavorieHidden ? "hidden" : ""}`}>
-                            <li className={`menu-sidebar text-neutral-400
-                                ${!leftSidebarOpen && 'scale-0'}
-                                ${isMobileView ? 'text-base' : 'text-sm'}
-                                `}>
-                                <FontAwesomeIcon icon={faStar} className="menu-sidebar-icon" />
-                                <span className="text-overflow-ellipsis">
-                                    Note 1
-                                </span>
-                            </li>
+                            {currentWorkspaceData?.pages?.filter(page => page.isFavorite).map((page) => (
+                                <SidebarPageLink key={page.id} page={page} />
+                            ))}
                         </ul>
                     </div>
 

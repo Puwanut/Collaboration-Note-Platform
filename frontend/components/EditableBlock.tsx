@@ -1,4 +1,5 @@
-import { useRef, useEffect, KeyboardEvent, useState, useMemo, useCallback, MouseEvent } from "react"
+/* eslint-disable no-unused-vars */
+import React, { useRef, useEffect, KeyboardEvent, useState, useMemo, useCallback, MouseEvent } from "react"
 import ContentEditable, { ContentEditableEvent } from "react-contenteditable"
 import { getCaretCoordinates, getCaretStart, isCaretOnBottom, isCaretOnTop, moveCaret, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import { faGripVertical, faPlus } from "@fortawesome/free-solid-svg-icons"
@@ -15,10 +16,20 @@ import { loadLanguage, langNames, LanguageName } from '@uiw/codemirror-extension
 import { githubLightInit } from "@uiw/codemirror-themes-all"
 import { EditorView } from "@codemirror/view";
 import CommandsOverlay from "./CommandsOverlay"
+import { Block, CurrentBlock } from "../types/block"
 
+interface IEditableBlockProps {
+    block: Block
+    updateBlocks: (updatedBlock: Block) => void
+    addNextBlock: (currentBlock: CurrentBlock, options: Record<string, string>) => void
+    deleteBlock: (currentBlock: CurrentBlock, key?: string) => void
+    setCurrentSelectedBlock: React.Dispatch<React.SetStateAction<HTMLElement>>
+    numberedListOrder: number
+    dataPosition: number
+    setKey: React.Dispatch<React.SetStateAction<KeyboardEvent>>
+}
 
-
-const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurrentSelectedBlock, numberedListOrder, dataPosition, setKey }) => {
+const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurrentSelectedBlock, numberedListOrder, dataPosition, setKey }: IEditableBlockProps) => {
     // common states and refs
     const [titleArray, setTitleArray] = useState<string[][]>(block.properties?.title)
     const [titleArrayBackup, setTitleArrayBackup] = useState<string[][]>([])

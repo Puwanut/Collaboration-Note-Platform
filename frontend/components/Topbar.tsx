@@ -19,8 +19,7 @@ const Topbar = () => {
       setOverlay({
         name: OverlayType.pageTitleEditor,
         properties: {
-          pageId: currentPage.id,
-          pageTitle: currentPage.title,
+          page: currentPage,
           referer: "topbar"
         },
         coordinate: {

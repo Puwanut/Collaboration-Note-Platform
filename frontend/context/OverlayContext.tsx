@@ -1,14 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { ScriptProps } from "next/script";
 import { createContext, FC, ReactNode, useContext, useState } from "react";
+import { Coordinate } from "../types/coordinate";
 
 interface IOverlayContextProviderProps {
     children: ReactNode
-}
-
-export interface Coordinate {
-    x: number,
-    y: number
 }
 
 export enum OverlayType {
@@ -43,3 +39,4 @@ export const OverlayProvider: FC<ScriptProps> = ({ children }: IOverlayContextPr
 export function useOverlayContext() {
     return useContext(OverlayContext)
 }
+

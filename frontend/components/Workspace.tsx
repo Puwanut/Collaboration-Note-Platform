@@ -5,37 +5,20 @@ import EditableBlock from "./EditableBlock"
 import { getCaretStart, isCaretOnBottomOfTitle, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import Head from "next/head"
 import usePrevious from "../hooks/usePrevious"
-import { LanguageName } from "@uiw/codemirror-extensions-langs"
 import { titleSlice } from "../lib/manageTitle"
 import { useAppContext } from "../context/AppContext"
 import ContentEditable from "react-contenteditable"
 import { useDebounce } from "react-use"
 import { useSession } from "next-auth/react"
 import { moveCaret } from "../lib/setCaret"
-
-export interface IEditableBlock {
-  id: string
-  type: string
-  properties: {
-    title: string[][] // [["text", "bold"], ["text", "italic"]
-    checked?: boolean
-    language?: LanguageName | "plaintext"
-  }
-  children?: string[]
-  parent?: string
-}
-
-interface ICurrentBlock {
-  id: string
-  contentEditableRef: HTMLElement
-}
+import { Block, CurrentBlock } from "../types/block"
 
 const Workspace = () => {
   const { currentPage, setCurrentPage, setCurrentWorkspaceData } = useAppContext()
   const { data: session } = useSession()
   const [pageTitle, setPageTitle] = useState<string>(currentPage?.title ?? "")
   const [isTop, setIsTop] = useState<boolean>(true)
-  const [blocks, setBlocks] = useState<IEditableBlock[]>(currentPage?.blocks ?? [])
+  const [blocks, setBlocks] = useState<Block[]>(currentPage?.blocks ?? [])
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
   const [key, setKey] = useState<KeyboardEvent>(null)
   const [previousBlocks, titlesLength] = usePrevious(blocks)
@@ -79,7 +62,7 @@ const Workspace = () => {
 
 
   // Send update function to EditableBlock
-  const updateBlocksHandler = (updatedBlock: IEditableBlock) => {
+  const updateBlocksHandler = (updatedBlock: Block) => {
     console.log("update page")
     setBlocks(prevState => {
       const updatedBlocks = prevState.map(block => {
@@ -94,7 +77,7 @@ const Workspace = () => {
     // console.log("[WORKSPACE] UPDATE BLOCKS")
   }
 
-  const addBlockHandler = (currentBlock: ICurrentBlock, options: Record<string, string>) => {
+  const addBlockHandler = (currentBlock: CurrentBlock, options: Record<string, string>) => {
     console.log("++++++++ ADDBLOCK ++++++++")
     const currentBlockIndex = blocks.findIndex((block) => block.id === currentBlock.id)
     if (options.actionSrc === "Enter") {
@@ -166,7 +149,7 @@ const Workspace = () => {
     }
   }
 
-  const deleteBlockHandler = (currentBlock: ICurrentBlock, key?: string) => {
+  const deleteBlockHandler = (currentBlock: CurrentBlock, key?: string) => {
     console.log("-------- DELETE BLOCK --------")
     const currentBlockIndex = blocks.findIndex((b) => b.id === currentBlock.id)
     // const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
@@ -259,7 +242,7 @@ const Workspace = () => {
 
   // Mockup initial blocks
   // useEffect(() => {
-  //   const initialBlock: IEditableBlock = {
+  //   const initialBlock: Block = {
   //     id: uuidv4(),
   //     type: "Text",
   //     properties: {
@@ -271,7 +254,7 @@ const Workspace = () => {
   //     parent: null
   //   }
 
-  //   const initialBlock2: IEditableBlock = {
+  //   const initialBlock2: Block = {
   //     id: uuidv4(),
   //     type: "Numbered List",
   //     properties: {
@@ -281,7 +264,7 @@ const Workspace = () => {
   //     parent: null
   //   }
 
-  //   const initialBlock3: IEditableBlock = {
+  //   const initialBlock3: Block = {
   //     id: uuidv4(),
   //     type: "Numbered List",
   //     properties: {
@@ -291,7 +274,7 @@ const Workspace = () => {
   //     parent: null
   //   }
 
-  //   const initialBlock4: IEditableBlock = {
+  //   const initialBlock4: Block = {
   //     id: uuidv4(),
   //     type: "Code",
   //     properties: {
@@ -302,7 +285,7 @@ const Workspace = () => {
   //     parent: null
   //   }
 
-  //   const initialBlock5: IEditableBlock = {
+  //   const initialBlock5: Block = {
   //     id: uuidv4(),
   //     type: "Text",
   //     properties: {

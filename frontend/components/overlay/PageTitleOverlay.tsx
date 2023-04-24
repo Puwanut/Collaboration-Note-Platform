@@ -1,20 +1,26 @@
 import { forwardRef, useState, useEffect, useMemo, KeyboardEvent } from 'react'
-import { useAppContext } from '../context/AppContext'
+import { useAppContext } from '../../context/AppContext'
 import ContentEditable from 'react-contenteditable'
-import { Coordinate, useOverlayContext } from '../context/OverlayContext'
-import { setCaretToEnd } from '../lib/setCaret'
+import { Coordinate, useOverlayContext } from '../../context/OverlayContext'
+import { setCaretToEnd } from '../../lib/setCaret'
+import { PageWithOutBlocks } from '../../types/page'
+import { useSession } from 'next-auth/react'
+import { useDebounce } from 'react-use'
+
 interface IPageTitleOverlayProps {
     coordinate: Coordinate,
-    pageId: string,
-    pageTitle: string,
+    selectedPage: PageWithOutBlocks,
     referer: "topbar" | "sidebar"
 }
 
-const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(function PageTitleOverlay({coordinate, pageId, pageTitle, referer} ,ref) {
+const TITLE_CHANGE_DEBOUNCE_MS = 100
 
+const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(function PageTitleOverlay({coordinate, selectedPage, referer} ,ref) {
+
+    const { data: session } = useSession()
     const { setOverlay } = useOverlayContext()
     const { currentPage, setCurrentPage, setCurrentWorkspaceData } = useAppContext()
-    const [title, setTitle] = useState<string>(pageTitle ?? "")
+    const [title, setTitle] = useState<string>(selectedPage?.title ?? "")
     const { x, y } = useMemo(() => {
         if (referer === "topbar") {
             const titlePosition = document.getElementById("topbar-title").getBoundingClientRect()
@@ -33,20 +39,38 @@ const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(func
         }
     }
 
+    const onTitleChangeHandler = async () => {
+        if (selectedPage.id === currentPage?.id) {
+            setCurrentPage(prev => ({ ...prev, title: title }))
+        }
+
+        setCurrentWorkspaceData(prev => ({
+            ...prev,
+            pages: prev.pages.map(page => page.id === selectedPage.id ? { ...page, title: title } : page)
+        }))
+    }
+
     useEffect(() => {
         const titleInput = document.getElementById("title-input")
         titleInput.innerText.length === 0 ? titleInput?.focus() : setCaretToEnd(titleInput)
     }, [])
 
     useEffect(() => {
-        if (pageId === currentPage?.id) {
-            setCurrentPage(prev => ({ ...prev, title: title }))
+        if (title) {
+            onTitleChangeHandler()
         }
-        setCurrentWorkspaceData(prev => ({
-            ...prev,
-            pages: prev.pages.map(page => page.id === pageId ? { ...page, title: title } : page)
-        }))
     }, [title])
+
+    useDebounce(async () => {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${selectedPage.id}/title`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session?.user.accessToken}`
+            },
+            body: JSON.stringify({title: title})
+        })
+    }, TITLE_CHANGE_DEBOUNCE_MS, [title])
 
     return (
         <div className="absolute bg-white p-2 shadow-xl w-80" ref={ref} style={{ left: x, top: y }}>

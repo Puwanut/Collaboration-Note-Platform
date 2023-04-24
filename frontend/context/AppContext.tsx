@@ -1,28 +1,50 @@
 import { ScriptProps } from "next/script";
 import React, { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Workspace, WorkspaceData } from "../types/workspace";
+import { PageWithBlocks } from "../types/page";
 
-export interface IAppContextProviderProps {
+interface IAppContextProviderProps {
     children: ReactNode
 }
 
-export const mobileViewWidth = 576
+interface IAppContext {
+    leftSidebarOpen: boolean
+    setLeftSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>
+    sidebarWidth: string | number
+    setSidebarWidth: React.Dispatch<React.SetStateAction<any>>
+    // eslint-disable-next-line no-unused-vars
+    handleToggleSidebar: (e: React.MouseEvent) => void
+    isMobileView: boolean
+    isDragging: boolean
+    setIsDragging: React.Dispatch<React.SetStateAction<boolean>>
+    workspaces: Workspace[]
+    setWorkspaces: React.Dispatch<React.SetStateAction<Workspace[]>>
+    currentWorkspaceId: string
+    setCurrentWorkspaceId: React.Dispatch<React.SetStateAction<string>>
+    currentWorkspaceData: WorkspaceData
+    setCurrentWorkspaceData: React.Dispatch<React.SetStateAction<WorkspaceData>>
+    currentPage: PageWithBlocks
+    setCurrentPage: React.Dispatch<React.SetStateAction<PageWithBlocks>>
+}
 
-const AppContext = createContext(undefined)
+export const MOBILE_VIEW_WIDTH = 576
+
+const AppContext = createContext<IAppContext>(undefined)
 
 export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderProps) => {
 
     // Sidebar state
     const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true)
-    const [sidebarWidth, setSidebarWidth] = useState<any>("15rem")
+    const [sidebarWidth, setSidebarWidth] = useState<string | number>("15rem")
     const [isMobileView, setIsMobileView] = useState<boolean>(false)
-    const sidebarWidthMemo = useRef(sidebarWidth) // Memo previous sidebarWidth
+    const sidebarWidthMemo = useRef<string | number>(sidebarWidth) // Memo previous sidebarWidth
     const [isDragging, setIsDragging] = useState<boolean>(false)
 
     // workspace state
-    const [workspaces, setWorkspaces] = useState<any>([])
+    const [workspaces, setWorkspaces] = useState<Workspace[]>([])
     const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string>("")
-    const [currentWorkspaceData, setCurrentWorkspaceData] = useState<any>(null)
-    const [currentPage, setCurrentPage] = useState<any>(null)
+    const [currentWorkspaceData, setCurrentWorkspaceData] = useState<WorkspaceData>(null)
+    const [currentPage, setCurrentPage] = useState<PageWithBlocks>(null)
 
     // Use Context to pass down functions to sidebar and topbar components
     const handleToggleSidebar = useCallback((e: React.MouseEvent) => {
@@ -46,7 +68,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     )
 
     const handleWindowViewport = useCallback(() => {
-      if (window.innerWidth < mobileViewWidth) {
+      if (window.innerWidth < MOBILE_VIEW_WIDTH) {
         setIsMobileView(true)
       } else {
         setIsMobileView(false)

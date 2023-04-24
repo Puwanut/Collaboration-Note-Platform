@@ -52,6 +52,59 @@ router.put("/:pageId", async (req: Request, res: Response) => {
     }
 })
 
+router.patch("/:pageId/title", async (req: Request, res: Response) => {
+    const userId = res.locals.user.userId
+    const pageId = req.params.pageId
+    const { title } = req.body
+    try {
+        const page = await prisma.page.updateMany({
+            data: {
+                title: title
+            },
+            where: {
+                id: pageId,
+                workspace: {
+                    users: {
+                        some: {
+                            userId: userId
+                        }
+                    }
+                }
+            },
+        })
+        res.json(page)
+    } catch (e) {
+        res.status(404).json({ message: "Page not found or You don't have permission to modify this page." })
+    }
+})
+
+router.patch("/:pageId/favorite", async (req: Request, res: Response) => {
+    const userId = res.locals.user.userId
+    const pageId = req.params.pageId
+    const { isFavorite } = req.body
+    try {
+        const page = await prisma.page.updateMany({
+            data: {
+                isFavorite: isFavorite
+            },
+            where: {
+                id: pageId,
+                workspace: {
+                    users: {
+                        some: {
+                            userId: userId
+                        }
+                    }
+                }
+            },
+        })
+        res.json(page)
+    } catch (e) {
+        res.status(404).json({ message: "Page not found or You don't have permission to modify this page." })
+    }
+})
+
+
 router.delete("/:pageId", async (req: Request, res: Response) => {
     const userId = res.locals.user.userId
     const pageId = req.params.pageId

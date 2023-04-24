@@ -1,21 +1,21 @@
 import { forwardRef } from 'react'
-import { Coordinate, OverlayType, useOverlayContext } from '../context/OverlayContext'
+import { Coordinate, OverlayType, useOverlayContext } from '../../context/OverlayContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faClone, faStar, faTrashCan, faEdit } from '@fortawesome/free-regular-svg-icons'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import { useAppContext } from '../context/AppContext'
+import { useAppContext } from '../../context/AppContext'
 import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'react-toastify'
+import { PageWithBlocks, PageWithOutBlocks } from '../../types/page'
 
 interface IPageMenuOverlayProps {
     coordinate: Coordinate
-    pageId: string
-    pageTitle: string
+    selectedPage: PageWithOutBlocks
 }
 
-const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(function PageMenuOverlay({coordinate, pageId, pageTitle}, ref) {
+const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(function PageMenuOverlay({ coordinate, selectedPage }, ref) {
 
     const { data: session } = useSession()
     const { setOverlay } = useOverlayContext()
@@ -24,7 +24,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
 
     const onDeleteHandler = async () => {
         setOverlay(null)
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${pageId}`, {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${selectedPage.id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -37,20 +37,20 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
             // if current page is first page and deleted, redirect to second page
             // if current page is deleted, redirect to first page
             // else no redirect
-            if (currentWorkspaceData.pages[0].id === pageId && currentPage.id === pageId) {
+            if (currentWorkspaceData.pages[0].id === selectedPage.id && currentPage.id === selectedPage.id) {
                 router.push(`/${currentWorkspaceData.pages[1].id}`)
-            } else if (pageId === currentPage.id) {
+            } else if (selectedPage.id === currentPage.id) {
                 router.push(`/${currentWorkspaceData.pages[0].id}`)
             }
 
             setCurrentWorkspaceData(prev => ({
                 ...prev,
-                pages: prev.pages.filter((page) => page.id !== pageId)
+                pages: prev.pages.filter((page) => page.id !== selectedPage.id)
             }))
         } else {
             // if only one page left, create new page
             const newPage = {id: uuidv4(), title: "", blocks: []}
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
+            const res: PageWithBlocks = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -61,7 +61,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
 
             setCurrentWorkspaceData(prev => ({
                 ...prev,
-                pages: [{ id: res.id, title: res.title }]
+                pages: [{ id: res.id, title: res.title, isFavorite: res.isFavorite }]
             }))
 
             router.push(`/${res.id}`)
@@ -71,7 +71,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
 
     const onCopyLinkHandler = () => {
         setOverlay(null)
-        navigator.clipboard.writeText(`${window.location.origin}/${pageId}`)
+        navigator.clipboard.writeText(`${window.location.origin}/${selectedPage.id}`)
         toast("Link copied to clipboard", { type: "success" })
     }
 
@@ -79,8 +79,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
         setOverlay({
             name: OverlayType.pageTitleEditor,
             properties: {
-                pageId: pageId,
-                pageTitle: pageTitle,
+                page: selectedPage,
                 referer: "sidebar"
             },
             coordinate: {
@@ -94,7 +93,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
         setOverlay(null)
 
         // get full page data
-        const selectedPage = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${pageId}`, {
+        const selectedPageIncludeBlocks: PageWithBlocks = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${selectedPage.id}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${session?.user.accessToken}`
@@ -103,10 +102,10 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
 
         const newPage = {
             id: uuidv4(),
-            title: selectedPage.title,
-            blocks: selectedPage.blocks,
-            icon: selectedPage.icon,
-            cover: selectedPage.cover
+            title: selectedPageIncludeBlocks.title,
+            blocks: selectedPageIncludeBlocks.blocks,
+            icon: selectedPageIncludeBlocks.icon,
+            cover: selectedPageIncludeBlocks.cover
         }
 
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
@@ -121,13 +120,33 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
         router.push(`/${newPage.id}`)
     }
 
-    const onFavoriteHandler = () => {
+    const onFavoriteHandler = async () => {
         setOverlay(null)
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${selectedPage.id}/favorite`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session?.user.accessToken}`
+            },
+            body: JSON.stringify({ isFavorite: !selectedPage.isFavorite })
+        })
+        setCurrentWorkspaceData(prev => ({
+            ...prev,
+            pages: prev.pages.map((page) => {
+                if (page.id === selectedPage.id) {
+                    return {
+                        ...page,
+                        isFavorite: !selectedPage.isFavorite
+                    }
+                }
+                return page
+            }
+        )}))
     }
 
     const pageMenus = [
         { name: "Delete", icon: <FontAwesomeIcon icon={faTrashCan} className="w-4" />, onClickHandler: onDeleteHandler },
-        { name: "Add to Favorites", icon: <FontAwesomeIcon icon={faStar} className="w-4" />, onClickHandler: onFavoriteHandler },
+        { name: `${selectedPage.isFavorite ? "Remove" : "Add"} to Favorites`, icon: <FontAwesomeIcon icon={faStar} className="w-4" />, onClickHandler: onFavoriteHandler },
         { name: "Duplicate", icon: <FontAwesomeIcon icon={faClone} className="w-4" />, onClickHandler: onDuplicateHandler },
         { name: "Copy link", icon: <FontAwesomeIcon icon={faLink} className="w-4" />, onClickHandler: onCopyLinkHandler },
         { name: "Rename", icon: <FontAwesomeIcon icon={faEdit} className="w-4" />, onClickHandler: onRenameHandler }

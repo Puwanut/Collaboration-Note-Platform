@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import { useState, forwardRef } from "react"
-import { useAppContext } from "../context/AppContext"
+import { useAppContext } from "../../context/AppContext"
 
 const WorkspaceOverlay = forwardRef<HTMLDivElement>(function WorkspaceOverlay(_, ref) {
 

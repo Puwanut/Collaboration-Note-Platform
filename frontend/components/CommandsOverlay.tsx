@@ -1,9 +1,10 @@
 import { Dispatch, SetStateAction, forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 import { basicBlocks } from "../shared/blockType"
 import Image from "next/image"
+import { Coordinate } from "../types/coordinate"
 
 interface ICommandsOverlayProps {
-  coordinate: { x: number, y: number }
+  coordinate: Coordinate
   // eslint-disable-next-line no-unused-vars
   handleTagSelection: (type: string) => void
   setCommandOverlayOpen: Dispatch<SetStateAction<boolean>>

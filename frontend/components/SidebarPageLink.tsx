@@ -6,14 +6,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons"
 import { faFileLines } from "@fortawesome/free-regular-svg-icons"
 import React from "react"
+import { PageWithOutBlocks } from "../types/page"
 
+interface ISidebarPageLinkProps {
+    page: PageWithOutBlocks
+}
 
-const SidebarPageLink = ({ page }) => {
+const SidebarPageLink = ({ page }: ISidebarPageLinkProps) => {
 
     const { setOverlay } = useOverlayContext()
     const { currentPage, leftSidebarOpen, isMobileView } = useAppContext()
 
-    const onClickEllipsisHandler = (e: React.MouseEvent, pageId: string, pageTitle: string) => {
+    const onClickEllipsisHandler = (e: React.MouseEvent) => {
         // on next/link, prevent default = prevent change page url
         e.preventDefault()
         setOverlay({
@@ -23,8 +27,7 @@ const SidebarPageLink = ({ page }) => {
                 y: e.clientY
             },
             properties: {
-                pageId: pageId,
-                pageTitle: pageTitle
+                page: page
             }
         })
 
@@ -44,7 +47,7 @@ const SidebarPageLink = ({ page }) => {
             </span>
             <div
                 className="hidden group-hover/sidebar-page:block text-neutral-600 px-0.5 text-sm rounded-sm hover:bg-neutral-300/60 hover:cursor-pointer"
-                onClick={(e) => onClickEllipsisHandler(e, page.id, page.title)}
+                onClick={(e) => onClickEllipsisHandler(e)}
             >
                 <FontAwesomeIcon icon={faEllipsis} size="lg" />
             </div>

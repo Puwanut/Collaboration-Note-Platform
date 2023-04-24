@@ -48,7 +48,9 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
                     select: {
                         id: true,
                         title: true,
-                        favorite: true
+                        isFavorite: true,
+                        icon: true,
+                        cover: true
                     },
                     orderBy: {
                         createdAt: "asc"
