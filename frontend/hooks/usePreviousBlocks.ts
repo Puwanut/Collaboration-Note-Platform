@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { IEditableBlock } from "../components/Frame";
+import { Block } from "../types/block"
 
-const usePrevious = (blocks: IEditableBlock[]) => {
-    const ref = useRef<IEditableBlock[]>()
+const usePreviousBlocks = (blocks: Block[]) => {
+    const ref = useRef<Block[]>()
     const titlesLength = useRef<number[]>([])
     useEffect(() => {
         titlesLength.current = blocks?.map(block => {
@@ -13,4 +13,4 @@ const usePrevious = (blocks: IEditableBlock[]) => {
     return [ref.current, titlesLength.current] as const
     }
 
-export default usePrevious;
+export default usePreviousBlocks

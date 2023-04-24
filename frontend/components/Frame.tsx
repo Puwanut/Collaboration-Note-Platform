@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid"
 import EditableBlock from "./EditableBlock"
 import { getCaretStart, isCaretOnBottomOfTitle, setCaretToEnd, setCaretToStart } from "../lib/setCaret"
 import Head from "next/head"
-import usePrevious from "../hooks/usePrevious"
+import usePreviousBlocks from "../hooks/usePreviousBlocks"
 import { titleSlice } from "../lib/manageTitle"
 import { useAppContext } from "../context/AppContext"
 import ContentEditable from "react-contenteditable"
@@ -21,7 +21,7 @@ const Frame = () => {
   const [blocks, setBlocks] = useState<Block[]>(currentPage?.blocks ?? [])
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
   const [key, setKey] = useState<KeyboardEvent>(null)
-  const [previousBlocks, titlesLength] = usePrevious(blocks)
+  const [previousBlocks, titlesLength] = usePreviousBlocks(blocks)
 
   const titleKeyDownHandler = (e: KeyboardEvent) => {
     switch (e.key) {
