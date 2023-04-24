@@ -20,6 +20,7 @@ const Topbar = () => {
         name: OverlayType.pageTitleEditor,
         properties: {
           pageId: currentPage.id,
+          pageTitle: currentPage.title,
           referer: "topbar"
         },
         coordinate: {

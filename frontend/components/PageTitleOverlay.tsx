@@ -2,17 +2,19 @@ import { forwardRef, useState, useEffect, useMemo, KeyboardEvent } from 'react'
 import { useAppContext } from '../context/AppContext'
 import ContentEditable from 'react-contenteditable'
 import { Coordinate, useOverlayContext } from '../context/OverlayContext'
+import { setCaretToEnd } from '../lib/setCaret'
 interface IPageTitleOverlayProps {
     coordinate: Coordinate,
-    pageId: string
+    pageId: string,
+    pageTitle: string,
     referer: "topbar" | "sidebar"
 }
 
-const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(function PageTitleOverlay({coordinate, pageId, referer} ,ref) {
+const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(function PageTitleOverlay({coordinate, pageId, pageTitle, referer} ,ref) {
 
     const { setOverlay } = useOverlayContext()
     const { currentPage, setCurrentPage, setCurrentWorkspaceData } = useAppContext()
-    const [pageTitle, setPageTitle] = useState<string>(currentPage?.title || "")
+    const [title, setTitle] = useState<string>(pageTitle ?? "")
     const { x, y } = useMemo(() => {
         if (referer === "topbar") {
             const titlePosition = document.getElementById("topbar-title").getBoundingClientRect()
@@ -32,15 +34,19 @@ const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(func
     }
 
     useEffect(() => {
-        // setCurrentPage(prev => ({ ...prev, title: pageTitle }))
+        const titleInput = document.getElementById("title-input")
+        titleInput.innerText.length === 0 ? titleInput?.focus() : setCaretToEnd(titleInput)
+    }, [])
+
+    useEffect(() => {
         if (pageId === currentPage?.id) {
-            setCurrentPage(prev => ({ ...prev, title: pageTitle }))
+            setCurrentPage(prev => ({ ...prev, title: title }))
         }
         setCurrentWorkspaceData(prev => ({
             ...prev,
-            pages: prev.pages.map(page => page.id === pageId ? { ...page, title: pageTitle } : page)
+            pages: prev.pages.map(page => page.id === pageId ? { ...page, title: title } : page)
         }))
-    }, [pageTitle])
+    }, [title])
 
     return (
         <div className="absolute bg-white p-2 shadow-xl w-80" ref={ref} style={{ left: x, top: y }}>
@@ -49,9 +55,10 @@ const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(func
                     i
                 </button>
                 <ContentEditable
+                    id="title-input"
                     className="w-full min-w-0 px-2 py-0.5 bg-neutral-100 border-[1px] rounded outline-none whitespace-pre-wrap"
-                    html={pageTitle}
-                    onChange={(e) => setPageTitle(e.target.value)}
+                    html={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     onKeyDown={(e) => onKeyDownHandler(e)}
                 />
             </div>

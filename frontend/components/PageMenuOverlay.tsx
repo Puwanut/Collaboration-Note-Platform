@@ -12,9 +12,10 @@ import { toast } from 'react-toastify'
 interface IPageMenuOverlayProps {
     coordinate: Coordinate
     pageId: string
+    pageTitle: string
 }
 
-const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(function PageMenuOverlay({coordinate, pageId}, ref) {
+const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(function PageMenuOverlay({coordinate, pageId, pageTitle}, ref) {
 
     const { data: session } = useSession()
     const { setOverlay } = useOverlayContext()
@@ -79,6 +80,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
             name: OverlayType.pageTitleEditor,
             properties: {
                 pageId: pageId,
+                pageTitle: pageTitle,
                 referer: "sidebar"
             },
             coordinate: {
@@ -88,10 +90,45 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
         })
     }
 
+    const onDuplicateHandler = async () => {
+        setOverlay(null)
+
+        // get full page data
+        const selectedPage = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${pageId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${session?.user.accessToken}`
+            }
+        }).then((res) => res.json())
+
+        const newPage = {
+            id: uuidv4(),
+            title: selectedPage.title,
+            blocks: selectedPage.blocks,
+            icon: selectedPage.icon,
+            cover: selectedPage.cover
+        }
+
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session?.user.accessToken}`
+            },
+            body: JSON.stringify(newPage)
+        }).then((res) => res.json())
+
+        router.push(`/${newPage.id}`)
+    }
+
+    const onFavoriteHandler = () => {
+        setOverlay(null)
+    }
+
     const pageMenus = [
         { name: "Delete", icon: <FontAwesomeIcon icon={faTrashCan} className="w-4" />, onClickHandler: onDeleteHandler },
-        { name: "Add to Favorites", icon: <FontAwesomeIcon icon={faStar} className="w-4" /> },
-        { name: "Duplicate", icon: <FontAwesomeIcon icon={faClone} className="w-4" />},
+        { name: "Add to Favorites", icon: <FontAwesomeIcon icon={faStar} className="w-4" />, onClickHandler: onFavoriteHandler },
+        { name: "Duplicate", icon: <FontAwesomeIcon icon={faClone} className="w-4" />, onClickHandler: onDuplicateHandler },
         { name: "Copy link", icon: <FontAwesomeIcon icon={faLink} className="w-4" />, onClickHandler: onCopyLinkHandler },
         { name: "Rename", icon: <FontAwesomeIcon icon={faEdit} className="w-4" />, onClickHandler: onRenameHandler }
     ]

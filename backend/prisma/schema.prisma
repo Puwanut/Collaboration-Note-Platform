@@ -58,6 +58,7 @@ model Page {
   title       String
   icon        String?
   cover       String?
+  favorite    Boolean   @default(false)
   blocks      Json[]
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")

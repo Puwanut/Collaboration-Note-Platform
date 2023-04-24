@@ -1,16 +1,15 @@
-import { faAngleDoubleLeft, faEllipsis, faGear, faPlus, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
-import { faClock, faFileLines } from "@fortawesome/free-regular-svg-icons"
+import { faAngleDoubleLeft, faGear, faPlus, faPlusCircle, faSearch, faStar } from "@fortawesome/free-solid-svg-icons"
+import { faClock } from "@fortawesome/free-regular-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 import { OverlayType, useOverlayContext } from "../context/OverlayContext"
 import { Tooltip } from "react-tooltip"
-import Link from "next/link"
-import { decode } from "entities"
 import Image from "next/image"
 import { v4 as uuidv4 } from "uuid"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/router"
+import SidebarPageLink from "./SidebarPageLink"
 
 const menus = [
         { title: "Search", icon: <FontAwesomeIcon icon={faSearch} className="menu-sidebar-icon"/> },
@@ -36,7 +35,7 @@ const Sidebar = () => {
     const transitionDuration = 300 // ms
 
     const { setOverlay } = useOverlayContext()
-    const { currentWorkspaceData, currentPage } = appcontext
+    const { currentWorkspaceData } = appcontext
 
     const [isFavorieHidden, setIsFavoriteHidden] = useState<boolean>(false)
     const [isPrivateHidden, setIsPrivateHidden] = useState<boolean>(false)
@@ -97,21 +96,22 @@ const Sidebar = () => {
         router.push(`/${newPage.id}`)
     }
 
-    const onClickEllipsisHandler = (e: React.MouseEvent, pageId: string) => {
-        // on next/link, prevent default = prevent change page url
-        e.preventDefault()
-        setOverlay({
-            name: OverlayType.pageMenu,
-            coordinate: {
-                x: e.clientX,
-                y: e.clientY
-            },
-            properties: {
-                pageId: pageId,
-            }
-        })
+    // const onClickEllipsisHandler = (e: React.MouseEvent, pageId: string, pageTitle: string) => {
+    //     // on next/link, prevent default = prevent change page url
+    //     e.preventDefault()
+    //     setOverlay({
+    //         name: OverlayType.pageMenu,
+    //         coordinate: {
+    //             x: e.clientX,
+    //             y: e.clientY
+    //         },
+    //         properties: {
+    //             pageId: pageId,
+    //             pageTitle: pageTitle
+    //         }
+    //     })
 
-    }
+    // }
 
     // Handle Toggle Sidebar between mobile as desktop
     useEffect(() => {
@@ -266,24 +266,7 @@ const Sidebar = () => {
                         </div>
                         <ul className={`${isPrivateHidden ? "hidden" : ""}`}>
                             {currentWorkspaceData?.pages?.map((page) => (
-                            <Link key={page.id} href={page.id} className={`menu-sidebar text-neutral-400 group/sidebar-page
-                                ${!leftSidebarOpen && 'scale-0'}
-                                ${isMobileView ? 'text-base' : 'text-sm'}
-                                ${page.id === currentPage?.id && 'bg-neutral-200/70'}
-                                `}
-                            >
-                                <FontAwesomeIcon icon={faFileLines} className="menu-sidebar-icon" size="lg" />
-                                <span className="flex-1 text-overflow-ellipsis empty:before:content-[attr(data-placeholder)]" data-placeholder="Untitled">
-                                    {/* Sync page title name when user edited */}
-                                    {currentPage?.id === page.id ? decode(currentPage.title) : decode(page.title)}
-                                </span>
-                                <div
-                                    className="hidden group-hover/sidebar-page:block text-neutral-600 px-0.5 text-sm rounded-sm hover:bg-neutral-300/60 hover:cursor-pointer"
-                                    onClick={(e) => onClickEllipsisHandler(e, page.id)}
-                                >
-                                    <FontAwesomeIcon icon={faEllipsis} size="lg" />
-                                </div>
-                            </Link>
+                                <SidebarPageLink key={page.id} page={page} />
                             ))}
                         </ul>
                     </div>

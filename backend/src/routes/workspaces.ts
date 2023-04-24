@@ -47,7 +47,8 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
                 pages: {
                     select: {
                         id: true,
-                        title: true
+                        title: true,
+                        favorite: true
                     },
                     orderBy: {
                         createdAt: "asc"

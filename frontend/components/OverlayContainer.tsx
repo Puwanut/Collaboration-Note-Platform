@@ -24,10 +24,10 @@ const OverlayContainer = () => {
                   <WorkspaceOverlay ref={overlayRef} />
                 }
                 {overlay.name === OverlayType.pageTitleEditor &&
-                  <PageTitleOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} referer={overlay.properties.referer} ref={overlayRef} />
+                  <PageTitleOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} pageTitle={overlay.properties.pageTitle} referer={overlay.properties.referer} ref={overlayRef} />
                 }
                 {overlay.name === OverlayType.pageMenu &&
-                  <PageMenuOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} ref={overlayRef} />
+                  <PageMenuOverlay coordinate={overlay.coordinate} pageId={overlay.properties.pageId} pageTitle={overlay.properties.pageTitle} ref={overlayRef} />
                 }
             </div>
             }
