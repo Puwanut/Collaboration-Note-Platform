@@ -17,7 +17,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
 
     const { data: session } = useSession()
     const { setOverlay } = useOverlayContext()
-    const { currentWorkspaceData, setCurrentWorkspaceData } = useAppContext()
+    const { currentWorkspaceData, setCurrentWorkspaceData, currentPage } = useAppContext()
     const router = useRouter()
 
     const onDeleteHandler = async () => {
@@ -31,10 +31,15 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
         })
 
         if (currentWorkspaceData.pages.length > 1) {
-            // if deleted page is current page, redirect to first page
-            if (currentWorkspaceData.pages[0].id !== pageId) router.push(`/${currentWorkspaceData.pages[0].id}`)
-            // redirect to second page (if first page is deleted)
-            else router.push(`/${currentWorkspaceData.pages[1].id}`)
+
+            // if current page is first page and deleted, redirect to second page
+            // if current page is deleted, redirect to first page
+            // else no redirect
+            if (currentWorkspaceData.pages[0].id === pageId) {
+                router.push(`/${currentWorkspaceData.pages[1].id}`)
+            } else if (pageId === currentPage.id) {
+                router.push(`/${currentWorkspaceData.pages[0].id}`)
+            }
 
             setCurrentWorkspaceData(prev => ({
                 ...prev,

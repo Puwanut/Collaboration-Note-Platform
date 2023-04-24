@@ -54,7 +54,6 @@ export default function Page({ workspaces }) {
   // set workspaces list for user who directly access page url
   useEffect(() => {
     if (workspaces) {
-      console.log("setworkspaces", workspaces)
       setWorkspaces(workspaces)
     }
   }, [])
