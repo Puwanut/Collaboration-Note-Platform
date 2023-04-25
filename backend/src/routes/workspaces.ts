@@ -1,8 +1,6 @@
 import { Request, Response, Router } from "express";
 import { prisma } from ".."
 import { Prisma } from "@prisma/client";
-import { IMAGE_EXPIRED_TIME, bucket, cachedImageUrls } from "../libs/supabase";
-
 
 const router = Router()
 
@@ -67,27 +65,6 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
             }
         }
         res.status(400).json({ message: "Unkonwn error" })
-    }
-})
-
-router.get("/:workspaceId/images/*", async (req: Request, res: Response) => {
-    /* to be implemented user permission checking
-
-    */
-    const imagePath = req.params[0]
-    const cachedUrl = cachedImageUrls.get(imagePath)
-    if (cachedUrl && cachedUrl.expiredAt > new Date()) {
-        res.json({
-            data: {
-                signedUrl: cachedUrl.signedUrl
-            }
-        })
-    } else {
-        const signedURL = await bucket.createSignedUrl(imagePath, IMAGE_EXPIRED_TIME)
-        if (!signedURL.error) {
-            cachedImageUrls.set(imagePath, { signedUrl: signedURL.data.signedUrl, expiredAt: new Date(Date.now() + IMAGE_EXPIRED_TIME * 1000) })
-        }
-        res.json(signedURL)
     }
 })
 

@@ -4,7 +4,7 @@ import userRouter from './routes/users'
 import authRouter from './routes/auth'
 import workspaceRouter from './routes/workspaces'
 import pageRouter from './routes/pages'
-import gallery from './routes/gallery'
+import imageRouter from './routes/images'
 import { PrismaClient } from '@prisma/client'
 import { authMiddleware } from './middleware/auth'
 
@@ -23,7 +23,7 @@ app.use("/users", userRouter)
 app.use("/auth", authRouter)
 app.use("/workspaces", authMiddleware, workspaceRouter)
 app.use("/pages", authMiddleware, pageRouter)
-app.use("/gallery", gallery)
+app.use("/images", authMiddleware, imageRouter)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)

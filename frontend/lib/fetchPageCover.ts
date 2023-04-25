@@ -1,6 +1,5 @@
 import { gallery } from "../shared/gallery"
 
-
 export function randomPageCover() {
     const category = gallery[Math.floor(Math.random() * gallery.length)]
     const image = category.images[Math.floor(Math.random() * category.images.length)]

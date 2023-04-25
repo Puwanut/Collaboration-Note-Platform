@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { forwardRef, useState } from 'react'
-import { Page } from '../../types/page'
+import { forwardRef, useState, useRef, ChangeEvent } from 'react'
 import { Coordinate } from '../../types/coordinate'
 import Image from 'next/image'
 import { useAppContext } from '../../context/AppContext'
 import { gallery } from '../../shared/gallery'
 import { Tooltip } from 'react-tooltip'
+import { toast } from 'react-toastify'
+import { useSession } from 'next-auth/react'
 
 interface ICoverSelectorOverlayProps {
     coordinate: Coordinate
@@ -17,12 +18,12 @@ enum Tab {
     Link = "Link"
 }
 
-const tempURL = "https://zbjqqzpujmtnfcrchymi.supabase.co/storage/v1/object/sign/dev/gallery/Bourbon.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJkZXYvZ2FsbGVyeS9Cb3VyYm9uLmpwZyIsImlhdCI6MTY4MjQzMTk4OSwiZXhwIjoxNjgzMDM2Nzg5fQ.zAOcAuNrtM7S91q5MtT6qZwKU1hbM0n4i6iWH8Fp6U8&t=2023-04-25T14%3A13%3A09.093Z"
-
 const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayProps>(function CoverSelectorOverlay({ coordinate }, ref) {
 
+    const { data: session } = useSession()
+    const { currentWorkspaceId, setCurrentPage } = useAppContext()
     const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Gallery)
-    const { setCurrentPage } = useAppContext()
+    const fileUploadRef = useRef<HTMLInputElement>(null)
 
     const onClickRemoveHandler = () => {
         setCurrentPage(prev => {
@@ -37,12 +38,35 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
     }
 
     const onClickUploadFileHandler = () => {
-        const fileInput = document.getElementById("cover-upload") as HTMLInputElement
-        fileInput.click()
+        fileUploadRef.current.click()
+    }
+
+    const onUploadFileHandler = async (e: ChangeEvent<HTMLInputElement>) => {
+        const fileList = e.target.files
+        if (fileList.length > 0) {
+            const uploadFile = fileList[0]
+            if (uploadFile.size > 4 * 1024 * 1024) {
+                toast("The uploaded file exceeds the maximum upload size (4 MB).", { type: "error" })
+                return
+            }
+            const formData = new FormData()
+            formData.append("file", uploadFile)
+            console.log(fileList)
+            // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images/${currentWorkspaceId}/upload`, {
+            //     method: "POST",
+            //     headers: {
+            //         "Authorization": `Bearer ${session?.user.accessToken}`,
+            //         "Content-Type": "multipart/form-data"
+            //     },
+            //     body: uploadFile
+            // })
+            // const data = await res.json()
+            // console.log(data)
+        }
     }
 
     return (
-        <div className="sticky max-w-[550px] rounded shadow-xl border-[1px] bg-white" ref={ref} style={{ left: coordinate.x - 200, top: coordinate.y + 30}}>
+        <div className="sticky max-w-xl rounded shadow-xl border-[1px] bg-white" ref={ref} style={{ left: coordinate.x - 200, top: coordinate.y + 30}}>
             <nav className="flex justify-between text-sm px-2">
                 <div id="cover-tab" className="text-neutral-700">
                     {Object.values(Tab).map((tab) => (
@@ -77,11 +101,11 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
                     ))
                 }
                 {selectedTab === Tab.Upload &&
-                    <div className="p-2">
-                        <input type='file' id='cover-upload' accept="image/*" hidden />
+                    <form className="p-2" encType="multipart/form-data" onSubmit={e => e.preventDefault()}>
+                        <input type='file' accept="image/*" ref={fileUploadRef} onChange={e => onUploadFileHandler(e)} hidden />
                         <button type="button" className="w-full border-[1px] rounded py-1 text-sm text-neutral-600 hover:bg-neutral-200/60" onClick={onClickUploadFileHandler}>Upload file</button>
                         <p className="w-full mt-2 text-center text-xs text-neutral-400">The maximum size per file is 4 MB.</p>
-                    </div>
+                    </form>
                 }
             </div>
         </div>
