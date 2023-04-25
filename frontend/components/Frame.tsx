@@ -15,6 +15,7 @@ import { Block, CurrentBlock } from "../types/block"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faImage } from "@fortawesome/free-solid-svg-icons"
 import PageCover from "./PageCover"
+import { randomPageCover } from "../lib/fetchPageCover"
 
 const Frame = () => {
   const { currentPage, setCurrentPage, setCurrentWorkspaceData } = useAppContext()
@@ -262,7 +263,7 @@ const Frame = () => {
     // to Update Page Title in sidebar (after change page)
     setCurrentWorkspaceData(prev => ({
       ...prev,
-      pages: prev.pages.map(page => page.id === currentPage.id ? { ...page, title: pageTitle, cover: pageCover } : page)
+      pages: prev.pages.map(page => page.id === currentPage.id ? { ...page, title: pageTitle} : page)
     }))
     console.log("Push to Database")
     // to Update Page in database
@@ -298,14 +299,14 @@ const Frame = () => {
         {pageCover &&
           <PageCover src={pageCover} />
         }
-        <div className="mx-auto mt-6 pl-2 pr-8 max-w-screen-md">
+        <div className={`mx-auto ${pageCover ? "mt-8" : "mt-20"} pl-2 pr-8 max-w-screen-md`}>
           <div
             className="pl-16 pb-5"
             onMouseOver={() => setShowPageActions(true)}
             onMouseLeave={() => setShowPageActions(false)}
           >
             <div className={`${showPageActions ? "opacity-100" : "opacity-0"} transition text-neutral-400 text-sm`}>
-              <button className={`hover:bg-neutral-200/60 px-1.5 py-1 rounded ${pageCover ? "hidden" : ""}`}>
+              <button className={`hover:bg-neutral-200/60 px-1.5 py-1 rounded ${pageCover ? "hidden" : ""}`} onClick={() => setPageCover(randomPageCover())}>
                 <FontAwesomeIcon icon={faImage} />&nbsp;&nbsp;Add cover
               </button>
             </div>
@@ -315,7 +316,7 @@ const Frame = () => {
               html={pageTitle}
               onChange={(e) => setPageTitle(e.target.value)}
               onKeyDown={(e) => titleKeyDownHandler(e)}
-              className="text-5xl font-bold leading-tight whitespace-pre-wrap outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
+              className="text-4xl font-bold leading-tight whitespace-pre-wrap outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
               data-placeholder="Untitled"
             />
           </div>

@@ -25,15 +25,17 @@ router.get("/:pageId", async (req: Request, res: Response) => {
     }
 })
 
+
 router.put("/:pageId", async (req: Request, res: Response) => {
     const userId = res.locals.user.userId
     const pageId = req.params.pageId
-    const { title, blocks } = req.body
+    const { title, blocks, cover } = req.body
     try {
         const page = await prisma.page.updateMany({
             data: {
                 title: title,
-                blocks: blocks
+                blocks: blocks,
+                cover: cover
             },
             where: {
                 id: pageId,

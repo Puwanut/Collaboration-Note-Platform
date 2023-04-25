@@ -11,6 +11,7 @@ export enum OverlayType {
     workspaceSelector = "workspace-selector",
     pageTitleEditor = "page-title-editor",
     pageMenu = "page-menu",
+    coverSelector = "cover-selector",
 }
 
 interface IOverlay {
@@ -39,4 +40,3 @@ export const OverlayProvider: FC<ScriptProps> = ({ children }: IOverlayContextPr
 export function useOverlayContext() {
     return useContext(OverlayContext)
 }
-

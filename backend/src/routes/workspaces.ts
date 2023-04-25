@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import { prisma } from ".."
 import { Prisma } from "@prisma/client";
-import { IMAGE_EXPIRED_TIME, bucket, memoImageUrls } from "../libs/supabase";
+import { IMAGE_EXPIRED_TIME, bucket, cachedImageUrls } from "../libs/supabase";
 
 
 const router = Router()
@@ -71,19 +71,21 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
 })
 
 router.get("/:workspaceId/images/*", async (req: Request, res: Response) => {
-    // to be implemented user permission checking
+    /* to be implemented user permission checking
+
+    */
     const imagePath = req.params[0]
-    const memoUrl = memoImageUrls.get(imagePath)
-    if (memoUrl && memoUrl.expiredAt > new Date()) {
+    const cachedUrl = cachedImageUrls.get(imagePath)
+    if (cachedUrl && cachedUrl.expiredAt > new Date()) {
         res.json({
             data: {
-                signedUrl: memoUrl.signedUrl
+                signedUrl: cachedUrl.signedUrl
             }
         })
     } else {
         const signedURL = await bucket.createSignedUrl(imagePath, IMAGE_EXPIRED_TIME)
         if (!signedURL.error) {
-            memoImageUrls.set(imagePath, { signedUrl: signedURL.data.signedUrl, expiredAt: new Date(Date.now() + IMAGE_EXPIRED_TIME * 1000) })
+            cachedImageUrls.set(imagePath, { signedUrl: signedURL.data.signedUrl, expiredAt: new Date(Date.now() + IMAGE_EXPIRED_TIME * 1000) })
         }
         res.json(signedURL)
     }

@@ -6,10 +6,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons"
 import { faFileLines } from "@fortawesome/free-regular-svg-icons"
 import React from "react"
-import { PageWithOutBlocks } from "../types/page"
+import { PageMinimalData } from "../types/page"
 
 interface ISidebarPageLinkProps {
-    page: PageWithOutBlocks
+    page: PageMinimalData
 }
 
 const SidebarPageLink = ({ page }: ISidebarPageLinkProps) => {

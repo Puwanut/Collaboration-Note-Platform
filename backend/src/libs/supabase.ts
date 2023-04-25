@@ -10,4 +10,4 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 export const bucket = supabase.storage.from(bucketName)
 export const IMAGE_EXPIRED_TIME = 7*24*60*60 // 7 days
 
-export const memoImageUrls = new Map<string, ImageMemo>()
+export const cachedImageUrls = new Map<string, ImageMemo>()

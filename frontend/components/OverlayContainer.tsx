@@ -4,6 +4,7 @@ import WorkspaceOverlay from "./overlay/WorkspaceOverlay"
 import { useRef } from "react"
 import PageTitleOverlay from "./overlay/PageTitleOverlay"
 import PageMenuOverlay from "./overlay/PageMenuOverlay"
+import CoverSelectorOverlay from "./overlay/CoverSelectorOverlay"
 
 // overlay container will disabled all actions outside of overlay
 
@@ -28,6 +29,9 @@ const OverlayContainer = () => {
                 }
                 {overlay.name === OverlayType.pageMenu &&
                   <PageMenuOverlay coordinate={overlay.coordinate} selectedPage={overlay.properties.page} ref={overlayRef} />
+                }
+                {overlay.name === OverlayType.coverSelector &&
+                  <CoverSelectorOverlay coordinate={overlay.coordinate} ref={overlayRef} />
                 }
             </div>
             }

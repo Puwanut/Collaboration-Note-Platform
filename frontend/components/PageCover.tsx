@@ -1,10 +1,14 @@
-import Image from 'next/legacy/image'
-import { useOverlayContext } from "../context/OverlayContext"
+import Image from 'next/image'
+import { OverlayType, useOverlayContext } from "../context/OverlayContext"
 import { MouseEvent, useEffect, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 import { useSession } from "next-auth/react"
 
-const PageCover = ({ src }) => {
+interface IPageCoverProps {
+    src: string
+}
+
+const PageCover = ({ src }: IPageCoverProps) => {
 
     const { data: session } = useSession()
     const { setOverlay } = useOverlayContext()
@@ -12,21 +16,31 @@ const PageCover = ({ src }) => {
     const [imageUrl, setImageUrl] = useState<string>("/images/placeholder.png")
 
     useEffect(() => {
-        const fetchImageUrl = async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceId}/images/${src}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${session?.user.accessToken}`
-                }
-            }).then(res => res.json()).then(res => res.data)
-            setImageUrl(res.signedUrl)
+        if (!src.startsWith("gallery")) {
+            const fetchImageUrl = async () => {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceId}/images/${src}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${session?.user.accessToken}`
+                    }
+                }).then(res => res.json()).then(res => res.data)
+                setImageUrl(res.signedUrl)
+            }
+            fetchImageUrl()
+        } else {
+            setImageUrl(`/images/${src}`)
         }
-        fetchImageUrl()
     }, [src])
 
     const onClickHandler = (e: MouseEvent) => {
-        console.log(e)
-        setOverlay(null)
+        const buttonPosition = e.currentTarget.getBoundingClientRect()
+        setOverlay({
+            name: OverlayType.coverSelector,
+            coordinate: {
+                x: buttonPosition.x,
+                y: buttonPosition.y
+            }
+        })
     }
 
     return (
@@ -35,7 +49,7 @@ const PageCover = ({ src }) => {
             <Image
                 src={imageUrl ?? ""}
                 alt="page cover"
-                layout="fill"
+                fill
                 sizes="100%"
                 priority
             />
