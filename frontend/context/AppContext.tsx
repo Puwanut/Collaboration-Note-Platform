@@ -1,7 +1,7 @@
 import { ScriptProps } from "next/script";
 import React, { createContext, FC, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Workspace, WorkspaceData } from "../types/workspace";
-import { PageWithBlocks } from "../types/page";
+import { Page } from "../types/page";
 
 interface IAppContextProviderProps {
     children: ReactNode
@@ -23,8 +23,8 @@ interface IAppContext {
     setCurrentWorkspaceId: React.Dispatch<React.SetStateAction<string>>
     currentWorkspaceData: WorkspaceData
     setCurrentWorkspaceData: React.Dispatch<React.SetStateAction<WorkspaceData>>
-    currentPage: PageWithBlocks
-    setCurrentPage: React.Dispatch<React.SetStateAction<PageWithBlocks>>
+    currentPage: Page
+    setCurrentPage: React.Dispatch<React.SetStateAction<Page>>
 }
 
 export const MOBILE_VIEW_WIDTH = 576
@@ -44,7 +44,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
     const [workspaces, setWorkspaces] = useState<Workspace[]>([])
     const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string>("")
     const [currentWorkspaceData, setCurrentWorkspaceData] = useState<WorkspaceData>(null)
-    const [currentPage, setCurrentPage] = useState<PageWithBlocks>(null)
+    const [currentPage, setCurrentPage] = useState<Page>(null)
 
     // Use Context to pass down functions to sidebar and topbar components
     const handleToggleSidebar = useCallback((e: React.MouseEvent) => {

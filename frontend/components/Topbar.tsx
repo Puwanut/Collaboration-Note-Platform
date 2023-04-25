@@ -40,7 +40,7 @@ const Topbar = () => {
       />
       <button
         id="topbar-title"
-        className="text-overflow-ellipsis hover:bg-neutral-200/70 empty:before:content-[attr(data-placeholder)]"
+        className="text-overflow-ellipsis px-1.5 rounded hover:bg-neutral-200/70 empty:before:content-[attr(data-placeholder)]"
         onClick={(e) => topbarTitleHandler(e)}
         data-placeholder="Untitled">
         {currentPage?.title ? decode(currentPage.title) : ""}

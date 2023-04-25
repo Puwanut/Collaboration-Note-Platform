@@ -1,4 +1,4 @@
-import { PageWithOutBlocks } from "./page"
+import { PageMinimalData } from "./page"
 
 export interface Workspace {
     id: string
@@ -12,5 +12,5 @@ export interface Workspace {
 export interface WorkspaceData {
     id: string
     name: string
-    pages: PageWithOutBlocks[]
+    pages: PageMinimalData[]
 }

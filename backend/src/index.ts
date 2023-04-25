@@ -7,7 +7,6 @@ import pageRouter from './routes/pages'
 import { PrismaClient } from '@prisma/client'
 import { authMiddleware } from './middleware/auth'
 
-
 const app: Application = express()
 const port = parseInt(process.env.PORT as string) || 8000
 export const prisma = new PrismaClient()

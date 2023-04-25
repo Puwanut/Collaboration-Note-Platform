@@ -152,7 +152,7 @@ const Sidebar = () => {
                     />
                 </div>
 
-                <h1 className={`text-slate-700 origin-left font-medium duration-300 grow text-overflow-ellipsis select-none
+                <h1 className={`text-neutral-700 origin-left font-medium duration-300 grow text-overflow-ellipsis select-none
                     ${!leftSidebarOpen && "scale-0"}
                 `}>
                     {currentWorkspaceData?.name}

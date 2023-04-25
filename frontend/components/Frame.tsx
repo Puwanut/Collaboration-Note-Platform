@@ -12,11 +12,18 @@ import { useDebounce } from "react-use"
 import { useSession } from "next-auth/react"
 import { moveCaret } from "../lib/setCaret"
 import { Block, CurrentBlock } from "../types/block"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faImage } from "@fortawesome/free-solid-svg-icons"
+import PageCover from "./PageCover"
 
 const Frame = () => {
   const { currentPage, setCurrentPage, setCurrentWorkspaceData } = useAppContext()
   const { data: session } = useSession()
   const [pageTitle, setPageTitle] = useState<string>(currentPage?.title ?? "")
+
+  const [pageCover, setPageCover] = useState<string>(currentPage?.cover ?? "")
+  const [showPageActions, setShowPageActions] = useState<boolean>(false)
+
   const [isTop, setIsTop] = useState<boolean>(true)
   const [blocks, setBlocks] = useState<Block[]>(currentPage?.blocks ?? [])
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
@@ -59,7 +66,6 @@ const Frame = () => {
       }
     }
   }
-
 
   // Send update function to EditableBlock
   const updateBlocksHandler = (updatedBlock: Block) => {
@@ -240,80 +246,25 @@ const Frame = () => {
   }, [blocks])
 
 
-  // Mockup initial blocks
-  // useEffect(() => {
-  //   const initialBlock: Block = {
-  //     id: uuidv4(),
-  //     type: "Text",
-  //     properties: {
-  //       title: [["<script>bold</script>"], ["testbold", "b"], ["testitalic very long long long long long long long long text", "i"]
-  //       , ["testitalic very long long long long long long long long text", "i"]
-  //     ]
-  //     },
-  //     children: [],
-  //     parent: null
-  //   }
-
-  //   const initialBlock2: Block = {
-  //     id: uuidv4(),
-  //     type: "Numbered List",
-  //     properties: {
-  //       title: [["stronger", "b"], ["aeeng", "i"]]
-  //     },
-  //     children: [],
-  //     parent: null
-  //   }
-
-  //   const initialBlock3: Block = {
-  //     id: uuidv4(),
-  //     type: "Numbered List",
-  //     properties: {
-  //       title: [["simpleText"]]
-  //     },
-  //     children: [],
-  //     parent: null
-  //   }
-
-  //   const initialBlock4: Block = {
-  //     id: uuidv4(),
-  //     type: "Code",
-  //     properties: {
-  //       title: [["const a = 1\nconst b = 2\nconsole.log(a+b)"]],
-  //       language: "javascript"
-  //     },
-  //     children: [],
-  //     parent: null
-  //   }
-
-  //   const initialBlock5: Block = {
-  //     id: uuidv4(),
-  //     type: "Text",
-  //     properties: {
-  //       title: [[""]],
-  //     },
-  //     children: [],
-  //     parent: null
-  //   }
-  //   setBlocks([initialBlock, initialBlock2, initialBlock3, initialBlock4, initialBlock5])
-  // }, [])
-
   useEffect(() => {
     if (currentPage) {
       setBlocks(currentPage.blocks)
       setPageTitle(currentPage.title)
+      setPageCover(currentPage.cover)
     }
   }, [currentPage])
 
   useDebounce(async () => {
     // to Update Page Title among components
     setCurrentPage(prevState => {
-      return { ...prevState, title: pageTitle, blocks: blocks }
+      return { ...prevState, title: pageTitle, blocks: blocks, cover: pageCover }
     })
     // to Update Page Title in sidebar (after change page)
     setCurrentWorkspaceData(prev => ({
       ...prev,
-      pages: prev.pages.map(page => page.id === currentPage.id ? { ...page, title: pageTitle } : page)
+      pages: prev.pages.map(page => page.id === currentPage.id ? { ...page, title: pageTitle, cover: pageCover } : page)
     }))
+    console.log("Push to Database")
     // to Update Page in database
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${currentPage.id}`, {
       method: "PUT",
@@ -324,9 +275,10 @@ const Frame = () => {
       body: JSON.stringify({
         title: pageTitle,
         blocks: blocks,
+        cover: pageCover
       }),
     })
-  }, 500, [pageTitle, blocks])
+  }, 500, [pageTitle, blocks, pageCover])
 
   return (
     <>
@@ -337,22 +289,36 @@ const Frame = () => {
       <div
         // height = 100vh - 3rem (topbar height)
         id="page-workspace"
-        className={`pt-20 pb-24 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
+        className={`pb-24 h-[calc(100vh-3rem)] overflow-y-auto scroll-smooth
                 ${isTop ? "overscroll-auto" : "overscroll-none"}`}
         onScroll={(e) =>
           e.currentTarget.scrollTop == 0 ? setIsTop(true) : setIsTop(false)
         }
       >
-        <div className="mx-auto pl-2 pr-8 max-w-screen-md">
-          <ContentEditable
-            id="page-title-workspace"
-            tagName="h1"
-            html={pageTitle}
-            onChange={(e) => setPageTitle(e.target.value)}
-            onKeyDown={(e) => titleKeyDownHandler(e)}
-            className="ml-16 mb-5 text-5xl font-bold leading-tight whitespace-pre-wrap outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
-            data-placeholder="Untitled"
-          />
+        {pageCover &&
+          <PageCover src={pageCover} />
+        }
+        <div className="mx-auto mt-6 pl-2 pr-8 max-w-screen-md">
+          <div
+            className="pl-16 pb-5"
+            onMouseOver={() => setShowPageActions(true)}
+            onMouseLeave={() => setShowPageActions(false)}
+          >
+            <div className={`${showPageActions ? "opacity-100" : "opacity-0"} transition text-neutral-400 text-sm`}>
+              <button className={`hover:bg-neutral-200/60 px-1.5 py-1 rounded ${pageCover ? "hidden" : ""}`}>
+                <FontAwesomeIcon icon={faImage} />&nbsp;&nbsp;Add cover
+              </button>
+            </div>
+            <ContentEditable
+              id="page-title-workspace"
+              tagName="h1"
+              html={pageTitle}
+              onChange={(e) => setPageTitle(e.target.value)}
+              onKeyDown={(e) => titleKeyDownHandler(e)}
+              className="text-5xl font-bold leading-tight whitespace-pre-wrap outline-none cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200"
+              data-placeholder="Untitled"
+            />
+          </div>
           <div className="revert-global">
             <ReactSortable
               list={blocks}

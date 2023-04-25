@@ -82,7 +82,12 @@ export default function Page({ workspaces }: IPageProps) {
         if (foundCurrentPage) {
             return prev
         }
-        return { ...prev, pages: [...prev.pages, {id: currentPage.id, title: currentPage.title}]}
+        return {
+          ...prev,
+          pages: [
+            ...prev.pages,
+            { id: currentPage.id, title: currentPage.title}
+          ]}
       })
     }
   }, [currentPage])

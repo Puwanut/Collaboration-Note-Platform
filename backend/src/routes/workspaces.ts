@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import { prisma } from ".."
 import { Prisma } from "@prisma/client";
+import { IMAGE_EXPIRED_TIME, bucket, memoImageUrls } from "../libs/supabase";
 
 
 const router = Router()
@@ -50,7 +51,6 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
                         title: true,
                         isFavorite: true,
                         icon: true,
-                        cover: true
                     },
                     orderBy: {
                         createdAt: "asc"
@@ -67,6 +67,25 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
             }
         }
         res.status(400).json({ message: "Unkonwn error" })
+    }
+})
+
+router.get("/:workspaceId/images/*", async (req: Request, res: Response) => {
+    // to be implemented user permission checking
+    const imagePath = req.params[0]
+    const memoUrl = memoImageUrls.get(imagePath)
+    if (memoUrl && memoUrl.expiredAt > new Date()) {
+        res.json({
+            data: {
+                signedUrl: memoUrl.signedUrl
+            }
+        })
+    } else {
+        const signedURL = await bucket.createSignedUrl(imagePath, IMAGE_EXPIRED_TIME)
+        if (!signedURL.error) {
+            memoImageUrls.set(imagePath, { signedUrl: signedURL.data.signedUrl, expiredAt: new Date(Date.now() + IMAGE_EXPIRED_TIME * 1000) })
+        }
+        res.json(signedURL)
     }
 })
 
@@ -123,5 +142,7 @@ router.delete("/:workspaceId/pages/:pageId", async (req: Request, res: Response)
         res.status(404).json({ message: "Page not found or You don't have permission to delete this page." })
     }
 })
+
+
 
 export default router

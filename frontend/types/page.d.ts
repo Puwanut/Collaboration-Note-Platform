@@ -1,13 +1,13 @@
 import { Block } from "./block"
 
-export interface PageWithOutBlocks {
+export interface PageMinimalData {
     id: string
     title: string
     icon?: string
-    cover?: string
     isFavorite?: boolean
 }
 
-export interface PageWithBlocks extends PageWithOutBlocks {
+export interface Page extends PageMinimalData {
+    cover?: string
     blocks: Block[]
 }

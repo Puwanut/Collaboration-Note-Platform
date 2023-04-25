@@ -3,14 +3,16 @@ import { useAppContext } from '../../context/AppContext'
 import ContentEditable from 'react-contenteditable'
 import { useOverlayContext } from '../../context/OverlayContext'
 import { setCaretToEnd } from '../../lib/setCaret'
-import { PageWithOutBlocks } from '../../types/page'
+import { PageMinimalData } from '../../types/page'
 import { useSession } from 'next-auth/react'
 import { useDebounce } from 'react-use'
 import { Coordinate } from '../../types/coordinate'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFileLines } from '@fortawesome/free-regular-svg-icons'
 
 interface IPageTitleOverlayProps {
     coordinate: Coordinate,
-    selectedPage: PageWithOutBlocks,
+    selectedPage: PageMinimalData,
     referer: "topbar" | "sidebar"
 }
 
@@ -75,20 +77,23 @@ const PageTitleOverlay = forwardRef<HTMLDivElement, IPageTitleOverlayProps>(func
     }, TITLE_CHANGE_DEBOUNCE_MS, [title])
 
     return (
-        <div className="absolute bg-white p-2 shadow-xl w-80" ref={ref} style={{ left: x, top: y }}>
-            <div className="flex gap-x-2">
-                <button className='flex-none border-[1px] rounded px-1 py-0.5 w-8 h-8 hover:bg-neutral-200/60'>
-                    i
-                </button>
-                <ContentEditable
-                    id="title-input"
-                    className="w-full min-w-0 px-2 py-0.5 bg-neutral-100 border-[1px] rounded outline-none whitespace-pre-wrap"
-                    html={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onKeyDown={(e) => onKeyDownHandler(e)}
-                />
+        <>
+            <div className="absolute bg-white p-2 shadow-xl w-80" ref={ref} style={{ left: x, top: y }}>
+                <div className="flex gap-x-2">
+                    <button className='flex-none border-[1px] rounded px-1 py-0.5 w-8 h-8 hover:bg-neutral-200/60' onClick={() => console.log("show picker")}>
+                        <FontAwesomeIcon icon={faFileLines} className="text-neutral-400" />
+                    </button>
+
+                    <ContentEditable
+                        id="title-input"
+                        className="w-full min-w-0 px-2 py-0.5 bg-neutral-100 border-[1px] rounded outline-none whitespace-pre-wrap"
+                        html={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        onKeyDown={(e) => onKeyDownHandler(e)}
+                    />
+                </div>
             </div>
-        </div>
+        </>
     )
 })
 

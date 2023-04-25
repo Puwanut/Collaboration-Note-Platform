@@ -8,12 +8,12 @@ import { useRouter } from 'next/router'
 import { useAppContext } from '../../context/AppContext'
 import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'react-toastify'
-import { PageWithBlocks, PageWithOutBlocks } from '../../types/page'
+import { Page, PageMinimalData } from '../../types/page'
 import { Coordinate } from '../../types/coordinate'
 
 interface IPageMenuOverlayProps {
     coordinate: Coordinate
-    selectedPage: PageWithOutBlocks
+    selectedPage: PageMinimalData
 }
 
 const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(function PageMenuOverlay({ coordinate, selectedPage }, ref) {
@@ -51,7 +51,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
         } else {
             // if only one page left, create new page
             const newPage = {id: uuidv4(), title: "", blocks: []}
-            const res: PageWithBlocks = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
+            const res: Page = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceData.id}/pages`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -94,7 +94,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
         setOverlay(null)
 
         // get full page data
-        const selectedPageIncludeBlocks: PageWithBlocks = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${selectedPage.id}`, {
+        const selectedPageIncludeBlocks: Page = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${selectedPage.id}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${session?.user.accessToken}`
@@ -147,7 +147,7 @@ const PageMenuOverlay = forwardRef<HTMLDivElement, IPageMenuOverlayProps>(functi
 
     const pageMenus = [
         { name: "Delete", icon: <FontAwesomeIcon icon={faTrashCan} className="w-4" />, onClickHandler: onDeleteHandler },
-        { name: `${selectedPage.isFavorite ? "Remove" : "Add"} to Favorites`, icon: <FontAwesomeIcon icon={faStar} className="w-4" />, onClickHandler: onFavoriteHandler },
+        { name: `${selectedPage.isFavorite ? "Remove from" : "Add to"} Favorites`, icon: <FontAwesomeIcon icon={faStar} className="w-4" />, onClickHandler: onFavoriteHandler },
         { name: "Duplicate", icon: <FontAwesomeIcon icon={faClone} className="w-4" />, onClickHandler: onDuplicateHandler },
         { name: "Copy link", icon: <FontAwesomeIcon icon={faLink} className="w-4" />, onClickHandler: onCopyLinkHandler },
         { name: "Rename", icon: <FontAwesomeIcon icon={faEdit} className="w-4" />, onClickHandler: onRenameHandler }
