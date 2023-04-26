@@ -18,6 +18,9 @@ app.use(cors({
 }))
 app.use(express.json())
 
+app.get("/health", (_req, res) => {
+    res.json({ message: "OK" })
+})
 
 app.use("/users", userRouter)
 app.use("/auth", authRouter)
