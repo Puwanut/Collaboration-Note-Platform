@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  owner
+  member
+}
+
+// enum BlockType {
+//   Text
+//   Heading_1 @map("Heading 1")
+//   Heading_2 @map("Heading 2")
+//   Heading_3 @map("Heading 3")
+//   Bulleted_List @map("Bulleted List")
+//   Numbered_List @map("Numbered List")
+//   Code
+//   To_do_List @map("To-do List")
+// }
+
+model User {
+  id         Int              @id
+  email      String           @unique
+  username   String
+  password   String
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+  workspaces UserWorkspaces[]
+}
+
+model UserWorkspaces {
+  userId      Int           @map("user_id")
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+  workspaceId String        @map("workspace_id")
+  role        WorkspaceRole
+  user        User          @relation(fields: [userId], references: [id])
+
+  @@id([userId, workspaceId]) // composite primary key
+}
+
+model Workspace {
+  id    String           @id @default(uuid())
+  name  String
+  pages Page[]
+  users UserWorkspaces[]
+}
+
+model Page {
+  id          String    @id @default(uuid())
+  title       String
+  icon        String?
+  cover       String?
+  isFavorite  Boolean   @default(false)
+  blocks      Json[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String    @map("workspace_id")
+}
+
+// model Block {
+//   id         String   @id @default(uuid())
+//   type       String
+//   properties Json
+//   children   String[]
+//   parent     String?
+//   page       Page     @relation(fields: [pageId], references: [id])
+//   pageId     String
+// }
