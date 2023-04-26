@@ -13,7 +13,7 @@ const port = parseInt(process.env.PORT as string) || 8000
 export const prisma = new PrismaClient()
 
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     credentials: true
 }))
 app.use(express.json())

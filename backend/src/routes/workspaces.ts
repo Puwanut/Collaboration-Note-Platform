@@ -71,12 +71,14 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
 router.post("/:workspaceId/pages", async (req: Request, res: Response) => {
     const userId = res.locals.user.userId
     const { workspaceId } = req.params
-    const { id: pageId, title, blocks } = req.body
+    const { id: pageId, title, blocks, icon, cover } = req.body
     try {
         const page = await prisma.page.create({
             data: {
                 id: pageId,
                 title: title,
+                icon: icon,
+                cover: cover,
                 blocks: blocks,
                 workspace: {
                     connect: {

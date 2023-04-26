@@ -14,7 +14,12 @@ const PageCover = ({ src }: IPageCoverProps) => {
     const [imageUrl, setImageUrl] = useState<string>("/images/placeholder.png")
 
     useEffect(() => {
-        if (!src.startsWith("gallery")) {
+        if (src.startsWith("gallery")) {
+            setImageUrl(`/images/${src}`)
+        } else if (src.startsWith("http")) {
+            setImageUrl(src)
+        }
+        else {
             const fetchImageUrl = async () => {
                 // src is workspaceId/imageName
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images/${src}`, {
@@ -26,8 +31,6 @@ const PageCover = ({ src }: IPageCoverProps) => {
                 setImageUrl(res.signedUrl)
             }
             fetchImageUrl()
-        } else {
-            setImageUrl(`/images/${src}`)
         }
     }, [src])
 

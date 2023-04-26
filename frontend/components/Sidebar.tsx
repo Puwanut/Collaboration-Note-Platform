@@ -181,7 +181,7 @@ const Sidebar = () => {
                             className={`menu-sidebar
                             ${menu.title === "New page" ? "text-neutral-600" : "text-neutral-400" }
                             ${!leftSidebarOpen && 'scale-0'}
-                            ${isMobileView ? 'text-base' : 'text-sm'}
+                            ${isMobileView ? 'text-base mt-2' : 'text-sm'}
                             `}
                             onClick={() => menu.title === "New page" && newPageHandler()}
                         >

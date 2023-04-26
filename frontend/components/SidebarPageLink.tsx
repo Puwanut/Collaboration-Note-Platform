@@ -36,7 +36,7 @@ const SidebarPageLink = ({ page }: ISidebarPageLinkProps) => {
     return (
         <Link href={page.id} className={`menu-sidebar text-neutral-400 group/sidebar-page
             ${!leftSidebarOpen && 'scale-0'}
-            ${isMobileView ? 'text-base' : 'text-sm'}
+            ${isMobileView ? 'text-base mt-2' : 'text-sm'}
             ${page.id === currentPage?.id && 'bg-neutral-200/70'}
             `}
         >

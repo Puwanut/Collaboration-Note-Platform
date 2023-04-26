@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { forwardRef, useState, useRef, ChangeEvent, FormEvent } from 'react'
+import { forwardRef, useState, useRef, ChangeEvent, FormEvent, MouseEvent } from 'react'
 import { Coordinate } from '../../types/coordinate'
 import Image from 'next/image'
 import { useAppContext } from '../../context/AppContext'
@@ -24,6 +24,7 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
     const { currentWorkspaceId, setCurrentPage } = useAppContext()
     const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Gallery)
     const fileUploadRef = useRef<HTMLInputElement>(null)
+    const [link, setLink] = useState<string>("")
 
     const onClickRemoveHandler = () => {
         setCurrentPage(prev => {
@@ -65,6 +66,12 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
         }
     }
 
+    const onSubmitLinkHandler = async () => {
+        setCurrentPage(prev => {
+            return {...prev, cover: link}
+        })
+    }
+
     return (
         <div className="sticky max-w-xl rounded shadow-xl border-[1px] bg-white" ref={ref} style={{ left: coordinate.x - 200, top: coordinate.y + 30}}>
             <nav className="flex justify-between text-sm px-2">
@@ -103,8 +110,33 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
                 {selectedTab === Tab.Upload &&
                     <div className="p-2">
                         <input type='file' accept="image/*" ref={fileUploadRef} onChange={e => onUploadFileHandler(e)} hidden />
-                        <button type="button" className="w-full border-[1px] rounded py-1 text-sm text-neutral-600 hover:bg-neutral-200/60" onClick={onClickUploadFileHandler}>Upload file</button>
-                        <p className="w-full mt-2 text-center text-xs text-neutral-400">The maximum size per file is 4 MB.</p>
+                        <button
+                            type="button"
+                            className="w-full border-[1px] rounded py-1 text-sm text-neutral-600 hover:bg-neutral-200/60"
+                            onClick={onClickUploadFileHandler}>
+                                Upload file
+                        </button>
+                        <p className="w-full mt-2 text-center text-xs text-neutral-400">
+                            The maximum size per file is 4 MB.
+                        </p>
+                    </div>
+                }
+                {selectedTab === Tab.Link &&
+                    <div className="p-2">
+                        <input
+                            type="text"
+                            className="w-full border-[1px] rounded p-1 text-sm focus:outline-2 outline-sky-400 placeholder:text-neutral-300"
+                            placeholder="Paste an image link..."
+                            value={link}
+                            onChange={e => setLink(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="block w-72 max-w-full mx-auto mt-4 border-[1px] rounded py-1 text-sm font-medium text-white bg-sky-600/90 hover:bg-sky-600"
+                            onClick={onSubmitLinkHandler}
+                        >
+                            Submit
+                        </button>
                     </div>
                 }
             </div>

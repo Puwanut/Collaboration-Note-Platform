@@ -4,11 +4,15 @@ const nextConfig = {
   swcMinify: true,
   images: {
     remotePatterns: [
+      // {
+      //   protocol: 'https',
+      //   hostname: 'zbjqqzpujmtnfcrchymi.supabase.co',
+      //   port: '',
+      //   pathname: '/storage/v1/object/sign/**',
+      // }
       {
         protocol: 'https',
-        hostname: 'zbjqqzpujmtnfcrchymi.supabase.co',
-        port: '',
-        pathname: '/storage/v1/object/sign/**',
+        hostname: '**'
       }
     ]
   }
