@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { forwardRef, useState, useRef, ChangeEvent } from 'react'
+import { forwardRef, useState, useRef, ChangeEvent, FormEvent } from 'react'
 import { Coordinate } from '../../types/coordinate'
 import Image from 'next/image'
 import { useAppContext } from '../../context/AppContext'
@@ -51,17 +51,17 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
             }
             const formData = new FormData()
             formData.append("file", uploadFile)
-            console.log(fileList)
-            // const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images/${currentWorkspaceId}/upload`, {
-            //     method: "POST",
-            //     headers: {
-            //         "Authorization": `Bearer ${session?.user.accessToken}`,
-            //         "Content-Type": "multipart/form-data"
-            //     },
-            //     body: uploadFile
-            // })
-            // const data = await res.json()
-            // console.log(data)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images/${currentWorkspaceId}/upload`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${session?.user.accessToken}`,
+                },
+                body: formData
+            })
+            const data = await res.json()
+            setCurrentPage(prev => {
+                return {...prev, cover: data.path}
+            })
         }
     }
 
@@ -101,11 +101,11 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
                     ))
                 }
                 {selectedTab === Tab.Upload &&
-                    <form className="p-2" encType="multipart/form-data" onSubmit={e => e.preventDefault()}>
+                    <div className="p-2">
                         <input type='file' accept="image/*" ref={fileUploadRef} onChange={e => onUploadFileHandler(e)} hidden />
                         <button type="button" className="w-full border-[1px] rounded py-1 text-sm text-neutral-600 hover:bg-neutral-200/60" onClick={onClickUploadFileHandler}>Upload file</button>
                         <p className="w-full mt-2 text-center text-xs text-neutral-400">The maximum size per file is 4 MB.</p>
-                    </form>
+                    </div>
                 }
             </div>
         </div>

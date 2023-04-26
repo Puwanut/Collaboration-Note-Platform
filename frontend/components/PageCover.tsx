@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { OverlayType, useOverlayContext } from "../context/OverlayContext"
 import { MouseEvent, useEffect, useState } from "react"
-import { useAppContext } from "../context/AppContext"
 import { useSession } from "next-auth/react"
 
 interface IPageCoverProps {
@@ -12,18 +11,18 @@ const PageCover = ({ src }: IPageCoverProps) => {
 
     const { data: session } = useSession()
     const { setOverlay } = useOverlayContext()
-    const { currentWorkspaceId } = useAppContext()
     const [imageUrl, setImageUrl] = useState<string>("/images/placeholder.png")
 
     useEffect(() => {
         if (!src.startsWith("gallery")) {
             const fetchImageUrl = async () => {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspaceId}/images/${src}`, {
+                // src is workspaceId/imageName
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/images/${src}`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${session?.user.accessToken}`
                     }
-                }).then(res => res.json()).then(res => res.data)
+                }).then(res => res.json())
                 setImageUrl(res.signedUrl)
             }
             fetchImageUrl()
@@ -52,6 +51,7 @@ const PageCover = ({ src }: IPageCoverProps) => {
                 fill
                 sizes="100%"
                 priority
+                style={{objectFit:"cover"}}
             />
             <div className="relative w-full h-full mx-auto max-w-screen-sm opacity-0 group-hover/page-cover:opacity-100 transition">
                 <button
