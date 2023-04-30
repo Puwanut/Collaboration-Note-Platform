@@ -187,7 +187,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                     const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
                     if (previousBlock) {
                         setCaretToEnd(previousBlock)
-                        console.log("[Move to end]")
                     } else {
                         const titleDiv = document.getElementById("page-title-workspace")
                         setCaretToEnd(titleDiv)
@@ -198,13 +197,11 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
             case "ArrowRight": {
                 // if caret is at end of block, move caret to start of next block
                 // else do default behaviour
-                console.log(e.currentTarget.textContent.length, getCaretStart(contentEditableRef.current))
                 if (getCaretStart(contentEditableRef.current) === e.target.textContent.length) {
                     e.preventDefault()
                     const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
                     if (nextBlock) {
                         setCaretToStart(nextBlock)
-                        console.log("[Move to start]")
                     }
                 }
                 break
@@ -213,7 +210,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                 // if caret is on top of block, move caret to same x of previous block
                 // else do default behaviour
                 if (isCaretOnTop() && !isCommandOverlayOpen.current) {
-                    console.log("Top")
                     e.preventDefault()
                     const previousBlock = document.querySelector(`[data-position="${dataPosition - 1}"]`) as HTMLElement
                     if (previousBlock) {
@@ -222,7 +218,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                         const lastLinePreviousBlockOffsetTop = previousBlockBottom - parseInt(window.getComputedStyle(previousBlock).getPropertyValue("line-height"))
                         const possibleCaretLeft = caretLeft < previousBlockLeft ? previousBlockLeft : caretLeft
                         moveCaret(possibleCaretLeft, lastLinePreviousBlockOffsetTop)
-                        console.log("[Move to]", possibleCaretLeft, lastLinePreviousBlockOffsetTop)
                     } else if (contentEditableRef.current.getAttribute("data-position") === "0") {
                         const { caretLeft } = getCaretCoordinates()
                         const titleDiv = (document.getElementById("page-title-workspace") as HTMLElement).getBoundingClientRect()
@@ -235,7 +230,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                 // if caret is on bottom of block, move caret to same x of next block
                 // else do default behaviour
                 if (isCaretOnBottom() && !isCommandOverlayOpen.current) {
-                    console.log("Bottom")
                     e.preventDefault()
                     const nextBlock = document.querySelector(`[data-position="${dataPosition + 1}"]`) as HTMLElement
                     if (nextBlock) {
@@ -243,7 +237,6 @@ const EditableBlock = ({ block, updateBlocks, addNextBlock, deleteBlock, setCurr
                         const { left: nextBlockLeft, top: nextBlockTop } = nextBlock.getBoundingClientRect()
                         const possibleCaretLeft = caretLeft < nextBlockLeft ? nextBlockLeft : caretLeft
                         moveCaret(possibleCaretLeft, nextBlockTop) // +5 for padding
-                        console.log("[Move to]", possibleCaretLeft, nextBlockTop)
                     }
                 }
                 break

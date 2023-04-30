@@ -1,5 +1,7 @@
 import { Request, Response, Router } from "express"
-import { prisma } from ".."
+import { prisma } from "../libs/prisma"
+import { TypedRequestBody } from "../types/request.type"
+import { Page } from "@prisma/client"
 
 const router = Router()
 
@@ -26,7 +28,7 @@ router.get("/:pageId", async (req: Request, res: Response) => {
 })
 
 
-router.put("/:pageId", async (req: Request, res: Response) => {
+router.put("/:pageId", async (req: TypedRequestBody<Page>, res: Response) => {
     const userId = res.locals.user.userId
     const pageId = req.params.pageId
     const { title, blocks, cover } = req.body
@@ -54,7 +56,7 @@ router.put("/:pageId", async (req: Request, res: Response) => {
     }
 })
 
-router.patch("/:pageId/title", async (req: Request, res: Response) => {
+router.patch("/:pageId/title", async (req: TypedRequestBody<Page>, res: Response) => {
     const userId = res.locals.user.userId
     const pageId = req.params.pageId
     const { title } = req.body
@@ -80,7 +82,7 @@ router.patch("/:pageId/title", async (req: Request, res: Response) => {
     }
 })
 
-router.patch("/:pageId/favorite", async (req: Request, res: Response) => {
+router.patch("/:pageId/favorite", async (req: TypedRequestBody<Page>, res: Response) => {
     const userId = res.locals.user.userId
     const pageId = req.params.pageId
     const { isFavorite } = req.body

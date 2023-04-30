@@ -10,7 +10,9 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, decoded) => {
           if (err) throw new Error()
-          res.locals.user = decoded
+          res.locals.user = {
+            userId: (decoded as any).userId
+          }
           next()
         })
     } catch (e) {

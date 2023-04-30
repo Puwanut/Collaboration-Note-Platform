@@ -207,7 +207,6 @@ export const getCaretInfo = (): Record<string, number> => {
 
     // Get Line Height of text in Parent Element (slice(0, -2) to remove "px")
     const lineHeight = parseInt(window.getComputedStyle(contentEditableElement).getPropertyValue("line-height").slice(0, -2))
-    // console.log(caretLeft, caretTop, parentOffsetHeight, caretOffsetTop, lineHeight)
 
     return { caretOffsetTop, lineHeight, parentOffsetHeight, caretTop, caretLeft }
 

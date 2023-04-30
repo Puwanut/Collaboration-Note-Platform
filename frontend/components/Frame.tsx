@@ -29,6 +29,7 @@ const Frame = () => {
   const [blocks, setBlocks] = useState<Block[]>(currentPage?.blocks ?? [])
   const [currentSelectedBlock, setCurrentSelectedBlock] = useState<HTMLElement>(null)
   const [key, setKey] = useState<KeyboardEvent>(null)
+  // eslint-disable-next-line no-unused-vars
   const [previousBlocks, titlesLength] = usePreviousBlocks(blocks)
 
   const titleKeyDownHandler = (e: KeyboardEvent) => {
@@ -70,7 +71,6 @@ const Frame = () => {
 
   // Send update function to EditableBlock
   const updateBlocksHandler = (updatedBlock: Block) => {
-    console.log("update page")
     setBlocks(prevState => {
       const updatedBlocks = prevState.map(block => {
         if (block.id === updatedBlock.id) {
@@ -81,11 +81,9 @@ const Frame = () => {
       })
       return updatedBlocks
     })
-    // console.log("[WORKSPACE] UPDATE BLOCKS")
   }
 
   const addBlockHandler = (currentBlock: CurrentBlock, options: Record<string, string>) => {
-    console.log("++++++++ ADDBLOCK ++++++++")
     const currentBlockIndex = blocks.findIndex((block) => block.id === currentBlock.id)
     if (options.actionSrc === "Enter") {
       const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
@@ -157,7 +155,6 @@ const Frame = () => {
   }
 
   const deleteBlockHandler = (currentBlock: CurrentBlock, key?: string) => {
-    console.log("-------- DELETE BLOCK --------")
     const currentBlockIndex = blocks.findIndex((b) => b.id === currentBlock.id)
     // const currentCaretPosition = getCaretStart(currentBlock.contentEditableRef)
     const previousBlock = document.querySelector(`[data-position="${currentBlockIndex - 1}"]`) as HTMLElement
@@ -215,8 +212,6 @@ const Frame = () => {
 
   // Handle Caret Position
   useEffect(() => {
-    // console.log("[CURRENT]", currentSelectedBlock)
-    // console.log(previousBlocks, previousBlocks?.length, blocks?.length)
     const currentBlockPosition = currentSelectedBlock?.getAttribute("data-position")
     // when user press enter, focus to next block
     if (previousBlocks && previousBlocks.length + 1 === blocks?.length) {
@@ -232,7 +227,6 @@ const Frame = () => {
         const previousBlockIndex = parseInt(currentBlockPosition) - 1
         const previousBlock = document.querySelector(`[data-position="${previousBlockIndex}"]`) as HTMLElement
         if (previousBlock) {
-          console.log("[PREV]", previousBlock, titlesLength)
           setCurrentSelectedBlock(previousBlock)
           // if (titlesLength[previousBlockIndex] === 0) {
           setCaretToEnd(previousBlock)
@@ -265,7 +259,6 @@ const Frame = () => {
       ...prev,
       pages: prev.pages.map(page => page.id === currentPage.id ? { ...page, title: pageTitle} : page)
     }))
-    console.log("Push to Database")
     // to Update Page in database
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pages/${currentPage.id}`, {
       method: "PUT",
