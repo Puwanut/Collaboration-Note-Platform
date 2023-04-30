@@ -1,11 +1,10 @@
 import { Response, Router } from "express"
-import { TypedRequestBody, TypedRequestQuery } from "../types/request.type"
-import { User } from "../types/user.type"
-import { Prisma } from "@prisma/client"
+import { TypedRequestBody } from "../types/request.type"
+import { Prisma, User } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { initialPage } from "../libs/initialPage"
 import { generateAccessToken } from "../libs/token-utils"
-import { prisma } from ".."
+import { prisma } from "../libs/prisma"
 
 const router = Router()
 
@@ -28,7 +27,7 @@ router.post("/register", async (req: TypedRequestBody<User>, res: Response) => {
             })
             if (user) {
                 // create initial workspace and initial page in same workspace
-                // with nested create, Page will be created with workspaceId automatically
+                // with nested create, Page will be associated with workspaceId automatically
                 try {
                     await prisma.workspace.create({
                         data: {

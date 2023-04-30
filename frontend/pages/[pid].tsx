@@ -86,7 +86,7 @@ export default function Page({ workspaces }: IPageProps) {
           ...prev,
           pages: [
             ...prev.pages,
-            { id: currentPage.id, title: currentPage.title}
+            { id: currentPage.id, title: currentPage.title }
           ]}
       })
     }

@@ -48,6 +48,7 @@ export const AppProvider: FC<ScriptProps> = ({ children }: IAppContextProviderPr
 
     // Use Context to pass down functions to sidebar and topbar components
     const handleToggleSidebar = useCallback((e: React.MouseEvent) => {
+      // stop click event
       e.stopPropagation()
         if (leftSidebarOpen) { // Close sidebar
           sidebarWidthMemo.current = sidebarWidth // Memo previous sidebarWidth

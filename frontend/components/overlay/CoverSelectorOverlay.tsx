@@ -85,7 +85,7 @@ const CoverSelectorOverlay = forwardRef<HTMLDivElement, ICoverSelectorOverlayPro
                 <button className="text-neutral-400 px-2 my-1.5 hover:bg-neutral-200/60 rounded" onClick={onClickRemoveHandler}>Remove</button>
             </nav>
             <hr />
-            <div className="p-1 xs:max-h-[500px] overflow-y-auto">
+            <div className="p-1 max-h-[500px] overflow-y-auto">
                 {selectedTab === Tab.Gallery &&
                     gallery.map((imgCategory) => (
                         <div key={imgCategory.category} className="p-2">

@@ -6,6 +6,8 @@ This project is a clone of the popular note-taking app [Notion](https://www.noti
 
 Visit Here: <https://pepponz.codes>
 
+PS. First request after a while might failed because backend spin down due to inactivity. Just refresh the page and it should work.
+
 ## Disclaimer
 
 This project is not affiliated with Notion in any way. This is just a clone of the app for educational purposes.
@@ -16,6 +18,9 @@ It's might not be ready for production use.
 - [x] **Slash Commands** (Type `/` to turn or add a block into various types)
 - [x] **HTML Support** (Can use HTML tags like `<img>` in the editor)
 - [x] **Drag And Drop** (Can drag and drop blocks to reorder them)
+- [x] **Rich Text Editing** (Can edit text with various formatting options: **bold**, *italic*, <u>underline</u>)
+- [x] **Code Block** (Can add code blocks with syntax highlighting)
+- [ ] **Workspace** (Working together with other people in a workspace)
 - [ ] **Private and Public Notes** (Share notes with other people)
 - [ ] **Collaborative Realtime Editing** (Edit notes with other people in real time)
 
@@ -27,12 +32,6 @@ It's might not be ready for production use.
 - React
 - Tailwind CSS
 - TypeScript
-- React-ContentEditable
-- @uiw/react-codemirror
-- react-sortablejs
-- fontawesome
-- htmlparser2
-- next-auth
 
 ### Backend
 
@@ -43,9 +42,9 @@ It's might not be ready for production use.
 
 ## Hosting
 
-- Vercel (Frontend)
-- xxx (Backend)
-- Supabase (Database)
+- [Vercel](https://vercel.com) (Frontend)
+- [Render](https://render.com) (Backend)
+- [Supabase](https://supabase.com) (Database)
 
 
 ## Contact

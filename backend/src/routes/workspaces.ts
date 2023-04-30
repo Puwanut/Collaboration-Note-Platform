@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
-import { prisma } from ".."
-import { Prisma } from "@prisma/client";
+import { prisma } from "../libs/prisma";
+import { Page, Prisma } from "@prisma/client";
+import { TypedRequestBody } from "../types/request.type";
 
 const router = Router()
 
@@ -68,14 +69,14 @@ router.get("/:workspaceId", async (req: Request, res: Response) => {
     }
 })
 
-router.post("/:workspaceId/pages", async (req: Request, res: Response) => {
+router.post("/:workspaceId/pages", async (req: TypedRequestBody<Page>, res: Response) => {
     const userId = res.locals.user.userId
     const { workspaceId } = req.params
-    const { id: pageId, title, blocks, icon, cover } = req.body
+    const { id, title, blocks, icon, cover } = req.body
     try {
         const page = await prisma.page.create({
             data: {
-                id: pageId,
+                id: id,
                 title: title,
                 icon: icon,
                 cover: cover,
@@ -119,11 +120,8 @@ router.delete("/:workspaceId/pages/:pageId", async (req: Request, res: Response)
         })
         res.json(page)
     } catch (e) {
-        console.log(e)
         res.status(404).json({ message: "Page not found or You don't have permission to delete this page." })
     }
 })
-
-
 
 export default router

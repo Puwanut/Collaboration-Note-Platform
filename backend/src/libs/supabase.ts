@@ -8,6 +8,6 @@ const supabaseKey = process.env.SUPABASE_API_KEY as string
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 export const bucket = supabase.storage.from(bucketName)
-export const IMAGE_EXPIRED_TIME = 7*24*60*60 // 7 days
+export const IMAGE_SIGNURL_EXPIRED_TIME = 7*24*60*60 // 7 days
 
 export const cachedImageUrls = new Map<string, ImageCache>()
