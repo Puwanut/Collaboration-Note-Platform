@@ -1,6 +1,6 @@
 # Notion Clone
 
-## Table of Contents
+Table of Contents
 
 - [About The Project](#about-the-project)
   - [Built with](#built-with)
@@ -43,7 +43,7 @@ PS. First request after a while might failed because backend spin down due to in
 - Supabase (PostgreSQL) with Prisma
 - TypeScript
 
-## Hosting
+### Hosting
 
 - [Vercel](https://vercel.com) (Frontend)
 - [Render](https://render.com) (Backend)
@@ -83,7 +83,7 @@ PS. First request after a while might failed because backend spin down due to in
     yarn install
     ```
 
-4. Create `.env.local` file in the frontend folder and add secrets according to [.env.example](/frontend/.env.example) file. (For now you can leave `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` as any string)
+4. Create `.env.local` file in the frontend folder and add secrets according to [.env.example](/frontend/.env.example) file. (For now you can fill `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` as any string)
 
     ```bash
     NEXT_PUBLIC_BACKEND_API_URL=http://localhost:8000
@@ -159,7 +159,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [x] **Slash Commands** (Type `/` to turn or add a block into various types)
 - [x] **HTML Support** (Can use HTML tags like `<img>` in the editor)
 - [x] **Drag And Drop** (Can drag and drop blocks to reorder them)
-- [x] **Rich Text Editing** (Can edit text with various formatting options: **bold**, *italic*, underline)
+- [x] **Rich Text Editing** (Can edit text with various formatting options via general shortcut: **bold** (ctrl+b), *italic* (ctrl+i), underline (ctrl+u))
 - [x] **Code Block** (Can add code blocks with syntax highlighting)
 - [ ] **Page icon** (Can change your favourite icon to the page)
 - [ ] **Workspace** (Working together with other people in a workspace)
